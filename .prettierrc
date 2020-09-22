@@ -1,0 +1,22 @@
+{
+    "htmlWhitespaceSensitivity": "ignore",
+    "formatOnSave": "true",
+    "tabWidth": 4,
+    "overrides": [
+        {
+            "files": "*.js",
+            "options": {
+                "trailingComma": "all",
+                "tabWidth": 2,
+                "semi": true,
+                "singleQuote": true
+            }
+        },
+        {
+            "files": "*.pug",
+            "options": {
+                "tabWidth": 2
+            }
+        }
+    ]
+}

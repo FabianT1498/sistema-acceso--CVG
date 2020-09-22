@@ -1,0 +1,6 @@
+
+
+
+Ruta para los iconos de ioniccons Version2 que es la que usa el AdminLTE actual.
+
+https://ionicons.com/v2/cheatsheet.html
