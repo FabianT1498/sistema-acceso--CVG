@@ -27,7 +27,7 @@ class CreateCompaniesTable extends Migration
             $table->unique(array('name', 'condition'));
         });
         // Add the constraint
-        DB::statement('ALTER TABLE companies ADD CONSTRAINT chk_condicion CHECK (condition::TEXT=\'C\'::TEXT OR condition::TEXT=\'P\'::TEXT);');
+        //DB::statement('ALTER TABLE companies ADD CONSTRAINT chk_condicion CHECK (condition::TEXT=\'C\'::TEXT OR condition::TEXT=\'P\'::TEXT);');
     }
 
     /**
