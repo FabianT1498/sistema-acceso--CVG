@@ -37,7 +37,7 @@
     <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
       <!-- Add icons to the links using the .nav-icon class
            with font-awesome or any other icon font library -->
-            @if (Auth::user()->role->name == "ANALISTA" || Auth::user()->role->name == "ADMIN" || Auth::user()->role->name == "SUPERADMIN")  
+      
            <li class="nav-item has-treeview {{ setActive(['dashboard', 'compras', 'entregas', 'stocks'], 'menu-open') }}">
             <a href="{{ route('dashboard') }}" class="nav-link
                 {{ setActive(['dashboard', 'compras', 'entregas', 'stocks']) }}">
@@ -68,8 +68,14 @@
               </li>
             </ul>
           </li>
-          @endif
-          @if (Auth::user()->role->name == "ALMACENISTA" || Auth::user()->role->name == "ANALISTA" || Auth::user()->role->name == "ADMIN" || Auth::user()->role->name == "SUPERADMIN")
+
+           <li class="nav-item {{ setActive('visitantes') }}">
+              <a href="{{ route('visitantes.index') }}" class="nav-link {{ setActive('visitantes') }}">
+                <i class="nav-icon icon ion-android-contacts"></i>
+                <p>{{ __('VISITANTES') }}</p>
+              </a>
+            </li>
+          <!-- @if (Auth::user()->role->name == "ALMACENISTA" || Auth::user()->role->name == "ANALISTA" || Auth::user()->role->name == "ADMIN" || Auth::user()->role->name == "SUPERADMIN")
           <li class="nav-item has-treeview {{ setActive([ 'recepcion-paquetes', 'almacen.compras_confirmadas' , 'inventarios', 'inventarios-almacen'], 'menu-open') }}">
             <a href="#" class="nav-link
                 {{ setActive([ 'almacen', 'recepcion-paquetes', 'inventarios', 'inventarios-almacen', 'almacen.compras_confirmadas']) }}">
@@ -104,10 +110,10 @@
               </li>
             </ul>
           </li>
-      @endif
+      @endif -->
       @if (Auth::user()->role->name == "ADMIN" || Auth::user()->role->name == "SUPERADMIN")
       
-        <li class="nav-item has-treeview {{ setActive(['general', 'empresas', 'proveedores', 'localidades'], 'menu-open') }}">
+        <!-- <li class="nav-item has-treeview {{ setActive(['general', 'empresas', 'proveedores', 'localidades'], 'menu-open') }}">
           <a href="#" class="nav-link
               {{ setActive(['general', 'empresas', 'proveedores', 'localidades']) }}">
             <i class="nav-icon icon ion-android-globe"></i>
@@ -178,7 +184,7 @@
               </a>
             </li>
           </ul>
-        </li>
+        </li> -->
         <li class="nav-item {{ setActive('usuarios') }}">
               <a href="{{ route('usuarios.index') }}" class="nav-link {{ setActive('usuarios') }}">
                 <i class="nav-icon icon ion-android-contacts"></i>

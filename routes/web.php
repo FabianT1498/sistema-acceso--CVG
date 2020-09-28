@@ -111,8 +111,7 @@ Route::group(['middleware' => ['auth', 'admin']], function () {
 	Route::delete('inventarios/{inventory}/destroy', 'InventoryController@destroy')->name('inventarios.destroy');
 	Route::delete('inventarios/{inventory}/destroy-item', 'InventoryController@destroyRegister')->name('inventarios.destroy.item');
 
-
-
+	Route::get('visitantes/{id}/delete', 'VisitorController@destroy')->name('visitantes-destroy');
 
 });
 /*********************************************/
@@ -206,6 +205,10 @@ Route::get('/compras-items', 'InvoiceController@items_invoice');
 /********           INVENTORY         **********/
 Route::resource('inventarios', 'InventoryController')->parameters(['inventarios' => 'inventory'])->except(['update', 'destroy']);
 Route::get('/inventory-items', 'InventoryController@items_inventory');
+
+/********           VISITOR         **********/
+Route::resource('visitantes', 'VisitorController')->except(['destroy']);
+
 Route::get('/home', function(){
 	if(Auth::user())
 	{

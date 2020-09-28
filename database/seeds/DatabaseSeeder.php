@@ -23,5 +23,10 @@ class DatabaseSeeder extends Seeder
          $this->call(ProviderSeeder::class);
          $this->call(LocationSeeder::class);
          $this->call(CompanySeeder::class);
+         $this->call(VisitorSeeder::class);
+         $this->call(AutoBrandSeeder::class);
+         $this->call(AutoModelSeeder::class);
+         $this->call(AutoSeeder::class);
+         
     }
 }
