@@ -7,14 +7,23 @@ use App\Visitor;
 use App\Role;
 use App\Auto;
 use App\AutoModel;
+use App\Photo;
+use App\Traits\UploadTrait;
+
+use Illuminate\Validation\Rule;
 use App\Http\Controllers\WebController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class VisitorController extends WebController
 {
+
+    use UploadTrait;
+
      /**
      * Display a listing of the resource.
      *
@@ -54,11 +63,10 @@ class VisitorController extends WebController
     public function create()
     {
         
-        $roles = (\Auth::user()->role->name === "SUPERADMIN") ? Role::all() : Role::where('id', '>', 2)->get();
         $vista = $this::CREATE;
         $search = request('search');
         $trashed = request('trashed');
-        return view('visitor.create', compact('roles', 'trashed', 'vista', 'search'));
+        return view('visitor.create', compact('trashed', 'vista', 'search'));
     }
 
     /**
@@ -69,48 +77,80 @@ class VisitorController extends WebController
      */
     public function store(Request $request)
     {
+        
+
+        $vista = $this::CREATE;
         $search = request('search');
         $trashed = request('trashed');
-        $validator = Validator::make($request->all(), [
-            'firstname' => 'required|max:255',
-            'lastname' => 'required|max:255',
-            'dni' => 'required|unique:users|max:255',
-        ]);
 
+        $autos_registered = $request->has('enrrolment') 
+            ? sizeof($request->enrrolment) 
+            : 0;
 
-        if ($validator->fails()) {
-            $vista = $this::EDIT;
-            $roles = (\Auth::user()->role->name === "SUPERADMIN") ? Role::all() : Role::where('id', '>', 2)->get();
+        $validation = null;
+
+        if ($autos_registered > 0){
+            $validation = Validator::make($request->all(), [
+                'dni' => ['bail', 'required', 'unique:visitors,dni', 'max:10'],
+                'phone_number' => ['required', 'unique:visitors,phone_number'],
+                'enrrolment.*' => ['required', 'unique:autos,enrrolment', 'max:7'],
+                'image' => ['required', 'image' , 'mimes:jpeg,png,jpg,gif', 'max:2048'],
+            ]);    
+        } else {
+            $validation = Validator::make($request->all(), [
+                'dni' => ['bail', 'required', 'unique:visitors,dni', 'max:10'],
+                'phone_number' => ['required', 'unique:visitors,phone_number'],
+                'image' => ['required', 'image' , 'mimes:jpeg,png,jpg,gif', 'max:2048'],
+            ]);    
+        }
+
+        if ($validation->fails()) {
             toastr()->error(__('Error al crear el registro'));
-            return redirect()->route('usuarios.create', compact('roles', 'trashed', 'vista', 'search'))
-                        ->withErrors($validator)
-                        ->withInput();
+            return redirect()->route('visitantes.create', compact('vista', 'search', 'trashed'))
+                ->withErrors($validation)
+                ->withInput();
         }
-        $user = new User();
-        $user->firstname = $request->firstname;
-        $user->lastname = $request->lastname;
-        $user->email = $request->email;
-        $user->username = $request->username;
-        $user->dni = $request->dni;
-        if($request->role_id <= 2 && \Auth::user()->role->name !== "SUPERADMIN")
-        {
-            $vista = $this::EDIT;
-            $roles = (\Auth::user()->role->name == "SUPERADMIN") ? Role::all() : Role::where('id', '>', 2)->get();
-            toastr()->error(__('No lo vuelva a hacer.   '));
-            return redirect()->route('usuarios.create', compact('roles', 'trashed', 'vista', 'search'))
-                        ->withErrors($validator)
-                        ->withInput();
+
+        // Create visitor record
+        $visitor = new Visitor();
+        $visitor->firstname = $request->firstname;
+        $visitor->lastname = $request->lastname;
+        $visitor->dni = $request->dni;
+        $visitor->phone_number = $request->phone_number;
+        $visitor->save();
+
+        // Check if a profile image has been uploaded
+        if ($request->has('image')) {
+            // Get image file
+            $image = $request->file('image');
+            // Make a image name based on user name and current timestamp
+            $name = Str::slug($visitor->firstname.$visitor->lastname.'_'.time());
+            // Define folder path
+            $folder = '/images/';
+            // Make a file path where image will be stored [ folder path + file name + file extension]
+            $filePath = $folder . $name. '.' . $image->getClientOriginalExtension();
+            // Upload image
+            $this->uploadOne($image, $folder, 'public', $name);
+
+            // set the visitor_id and path on database photo
+            $photo = new Photo();
+            $photo->path = $filePath;
+            $visitor->photo()->save($photo);
         }
-        $user->role_id = $request->role_id;
 
-        $user->password = Hash::make($request->password);
-
-        $user->save();
+        // Create autos register if there is at least one auto registered
+        for ($i = 0; $i < $autos_registered ; $i++) {
+            $auto = new Auto();
+            $auto->auto_model_id = $request->auto_model[$i];
+            $auto->color = $request->color[$i];
+            $auto->enrrolment = strtoupper($request->enrrolment[$i]);
+            $visitor->autos()->save($auto);
+        } 
 
         $vista = $this::READ;
-        $registros = User::where('id', $user->id);
+        $registros = Visitor::where('id', $visitor->id);
         toastr()->success(__('Registro creado con éxito'));
-        return redirect()->route('usuarios.index', compact('vista', 'trashed', 'search', 'registros'));
+        return redirect()->route('visitantes.index', compact('vista', 'trashed', 'search', 'registros'));
     }
 
     /**
@@ -133,20 +173,19 @@ class VisitorController extends WebController
     public function edit($id)
     {
         $visitor = Visitor::withTrashed()->where('id',$id)->first();
+
+        // This retrieve just one photo
+        
+        $photo = $visitor->photo()->first();
+
         $autos = Auto::where('visitor_id', $id)
             ->leftJoin('auto_models', 'autos.auto_model_id', '=', 'auto_models.id');
-
-       /* $auto_models =  DB::table('auto_models')
-                     ->select(DB::raw('*'))
-                     ->where(DB::raw("(SELECT auto_model_id FROM autos WHERE visitor_id={$id})"), '!=', 'auto_models.id')
-                     ->get();*/
-
-        $auto_models = AutoModel::get();
 
         $vista = $this::EDIT;
         $search = request('search');
         $trashed = (request('trashed')) ? true : false;
-        return view('visitor.edit', compact('vista', 'search', 'trashed', 'visitor', 'autos', 'auto_models'));
+
+        return view('visitor.edit', compact('vista', 'search', 'trashed', 'visitor', 'autos', 'photo'));
     }
 
     /**
@@ -158,60 +197,92 @@ class VisitorController extends WebController
      */
     public function update(Request $request, $id)
     {
-        $visitor = Visitor::withTrashed()->where('id', $id)->first();
+        $vista = $this::EDIT;
         $search = request('search');
         $trashed = request('trashed');
 
-       return $request->all();
-
-
-        $validator = Validator::make($request->all(), [
-            'visitor.dni' => 'dni|unique:visitors',
-            'visitor.phone_number' => 'phone_number|unique:visitors',
-            'auto.*.enrrolment'
-
-        ]);
-
-        if ($validator->fails()) {
+        $visitor = Visitor::withTrashed()->where('id', $id)->first();
+        $autos = Auto::where('visitor_id', $id)->orderBy('id')->get();
+      
+        $validation = Validator::make($request->all(), [
+            'dni' => [
+                'bail',
+                'required',
+                Rule::unique('visitors', 'dni')->ignore($visitor->id),
+                'max:10'
+            ],
+            'phone_number' => [
+                'required',
+                Rule::unique('visitors', 'phone_number')->ignore($visitor->id),
+            ],
+            'enrrolment.*' => [
+                'required',
+                Rule::unique('autos', 'enrrolment')->ignore($autos),
+                'max:7'
+            ],
+            'image' => [
+                'image',
+                'mimes:jpeg,png,jpg,gif',
+                'max:2048'
+            ],
+        ]);    
+    
+        if ($validation->fails()) {
             return back()
-                        ->withErrors($validator)
-                        ->withInput();
+                ->withErrors($validation)
+                ->withInput();
         }
 
-        $user->firstname = $request->firstname;
-        $user->lastname = $request->lastname;
-        $user->email = $request->email;
-        $user->username = $request->username;
-        $user->dni = $request->dni;
-        if($request->role_id <= 2 && \Auth::user()->role->name !== "SUPERADMIN")
-        {
-            $vista = $this::EDIT;
-            $roles = (\Auth::user()->role->name == "SUPERADMIN") ? Role::all() : Role::where('id', '>', 2)->get();
-            toastr()->error(__('No lo vuelva a hacer.   '));
-            return redirect()->route('usuarios.create', compact('roles', 'trashed', 'vista', 'search'))
-                        ->withErrors($validator)
-                        ->withInput();
-        }
-        $user->role_id = $request->role_id;
-        if($request->password != '')
-        {
-            $user->password = Hash::make($request->password);        
-        }
-        if(!$user->update())
+        $visitor->firstname = $request->firstname;
+        $visitor->lastname = $request->lastname;
+        $visitor->dni = $request->dni;
+        $visitor->phone_number = $request->phone_number;
+
+        if(!$visitor->update())
         {
             $search = request('search');
-            $trashed = request('trashed');
-            $registros = null;
+            $trashed = (request('trashed')) ? true : false;
+            $buscar = true;
             toastr()->error(__('Error al actualizar el registro'));
-            return redirect()->route('usuarios.index', compact('vista', 'trashed', 'search', 'registros'));
+            return redirect()->route('visitantes.index', compact('vista', 'search', 'trashed', 'buscar'));
+        }
+
+        // Check if a profile image has been uploaded
+        if ($request->has('image')) {
+
+            $photo = Photo::where('visitor_id', $visitor->id)->first();
+    
+            // Delete existing image
+            Storage::disk('public')->delete($photo->path);
+
+            // Get image file
+            $image = $request->file('image');
+            // Make a image name based on user name and current timestamp
+            $name = Str::slug($visitor->firstname.$visitor->lastname.'_'.time());
+            // Define folder path
+            $folder = '/images/';
+            // Make a file path where image will be stored [ folder path + file name + file extension]
+            $filePath = $folder . $name. '.' . $image->getClientOriginalExtension();
+            // Upload image
+            $this->uploadOne($image, $folder, 'public', $name);
+
+            // set the visitor_id and path on database photo
+            $photo->path = $filePath;
+            $photo->update();
+        }
+
+        foreach ($autos as $key => $auto) {
+            $auto->enrrolment = strtoupper($request->enrrolment[$key]);
+            $auto->color = $request->color[$key];
+            $auto->update();
         }
 
         $vista = $this::READ;
         $search = request('search');
-        $trashed = request('trashed');
-        $registros = User::where('id', $user->id);
+        $trashed = (request('trashed')) ? true : false;
+        $buscar = true;
         toastr()->success(__('Registro actualizado con éxito'));
-        return redirect()->route('usuarios.index', compact('vista', 'trashed', 'search', 'registros'));
+        return redirect()->route('visitantes.index', compact('vista', 'search', 'trashed', 'buscar'));
     }
 
     /**
@@ -222,13 +293,24 @@ class VisitorController extends WebController
      */
     public function destroy($id)
     {
-        $user = User::withTrashed()->where('id', $id)->first();
+        
         $registros = null;
-        $user->delete();
         $vista = $this::READ;
         $search = request('search');
         $trashed = request('trashed');
+
+        // Delete visitor
+        $visitor = Visitor::withTrashed()->where('id', $id)->first();
+        $visitor->delete();
         toastr()->success(__('Registro eliminado con éxito'));
-        return redirect()->route('usuarios.index', compact('vista', 'trashed', 'search', 'registros'));
+
+
+        return redirect()->route('visitantes.index', compact('vista', 'search', 'trashed'));
+    }
+
+    public function auto_models()
+    {
+        $auto_models = AutoModel::all();
+        return $auto_models;
     }
 }
