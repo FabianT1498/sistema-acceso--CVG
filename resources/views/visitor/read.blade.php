@@ -10,8 +10,9 @@
   <script src="{{ asset('js/dataTables.bootstrap4.js') }}"></script>
   <script src="{{ asset('js/toastr.min.js') }}"></script>
   @toastr_render
+
   <script src="{{ asset('js/insumo.js') }}"></script>
-  <script src="{{ asset('js/user.js') }}"></script>
+  <script src="{{ asset('js/visitor.js') }}"></script>
 @endsection
 
 @section('migasdepan')
@@ -57,7 +58,7 @@
                 </thead>
                 <tbody>
                   @foreach ($registros->get() as $registro)
-                    <tr>
+                    <tr id="tr_{{$registro->id}}">
                       <td>
                         <a href="{{ route('visitantes.edit', $registro->id) }}"
                           onclick="event.preventDefault();
@@ -75,7 +76,20 @@
                     
                       <td>
                         @if ($trashed == 0)
-                        <a title="Eliminar" href="{{ route('visitantes-destroy', $registro->id) }}" onclick="return confirm('¿Está seguro? Esta acción no se puede deshacer.')" class="delete text-c-red"><small><small class="text-danger"><i class="fa fa-trash fa-2x"></i></small></small></a>
+                          <a title="{{ __('Eliminar') }}" href="#" onclick="
+                            event.preventDefault();
+                            confirm('{{ __("Esta acción no se puede deshacer. ¿Desea continuar?") }}') ?
+                              document.getElementById('frm_eliminar_{{ $registro->id }}').submit() : false;"
+                          >
+                            <small>
+                              <small class="text-danger"><i class="fa fa-trash fa-2x"></i></small>
+                            </small>
+                          </a>
+                          <form method="POST" id="frm_eliminar_{{ $registro->id }}"action="{{ route('visitantes-destroy', $registro->id) }}" class="d-none">
+                              @method('DELETE')
+                              @csrf
+                              <input type="hidden" name="search" value="{{ $search }}">
+                          </form>  
                         @endif
                       </td>
                     </tr>

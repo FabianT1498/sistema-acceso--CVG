@@ -1,6 +1,7 @@
 @extends('layouts.app')
 
 @section('mascss')
+  
   <link rel="stylesheet" href="{{ asset('css/toastr.css') }}">
 @endsection
 
@@ -15,7 +16,7 @@
 @section('migasdepan')
     <a href="{{ route('visitantes.index') }}">{{ __('VISITANTES') }}</a>
     &nbsp;&nbsp;<i class="icon ion-android-arrow-forward"></i>&nbsp;&nbsp;{{ __('VISITANTES') }}
-     <span class="text-success">({{ __('Editar') }})</span>
+     <span class="text-success">({{ __('Crear') }})</span>
 @endsection
 
 @section('content')
@@ -57,25 +58,25 @@
             @endif
             <div class="card card-primary">
               <!-- form start -->
-              <form method='POST' action="{{ route('visitantes.update', $visitor->id) }}"  role="form" enctype="multipart/form-data">
+              <form method='POST' action="{{ route('visitantes.store') }}"  role="form"  enctype="multipart/form-data">
                 @csrf
-                @method('PUT')
+                @method('POST')
                 <div class="card-body">
                   <div class="form-group">
                     <label for="firstname">{{ _('Nombre de la persona') }}&nbsp;<sup class="text-danger">*</sup></label>
-                    <input id="firstname" name="firstname" type="text" class="form-control" placeholder="{{ __('Ingrese Nombre') }}" value="{{ $visitor->firstname }}" required>
+                    <input id="firstname" name="firstname" type="text" class="form-control" placeholder="{{ __('Ingrese Nombre') }}" required>
                   </div>
                   <div class="form-group">
                     <label for="lastname">{{ _('Apellido de la persona') }}&nbsp;<sup class="text-danger">*</sup></label>
-                    <input id="lastname" name="lastname" type="text" class="form-control" placeholder="{{ __('Ingrese Apellido') }}" value="{{ $visitor->lastname }}" required>
+                    <input id="lastname" name="lastname" type="text" class="form-control" placeholder="{{ __('Ingrese Apellido') }}" required>
                   </div>
                   <div class="form-group">
                     <label for="dni">{{ _('Cédula de la persona') }}&nbsp;<sup class="text-danger">*</sup></label>
-                    <input id="dni" name="dni" type="text" class="form-control" style="text-transform:uppercase" placeholder="{{ __('Ingrese Cedula') }}" value="{{ $visitor->dni }}" required>
+                    <input id="dni" name="dni" type="text" class="form-control" style="text-transform:uppercase" placeholder="{{ __('Ingrese Cedula') }}" required>
                   </div>
                   <div class="form-group">
                     <label for="phone_number">{{ _('Telefono') }}&nbsp;<sup class="text-danger">*</sup></label>
-                    <input id="phone_number" name="phone_number" type="text" class="form-control" placeholder="{{ __('Ingrese numero') }}" value="{{ $visitor->phone_number }}" required>
+                    <input id="phone_number" name="phone_number" type="text" class="form-control" placeholder="{{ __('Ingrese numero') }}" required>
                   </div>
                   <div class="form-group">
                     <input type="file" name="image" class="file" accept="image/*">
@@ -86,11 +87,7 @@
                       </div>
                     </div>
                     <div class="ml-2 col-sm-4">
-                      @if (!is_null($photo))
-                        <img src="{{ Storage::url($photo->path) }}" id="preview" class="img-thumbnail">
-                      @else
-                        <img src="" id="preview" class="img-thumbnail">
-                      @endif
+                      <img src="" id="preview" class="img-thumbnail">
                     </div>
                   </div>
                   <div class="row">           
@@ -103,26 +100,16 @@
                         </tr>
                       </thead>
                       <tbody>
-                        @foreach ($autos->get() as $auto)
-                          <tr id="tr_{{$auto->id}}">
-                            <td>   
-                              {{$auto->name}}
-                            </td>
-                            <td><input id="color_{{ $loop->index }}" name="color[]" value="{{ $auto->color }}" type="text" class="form-control color" required ></td>
-                            <td><input style="text-transform: uppercase" id="enrrolment_{{ $loop->index }}" name="enrrolment[]" value="{{ $auto->enrrolment }}" type="text" class="form-control enrrolment" required ></td>
-                            
-                          </tr>
-                        @endforeach
                       </tbody>
                     </table>
                   </div>
-                  <!-- <a class="btn btn-primary btn-sm" id="add" title="AÑADIR">
+                  <a class="btn btn-primary btn-sm" id="add" title="AÑADIR">
                     <i class="icon ion-android-add px-1"></i>
-                  </a> -->
+                  </a>
                 </div>
                 <!-- /.card-body -->
                 <div class="card-footer">
-                  <button type="submit" class="btn btn-success">{{ __('Actualizar Registro') }}</button>
+                  <button type="submit" class="btn btn-success">{{ __('Crear Registro') }}</button>
                 </div>
               </form>
             </div>

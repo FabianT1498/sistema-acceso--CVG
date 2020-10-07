@@ -111,8 +111,7 @@ Route::group(['middleware' => ['auth', 'admin']], function () {
 	Route::delete('inventarios/{inventory}/destroy', 'InventoryController@destroy')->name('inventarios.destroy');
 	Route::delete('inventarios/{inventory}/destroy-item', 'InventoryController@destroyRegister')->name('inventarios.destroy.item');
 
-	Route::get('visitantes/{id}/delete', 'VisitorController@destroy')->name('visitantes-destroy');
-
+	Route::delete('visitantes/{id}/delete', 'VisitorController@destroy')->name('visitantes-destroy');
 });
 /*********************************************/
 
@@ -155,30 +154,28 @@ Route::group(['middleware' => ['auth', 'storer']], function () {
 /*********************************************/
 
 Route::group(['middleware' => ['auth', 'analyst']], function () {
-/*********************************************/
-/*********************************************/
-/********           COINTRA         **********/
-/*********************************************/
-/*********************************************/
-Route::get('/dashboard', 'HomeController@index')->name('dashboard');
+	/*********************************************/
+	/*********************************************/
+	/********           COINTRA         **********/
+	/*********************************************/
+	/*********************************************/
+	Route::get('/dashboard', 'HomeController@index')->name('dashboard');
 
-/********           INVOICE         **********/
-Route::resource('compras', 'InvoiceController')->except([ 'destroy', 'show']);
+	/********           INVOICE         **********/
+	Route::resource('compras', 'InvoiceController')->except([ 'destroy', 'show']);
 
-/********           DELIVERY         **********/
-Route::resource('entregas', 'DeliveryController')->except(['update', 'destroy', 'show']);
-Route::get('entregas/{delivery}/imprimir', 'DeliveryController@printRegister')->name('entregas.printing');
-Route::get('entregas/imprimirlst', 'DeliveryController@printList')->name('entreta.imprimirlst');
-
-
-
-/********             STOCK           **********/
-Route::get('/stocks', 'StockController@index')->name('stocks');
-//Route::get('/stocks/{id}/item', 'StockController@edit')->name('stocks.edit');
-Route::get('/stocks/{id}/items', 'StockController@update')->name('stocks.update');
-Route::get('/item-stock/{id}', 'StockController@stock_item')->name('stocks.stock_item');
+	/********           DELIVERY         **********/
+	Route::resource('entregas', 'DeliveryController')->except(['update', 'destroy', 'show']);
+	Route::get('entregas/{delivery}/imprimir', 'DeliveryController@printRegister')->name('entregas.printing');
+	Route::get('entregas/imprimirlst', 'DeliveryController@printList')->name('entreta.imprimirlst');
 
 
+
+	/********             STOCK           **********/
+	Route::get('/stocks', 'StockController@index')->name('stocks');
+	//Route::get('/stocks/{id}/item', 'StockController@edit')->name('stocks.edit');
+	Route::get('/stocks/{id}/items', 'StockController@update')->name('stocks.update');
+	Route::get('/item-stock/{id}', 'StockController@stock_item')->name('stocks.stock_item');
 });
 
 /*********************************************/
@@ -192,46 +189,40 @@ Route::get('/item-stock/{id}', 'StockController@stock_item')->name('stocks.stock
 Route::group(['middleware' => ['auth']], function () {
 
 	/********           WAREHOUSE         **********/
-Route::get('/paquetes-confirmados', 'WarehouseController@confirmed_invoices')->name('almacen.compras_confirmadas');
-Route::get('/paquetes-confirmados/{id}/show', 'WarehouseController@show_confirmed_invoices')->name('almacen.compra_confirmada');
+	Route::get('/paquetes-confirmados', 'WarehouseController@confirmed_invoices')->name('almacen.compras_confirmadas');
+	Route::get('/paquetes-confirmados/{id}/show', 'WarehouseController@show_confirmed_invoices')->name('almacen.compra_confirmada');
 
-/********           DELIVERY         **********/
-Route::get('/entregas-items', 'DeliveryController@items_delivery');
-Route::get('/cantidad/{id}/items-disponibles', 'DeliveryController@item_quantity');
+	/********           DELIVERY         **********/
+	Route::get('/entregas-items', 'DeliveryController@items_delivery');
+	Route::get('/cantidad/{id}/items-disponibles', 'DeliveryController@item_quantity');
 
-/********           INVOICE         **********/
-Route::get('/compras-items', 'InvoiceController@items_invoice');
+	/********           INVOICE         **********/
+	Route::get('/compras-items', 'InvoiceController@items_invoice');
 
-/********           INVENTORY         **********/
-Route::resource('inventarios', 'InventoryController')->parameters(['inventarios' => 'inventory'])->except(['update', 'destroy']);
-Route::get('/inventory-items', 'InventoryController@items_inventory');
+	/********           AUTO_MODEL         **********/
+	Route::get('/modelos-autos', 'VisitorController@auto_models');
 
-/********           VISITOR         **********/
-Route::resource('visitantes', 'VisitorController')->except(['destroy']);
+	/********           INVENTORY         **********/
+	Route::resource('inventarios', 'InventoryController')->parameters(['inventarios' => 'inventory'])->except(['update', 'destroy']);
+	Route::get('/inventory-items', 'InventoryController@items_inventory');
 
-Route::get('/home', function(){
-	if(Auth::user())
-	{
-		if(Auth::user()->role->name === "ALMACENISTA")
+	/********           VISITOR         **********/
+	Route::resource('visitantes', 'VisitorController')->except(['destroy']);
+
+	Route::get('/home', function(){
+		if(Auth::user())
 		{
-			return redirect()->route('almacen');
+			if(Auth::user()->role->name === "ALMACENISTA")
+			{
+				return redirect()->route('almacen');
+			}
+			
+			return redirect()->route('dashboard');
 		}
-		
-		return redirect()->route('dashboard');
-	}
-})->name('home');
+	})->name('home');	
 });
 
 /*********************************************/
-
-
-
-
-
-
-
-
-
 
 /*********************************************/
 /*********************************************/
