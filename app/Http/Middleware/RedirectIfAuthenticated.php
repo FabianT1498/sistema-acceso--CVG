@@ -18,10 +18,7 @@ class RedirectIfAuthenticated
     public function handle($request, Closure $next, $guard = null)
     {
         if (Auth::guard($guard)->check()) {
-            if(Auth::user()->role->name === "ALMACENISTA")
-            {
-                return redirect()->route('almacen');
-            }
+        
             return redirect('/');
         }
 

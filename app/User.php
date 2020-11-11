@@ -5,6 +5,7 @@ namespace App;
 use App\Role;
 use App\Report;
 use App\PassRecord;
+use App\Worker;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\SoftDeletes; //línea necesaria
@@ -45,6 +46,11 @@ class User extends Authenticatable
     public function role()
     {
         return $this->belongsTo(Role::class);
+    }
+
+    public function worker()
+    {
+        return $this->belongsTo(Worker::class);
     }
 
     /**

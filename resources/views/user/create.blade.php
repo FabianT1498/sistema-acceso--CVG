@@ -2,6 +2,8 @@
 
 @section('masjs')
   <script src="{{ asset('js/insumo.js') }}"></script>
+
+  <!-- User.js -->
   <script src="{{ asset('js/user.js') }}"></script>
 @endsection
 
@@ -49,39 +51,41 @@
               <form method='POST' action="{{ route('usuarios.store') }}"  role="form">
                 @csrf
                 <div class="card-body">
-                  <div class="form-group">
-                    <label for="firstname">{{ _('Nombre de la persona') }}&nbsp;<sup class="text-danger">*</sup></label>
-                    <input id="firstname" name="firstname" type="text" class="form-control" placeholder="{{ __('Ingrese Nombre') }}" value="{{ old('firstname') }}" required>
-                  </div>
-                  <div class="form-group">
-                    <label for="lastname">{{ _('Apellido de la persona') }}&nbsp;<sup class="text-danger">*</sup></label>
-                    <input id="lastname" name="lastname" type="text" class="form-control" placeholder="{{ __('Ingrese Apellido') }}" value="{{ old('lastname') }}" required>
-                  </div>
-                  <div class="form-group">
-                    <label for="dni">{{ _('Cédula de la persona') }}&nbsp;<sup class="text-danger">*</sup></label>
-                    <input id="dni" name="dni" type="text" class="form-control" style="text-transform:uppercase" placeholder="{{ __('Ingrese Cedula') }}" value="{{ old('dni') }}" required>
-                  </div>
-                  <div class="form-group">
-                    <label for="username">{{ _('Usuario de la persona') }}&nbsp;<sup class="text-danger">*</sup></label>
-                    <input id="username" name="username" type="text" class="form-control" placeholder="{{ __('Ingrese Usuario') }}" value="{{ old('username') }}" required>
-                  </div>
-                  <div class="form-group">
-                    <label for="email">{{ _('Correo de la persona') }}&nbsp;<sup class="text-danger">*</sup></label>
-                    <input id="email" name="email" type="email" class="form-control" placeholder="{{ __('Ingrese Correo') }}" value="{{ old('email') }}" required>
-                  </div>
-                  <div class="form-group">
-                    <label for="password">{{ _('Contraseña de la persona') }}&nbsp;<sup class="text-danger">*</sup></label>
-                    <input id="password" name="password" type="password" class="form-control" placeholder="{{ __('Ingrese Contraseña') }}" value="{{ old('password') }}" required>
-                  </div>
-                  <div class="form-group">
-                    <label for="role">{{ _('Rol') }}&nbsp;<sup class="text-danger">*</sup></label>
-                    <select id="role" name="role_id" class="form-control">
-                      <option value=""> Rol...</option>
-                      @foreach ($roles as $role)
-                        <option value="{{ $role->id }}"> {{ $role->name }}</option>
-                      @endforeach
-                    </select>
-                  </div>
+                	<div class="form-group">
+						<label for="workerSearch">{{ _('Nombre del trabajador') }}&nbsp;<sup class="text-danger">*</sup></label>
+						<input id="workerSearch" name="worker_name" type="text" class="form-control" placeholder="{{ __('Ingrese Nombre') }}" required>
+						<input type="hidden" id='workerID' name="worker_id" readonly>
+                  	</div>
+
+					<div class="form-group">
+						<label for="workerDNI">{{ _('Cédula del trabajador') }}&nbsp;<sup class="text-danger">*</sup></label>
+						<input id="workerDNI" name="worker_dni" type="text" class="form-control" style="text-transform:uppercase" placeholder="{{ __('Ingrese Cedula') }}" readonly required>
+					</div>
+
+					<div class="form-group">
+						<label for="username">{{ _('Usuario de la persona') }}&nbsp;<sup class="text-danger">*</sup></label>
+						<input id="username" name="username" type="text" class="form-control" placeholder="{{ __('Ingrese Usuario') }}" required>
+					</div>
+
+					<div class="form-group">
+						<label for="email">{{ _('Correo de la persona') }}&nbsp;<sup class="text-danger">*</sup></label>
+						<input id="email" name="email" type="email" class="form-control" placeholder="{{ __('Ingrese Correo') }}" required>
+					</div>
+
+					<div class="form-group">
+						<label for="password">{{ _('Contraseña de la persona') }}&nbsp;<sup class="text-danger">*</sup></label>
+						<input id="password" name="password" type="password" class="form-control" placeholder="{{ __('Ingrese Contraseña') }}" required>
+					</div>
+
+					<div class="form-group">
+						<label for="role">{{ _('Rol') }}&nbsp;<sup class="text-danger">*</sup></label>
+						<select id="role" name="role_id" class="form-control">
+							<option hidden disabled selected value> -- seleccione un rol -- </option>
+							@foreach ($roles as $role)
+								<option value="{{ $role->id }}"> {{ $role->name }}</option>
+							@endforeach
+						</select>
+					</div>
                 </div>
                 <!-- /.card-body -->
                 <div class="card-footer">
@@ -91,17 +95,6 @@
             </div>
             <!-- /.card -->
           </div>
-
-
-
-
-
-
-
-
-
-
-
         </div>
         <!-- /.row -->
       </div><!-- /.container-fluid -->

@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Delivery;
+use App\Visitor;
+use App\Report;
+use App\Auto;
 use App\Http\Controllers\WebController;
-use App\Inventory;
-use App\Invoice;
 use Illuminate\Http\Request;
 
 class HomeController extends WebController
@@ -21,22 +21,16 @@ class HomeController extends WebController
         $anioActual = date('Y');
         $mesActual = date("m");
         $estadisticas = new \stdClass();
-        $estadisticas->comprasAnio = Invoice::whereYear('invoice_date', $anioActual)
-                            ->count();
-        $estadisticas->comprasMes = Invoice::whereYear('invoice_date', $anioActual)
-                            ->whereMonth('invoice_date', $mesActual)
-                            ->count();
-        $estadisticas->entregasAnio = Delivery::whereYear('delivered_date', $anioActual)
-                            ->count();
-        $estadisticas->entregasMes = Delivery::whereYear('delivered_date', $anioActual)
-                            ->whereMonth('delivered_date', $mesActual)
-                            ->count();
-        $estadisticas->inventariosAnio = Inventory::whereYear('start_date', $anioActual)
-                            ->count();
-        $estadisticas->inventariosMes = Inventory::whereYear('start_date', $anioActual)
-                            ->whereMonth('start_date', $mesActual)
-                            ->count();
 
+        $estadisticas->visitantesAnio = Visitor::whereYear('created_at', $anioActual)
+                            ->count();
+        $estadisticas->reportesAnio = Report::whereYear('date_attendance', $anioActual)
+                            ->count();
+        
+        $estadisticas->visitantesMes = Visitor::whereMonth('created_at', $mesActual)
+                            ->count();
+        $estadisticas->reportesMes = Report::whereMonth('date_attendance', $mesActual)
+                            ->count();
         return view('home', compact('estadisticas'));
     }
 }

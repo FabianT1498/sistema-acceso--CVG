@@ -13,4 +13,15 @@ class Auto extends Model
 		public function visitor(){
 			return $this->belongsTo(Visitor::class);
 		}
+
+		/**
+		 * Guardar tods la matricula en mayuscula
+		 *
+		 * @param  string  $value
+		 * @return void
+		 */
+		public function setEnrrolment($value)
+		{
+			$this->attributes['enrrolment'] = strtoupper($value);
+		}
 }

@@ -5,10 +5,12 @@ namespace App\Http\Controllers;
 
 use App\User;
 use App\Role;
+use Illuminate\Validation\Rule;
 use App\Http\Controllers\WebController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Auth;
 
 class UserController extends WebController
 {
@@ -22,26 +24,60 @@ class UserController extends WebController
         $vista = $this::READ;
         $search = request('search');
         $trashed = request('trashed');
-        if (request('buscar')) {
-            if($trashed == 1)
-            {
-                $registros = User::onlyTrashed()->where('firstname', 'LIKE' ,"%$search%")
-                ->where('lastname', 'LIKE', "%$search%")
-                ->where('dni', 'LIKE', "%$search%")
-                ->where('role_id', '!=', 2);
-            }
-            else
-            {
-                $registros = User::where('firstname', 'LIKE' ,"%$search%")
-                ->where('lastname', 'LIKE', "%$search%")
-                ->where('dni', 'LIKE', "%$search%")
-                ->where('role_id', '!=', 2);
-            }
-            
-        }else{
-            $registros = null;
+
+        /**
+         * 1.
+         *  1.1- Obtener los usuarios que son administradores, trabajadores, y recepcionista, si el usuario actual es super admin.
+         *  1.2- Obtener los usuarios trabajadores y recepcionista, si el usuario actual es admin.
+         * 2. Omitir a si mismo.
+         */
+
+        if (!Auth::user()){
+            // Devolver al login
         }
-        return view('user.read', compact('vista', 'trashed', 'search', 'registros'));
+
+        $user_id = Auth::id();
+        $user_role = Auth::user()->role_id;
+        
+        $users = null;
+
+        $columns = [
+            'workers.firstname as firstname',
+            'workers.lastname as lastname',
+            'workers.dni as dni',
+            'workers.email as email',
+            'users.id as user_id',
+            'users.username as username',
+            'roles.name as role_name' 
+        ];
+
+        if($trashed){
+            $users = User::onlyTrashed()->select($columns);
+        } else {
+            $users = User::select($columns);
+        }
+
+        $users = $users
+            ->join('workers', 'workers.id', '=', 'users.worker_id')
+            ->join('roles', 'roles.id', '=', 'users.role_id');
+
+        if ($user_role === 1){
+            $users = $users->where('users.role_id', '>', 1);
+        } else {
+            $users = $users->where('users.role_id', '>', 2);
+        }
+
+        if (strlen($search) > 0){
+            $users = $users->where('workers.firstname', 'LIKE' ,"%$search%")
+                ->orWhere('workers.lastname', 'LIKE' ,"%$search%")
+                ->orWhere('workers.dni', 'LIKE' ,"%$search%");
+        }
+
+        $users = $users->where('users.id', '!=', $user_id);
+        
+        $users = $users->paginate(10); 
+
+        return view('user.read', compact('vista', 'trashed', 'search', 'users'));
     }
 
     /**
@@ -69,46 +105,71 @@ class UserController extends WebController
     {
         $search = request('search');
         $trashed = request('trashed');
-        $validator = Validator::make($request->all(), [
-            'firstname' => 'required|max:255',
-            'lastname' => 'required|max:255',
-            'dni' => 'required|unique:users|max:255',
-        ]);
 
-
-        if ($validator->fails()) {
-            $vista = $this::EDIT;
-            $roles = (\Auth::user()->role->name === "SUPERADMIN") ? Role::all() : Role::where('id', '>', 2)->get();
+        $auth_user_role = Auth::user()->role_id;
+        $new_user_role = (int) $request->get('role_id');
+        
+        if (($new_user_role && $new_user_role <= 2)
+                && $auth_user_role !== 1){
             toastr()->error(__('Error al crear el registro'));
-            return redirect()->route('usuarios.create', compact('roles', 'trashed', 'vista', 'search'))
-                        ->withErrors($validator)
-                        ->withInput();
+            return redirect()->route('usuarios.create', compact('trashed', 'vista', 'search'))
+                ->withErrors($validator)
+                ->withInput();    
         }
-        $user = new User();
-        $user->firstname = $request->firstname;
-        $user->lastname = $request->lastname;
-        $user->email = $request->email;
-        $user->username = $request->username;
-        $user->dni = $request->dni;
-        if($request->role_id <= 2 && \Auth::user()->role->name !== "SUPERADMIN")
-        {
+
+        $validation = null;
+    
+        $worker_id = $request->get('worker_id');
+
+        $rules = [
+            'worker_id' => ['bail', 'required', 'exists:workers,id', 'unique:users,worker_id'],
+            'worker_dni' => [
+                'required',
+                Rule::exists('workers', 'dni')->where(function ($query) use ($worker_id) {
+                    $query->where('id', $worker_id);
+                }),
+                'max:10'
+            ],
+            'username' => [
+                'required',
+                'unique:users,username',
+            ],
+            'email' => [
+                'required',
+                Rule::exists('workers', 'email')->where(function ($query) use ($worker_id) {
+                    $query->where('id', $worker_id);
+                }),
+            ],
+            'password' => [
+                'required',
+                'min: 9'
+            ],
+            'role_id' => [
+                'required',
+                'exists:roles,id'
+            ]
+        ];
+
+        $validation = Validator::make($request->all(), $rules);    
+
+        if ($validation->fails()) {
             $vista = $this::EDIT;
-            $roles = (\Auth::user()->role->name == "SUPERADMIN") ? Role::all() : Role::where('id', '>', 2)->get();
-            toastr()->error(__('No lo vuelva a hacer.   '));
-            return redirect()->route('usuarios.create', compact('roles', 'trashed', 'vista', 'search'))
-                        ->withErrors($validator)
+            toastr()->error(__('Error al crear el registro'));
+            return redirect()->route('usuarios.create', compact('trashed', 'vista', 'search'))
+                        ->withErrors($validation)
                         ->withInput();
         }
-        $user->role_id = $request->role_id;
 
+        $user = new User();
+        $user->username = $request->username;
         $user->password = Hash::make($request->password);
-
+        $user->role_id = $request->role_id;
+        $user->worker_id = $request->worker_id;
         $user->save();
 
         $vista = $this::READ;
-        $registros = User::where('id', $user->id);
         toastr()->success(__('Registro creado con éxito'));
-        return redirect()->route('usuarios.index', compact('vista', 'trashed', 'search', 'registros'));
+        return redirect()->route('usuarios.index', compact('vista', 'trashed', 'search'));
     }
 
     /**
@@ -130,12 +191,28 @@ class UserController extends WebController
      */
     public function edit($id)
     {
-        $registro = User::withTrashed()->where('id', $id)->first();
+        $columns = [
+            'workers.firstname as firstname',
+            'workers.lastname as lastname',
+            'workers.email as email',
+            'workers.dni as dni',
+            'users.id as user_id',
+            'users.username as username',
+            'users.worker_id as worker_id',
+            'users.role_id as role_id'
+        ];
+
+        $user = User::withTrashed()
+            ->select($columns)
+            ->join('workers', 'workers.id', '=', 'users.worker_id')
+            ->where('users.id', $id)
+            ->first();
+        
         $roles = (\Auth::user()->role->name == "SUPERADMIN") ? Role::all() : Role::where('id', '>', 2)->get();
         $vista = $this::EDIT;
         $search = request('search');
         $trashed = request('trashed');
-        return view('user.edit', compact('vista', 'trashed', 'search', 'registro', 'roles'));
+        return view('user.edit', compact('vista', 'trashed', 'search', 'user', 'roles'));
     }
 
     /**
@@ -147,12 +224,66 @@ class UserController extends WebController
      */
     public function update(Request $request, $id)
     {
-        $user = User::withTrashed()->where('id', $id)->first();
+      
+        $user = User::withTrashed()
+            ->join('workers', 'workers.id', '=', 'users.worker_id')
+            ->where('users.id', '=', $id)
+            ->first();
+
         $search = request('search');
         $trashed = request('trashed');
-        $validator = Validator::make($request->all(), [
-            'firstname' => 'unique:users,firstname,'. $user->id.'|max:255'
-        ]);
+
+        $worker_id = (int) $request->get('worker_id');
+
+        $auth_user_role = Auth::user()->role_id;
+        $new_user_role = (int) $request->get('role_id');
+        
+        if (($new_user_role && $new_user_role <= 2)
+                && $auth_user_role !== 1){
+            toastr()->error(__('Error al actualizar el registro'));
+            return redirect()->route('usuarios.index', compact('trashed', 'vista', 'search'))
+                ->withErrors($validator)
+                ->withInput();    
+        }
+
+        $rules = [
+            'worker_id' => [
+                'bail',
+                'required',
+                'exists:workers,id',
+                Rule::unique('users', 'worker_id')->ignore($user->id)
+            ],
+            'worker_dni' => [
+                'required',
+                Rule::exists('workers', 'dni')->where(function ($query) use ($worker_id) {
+                    $query->where('id', $worker_id);
+                }),
+                'max:10'
+            ],
+            'username' => [
+                'required',
+                Rule::unique('users', 'username')->ignore($user->id)
+            ],
+            'email' => [
+                'required',
+                Rule::exists('workers', 'email')->where(function ($query) use ($worker_id) {
+                    $query->where('id', $worker_id);
+                }),
+            ],
+            'role_id' => [
+                'required',
+                'exists:roles,id'
+            ]
+        ];
+
+        $password = $request->password;
+
+        if ($password && $password !== ''){
+            $rules['password'] = array('min:9', Rule::unique('users', 'password')->ignore($user->id));
+            $user->password = Hash::make($password);   
+        }
+
+        $validator = Validator::make($request->all(), $rules);
 
         if ($validator->fails()) {
             return back()
@@ -160,25 +291,11 @@ class UserController extends WebController
                         ->withInput();
         }
 
-        $user->firstname = $request->firstname;
-        $user->lastname = $request->lastname;
-        $user->email = $request->email;
         $user->username = $request->username;
-        $user->dni = $request->dni;
-        if($request->role_id <= 2 && \Auth::user()->role->name !== "SUPERADMIN")
-        {
-            $vista = $this::EDIT;
-            $roles = (\Auth::user()->role->name == "SUPERADMIN") ? Role::all() : Role::where('id', '>', 2)->get();
-            toastr()->error(__('No lo vuelva a hacer.   '));
-            return redirect()->route('usuarios.create', compact('roles', 'trashed', 'vista', 'search'))
-                        ->withErrors($validator)
-                        ->withInput();
-        }
+        $user->password = Hash::make($request->password);
         $user->role_id = $request->role_id;
-        if($request->password != '')
-        {
-            $user->password = Hash::make($request->password);        
-        }
+        $user->worker_id = $request->worker_id;
+        
         if(!$user->update())
         {
             $search = request('search');
@@ -191,9 +308,8 @@ class UserController extends WebController
         $vista = $this::READ;
         $search = request('search');
         $trashed = request('trashed');
-        $registros = User::where('id', $user->id);
         toastr()->success(__('Registro actualizado con éxito'));
-        return redirect()->route('usuarios.index', compact('vista', 'trashed', 'search', 'registros'));
+        return redirect()->route('usuarios.index', compact('vista', 'trashed', 'search'));
     }
 
     /**
@@ -205,12 +321,11 @@ class UserController extends WebController
     public function destroy($id)
     {
         $user = User::withTrashed()->where('id', $id)->first();
-        $registros = null;
         $user->delete();
         $vista = $this::READ;
         $search = request('search');
         $trashed = request('trashed');
         toastr()->success(__('Registro eliminado con éxito'));
-        return redirect()->route('usuarios.index', compact('vista', 'trashed', 'search', 'registros'));
+        return redirect()->route('usuarios.index', compact('vista', 'trashed', 'search'));
     }
 }

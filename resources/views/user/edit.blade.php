@@ -34,31 +34,45 @@
         <!-- Small boxes (Stat box) -->
         <div class="row justify-content-center">
           <div class="col-12 col-md-10">
+            @if ($errors->any())
+              <div class="alert alert-danger alert-dismissible" role="alert">
+                  <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                      <span aria-hidden="true">×</span>
+                  </button>
+                  <ul>
+                      @foreach ($errors->all() as $error)
+                          <li>
+                              {{ $error }}
+                          </li>
+                      @endforeach
+                  </ul>
+              </div>
+            @endif
             <div class="card card-primary">
               <!-- form start -->
-              <form method='POST' action="{{ route('usuarios.update', $registro) }}"  role="form">
+              <form method='POST' action="{{ route('usuarios.update', $user->user_id) }}"  role="form">
                 @csrf
                 @method('PUT')
                 <div class="card-body">
-                  <div class="form-group">
-                    <label for="firstname">{{ _('Nombre de la persona') }}&nbsp;<sup class="text-danger">*</sup></label>
-                    <input id="firstname" name="firstname" type="text" class="form-control" placeholder="{{ __('Ingrese Nombre') }}" value="{{ $registro->firstname }}" required>
+
+                	<div class="form-group">
+                    <label for="workerSearch">{{ _('Nombre del trabajador') }}&nbsp;<sup class="text-danger">*</sup></label>
+                    <input id="workerSearch" name="worker_name" type="text" class="form-control" placeholder="{{ __('Ingrese Nombre') }}"  value="{{ $user->firstname . ' ' . $user->lastname }}" required>
+                    <input type="hidden" id='workerID' name="worker_id" value="{{$user->worker_id}}" readonly>
                   </div>
+
                   <div class="form-group">
-                    <label for="lastname">{{ _('Apellido de la persona') }}&nbsp;<sup class="text-danger">*</sup></label>
-                    <input id="lastname" name="lastname" type="text" class="form-control" placeholder="{{ __('Ingrese Apellido') }}" value="{{ $registro->lastname }}" required>
+                    <label for="workerDNI">{{ _('Cédula del trabajador') }}&nbsp;<sup class="text-danger">*</sup></label>
+                    <input id="workerDNI" name="worker_dni" type="text" class="form-control" style="text-transform:uppercase" placeholder="{{ __('Ingrese Cedula') }}" value="{{$user->dni}}" readonly required>
                   </div>
-                  <div class="form-group">
-                    <label for="dni">{{ _('Cédula de la persona') }}&nbsp;<sup class="text-danger">*</sup></label>
-                    <input id="dni" name="dni" type="text" class="form-control" style="text-transform:uppercase" placeholder="{{ __('Ingrese Cedula') }}" value="{{ $registro->dni }}" required>
-                  </div>
+
                   <div class="form-group">
                     <label for="username">{{ _('Usuario de la persona') }}&nbsp;<sup class="text-danger">*</sup></label>
-                    <input id="username" name="username" type="text" class="form-control" placeholder="{{ __('Ingrese Usuario') }}" value="{{ $registro->username }}" required>
+                    <input id="username" name="username" type="text" class="form-control" placeholder="{{ __('Ingrese Usuario') }}" value="{{ $user->username }}" required>
                   </div>
                   <div class="form-group">
                     <label for="email">{{ _('Correo de la persona') }}&nbsp;<sup class="text-danger">*</sup></label>
-                    <input id="email" name="email" type="email" class="form-control" placeholder="{{ __('Ingrese Correo') }}" value="{{ $registro->email }}" required>
+                    <input id="email" name="email" type="email" class="form-control" placeholder="{{ __('Ingrese Correo') }}" value="{{ $user->email }}" required>
                   </div>
                   <div class="form-group">
                     <label for="password">{{ _('Contraseña de la persona') }}&nbsp;<sup class="text-danger">*</sup></label>
@@ -67,9 +81,9 @@
                   <div class="form-group">
                     <label for="role">{{ _('Rol') }}&nbsp;<sup class="text-danger">*</sup></label>
                     <select id="role" name="role_id" class="form-control">
-                      <option value=""> Rol...</option>
+                      <option hidden disabled selected value> -- seleccione un rol -- </option>
                       @foreach ($roles as $role)
-                        @if ($role->id == $registro->role_id)
+                        @if ($role->id == $user->role_id)
                           <option value="{{ $role->id }}" selected> {{ $role->name }}</option>
                         @else
                           <option value="{{ $role->id }}"> {{ $role->name }}</option>
@@ -81,7 +95,7 @@
                 </div>
                 <!-- /.card-body -->
                 <div class="card-footer">
-                  <button type="submit" class="btn btn-success">{{ __('Actualizar Registro') }}</button>
+                  <button type="submit" class="btn btn-success">{{ __('Actualizar user') }}</button>
                 </div>
               </form>
             </div>

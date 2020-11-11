@@ -10,13 +10,14 @@
   <script src="{{ asset('js/dataTables.bootstrap4.js') }}"></script>
   <script src="{{ asset('js/toastr.min.js') }}"></script>
   @toastr_render
+
   <script src="{{ asset('js/insumo.js') }}"></script>
-  <script src="{{ asset('js/user.js') }}"></script>
+  <script src="{{ asset('js/report.js') }}"></script>
 @endsection
 
 @section('migasdepan')
-    <a href="{{ route('usuarios.index') }}">{{ __('USUARIOS') }}</a>
-    &nbsp;&nbsp;<i class="icon ion-android-arrow-forward"></i>&nbsp;&nbsp;{{ __('USUARIOS') }}
+    <a href="{{ route('reportes.index') }}">{{ __('REPORTES') }}</a>
+    &nbsp;&nbsp;<i class="icon ion-android-arrow-forward"></i>&nbsp;&nbsp;{{ __('REPORTES') }}
      <span class="text-info">({{ __('Listado') }})</span>
 @endsection
 
@@ -32,7 +33,7 @@
   </aside>
   <!-- Fin Main Sidebar Container -->
   <!-- Content Header (Page header) -->
-  @include('user.head')
+  @include('report.head')
   <!-- /.content-header -->
 
   <!-- Content Wrapper. Contains page content -->
@@ -43,55 +44,69 @@
       <div class="container-fluid">
         <!-- Small boxes (Stat box) -->
         <div class="row justify-content-center">
-          <div id="contenedor_tbl" class="col-12 {{ $users ? 'd-none' : '' }}">
-            @if ($users)
+          <div id="contenedor_tbl" class="col-12 {{ $reports ? 'd-none' : '' }}">
+            @if ($reports)
               <table id="tbl_read" class="table table-bordered table-hover">
                 <thead>
                   <tr>
-                    <th>{{ __('Nombres') }}</th>
-                    <th>{{ __('Apellidos') }}</th>
-                    <th>{{ __('Cédula') }}</th>
-                    <th>{{ __('Usuario') }}</th>
-                    <th>{{ __('Correo') }}</th>
-                    <th>{{ __('Rol') }}</th>
+                    <th>{{ __('Visitante') }}</th>
+                    <th>{{ __('Visitado') }}</th>
+                    <th>{{ __('Emisor') }}</th>
+                    <th>{{ __('Fecha de visita') }}</th>
                     <th>{{ __('Opciones') }}</th>
                   </tr>
                 </thead>
                 <tbody>
-                  @foreach ($users as $user)
-                    <tr>
+                  @foreach ($reports as $report)
+                    <tr id="tr_{{$report->id}}">
                       <td>
-                        <a href="{{ route('usuarios.edit', $user->user_id) }}"
+                        <a href="{{ route('reportes.edit', $report->id) }}"
                           onclick="event.preventDefault();
-                          document.getElementById('frm_user_{{ $user->user_id }}').submit();">
-                              {{ $user->firstname }}
+                          document.getElementById('frm_report_{{ $report->id }}').submit();">
+                              {{ $report->visitor_firstname. ' ' .$report->visitor_lastname }}
                         </a>
-                        <form id="frm_user_{{ $user->user_id }}" action="{{ route('usuarios.edit', $user->user_id) }}" class="d-none">
+                        <form id="frm_report_{{ $report->id }}" action="{{ route('reportes.edit', $report->id) }}" class="d-none">
                             @method('PUT')
                             @csrf
                         </form>
                       </td>
-                      <td>{{ $user->lastname }}</td>
-                      <td>{{ $user->dni }}</td>
-                      <td>{{ $user->username }}</td>
-                      <td>{{ $user->email }}</td>
-                      <td>{{ $user->role_name }}</td>
+                      <td>{{ $report->worker_firstname. ' ' .$report->worker_lastname }}</td>
+                      <td>{{ $report->user_username }}</td>
+                      <td>{{ $report->date_attendance }}</td>               
                       <td>
                         @if ($trashed == 0)
-                          <a title="{{ __('Eliminar') }}" href="#" onclick="
+                          @if (Auth::user()->role->name == "ADMIN" || Auth::user()->role->name == "SUPERADMIN")
+                            <a title="{{ __('Eliminar') }}" href="#" onclick="
                               event.preventDefault();
                               confirm('{{ __("Esta acción no se puede deshacer. ¿Desea continuar?") }}') ?
-                                document.getElementById('frm_eliminar_{{ $user->user_id }}').submit() : false;"
+                                document.getElementById('frm_eliminar_{{ $report->id }}').submit() : false;"
+                            >
+                              <small>
+                                <small class="text-danger"><i class="fa fa-trash fa-2x"></i></small>
+                              </small>
+                            </a>
+                            <form method="POST" id="frm_eliminar_{{ $report->id }}"action="{{ route('reportes-destroy', $report->id) }}" class="d-none">
+                                @method('DELETE')
+                                @csrf
+                                <input type="hidden" name="search" value="{{ $search }}">
+                            </form>
+                          @endif
+
+                          <a title="{{ __('Generar PDF') }}" href="#" onclick="
+                            event.preventDefault();
+                            confirm('{{ __("Usted va a generar un pase, esto quedará registrado. ¿Desea continuar?") }}') ?
+                              document.getElementById('frm_pdf_{{ $report->id }}').submit() : false;"
                           >
                             <small>
-                              <small class="text-danger"><i class="fa fa-trash fa-2x"></i></small>
+                              <small class="text-info"><i class="fa fa-file-pdf fa-2x"></i></small>
                             </small>
                           </a>
-                          <form method="POST" id="frm_eliminar_{{ $user->user_id }}"action="{{ route('usuarios-destroy', $user->user_id) }}" class="d-none">
-                              @method('DELETE')
+                          <form method="GET" id="frm_pdf_{{ $report->id }}" action="{{ route('reportes.generar_pase', $report->id) }}" class="d-none">
                               @csrf
                               <input type="hidden" name="search" value="{{ $search }}">
                           </form>
+
+                            
                         @endif
                       </td>
                     </tr>
@@ -100,7 +115,7 @@
               </table>
               {{-- Pagination --}}
               <div class="d-flex justify-content-center">
-                  {!! $users->links() !!}
+                  {!! $reports->links() !!}
               </div>
             @else
               <div class="alert alert-info h5">

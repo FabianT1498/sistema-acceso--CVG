@@ -34,25 +34,24 @@ class VisitorController extends WebController
         $vista = $this::READ;
         $search = request('search');
         $trashed = request('trashed');
-        if (request('buscar')) {
-            if($trashed == 1)
-            {
-                $registros = Visitor::onlyTrashed()->where('firstname', 'LIKE' ,"%$search%")
-                ->where('lastname', 'LIKE', "%$search%")
-                ->where('dni', 'LIKE', "%$search%");
-             
-            }
-            else
-            {
-                $registros = Visitor::where('firstname', 'LIKE' ,"%$search%")
-                ->orWhere('lastname', 'LIKE', "%$search%")
-                ->orWhere('dni', 'LIKE', "%$search%");
-            }
-            
-        }else{
-            $registros = null;
+
+        $visitors = null;
+
+        if($trashed){
+            $visitors = Visitor::onlyTrashed();
+        } else {
+            $visitors = Visitor::withTrashed();
         }
-        return view('visitor.read', compact('vista', 'trashed', 'search', 'registros'));
+
+        if (strlen($search) > 0){
+            $visitors = $visitors->where('visitors.firstname', 'LIKE' ,"%$search%")
+                ->orWhere('visitors.lastname', 'LIKE' ,"%$search%")
+                ->orwhere('visitors.dni', 'LIKE', "%$search%");
+        }
+        
+        $visitors = $visitors->paginate(10); 
+
+        return view('visitor.read', compact('vista', 'trashed', 'search', 'visitors'));
     }
 
     /**
@@ -312,5 +311,61 @@ class VisitorController extends WebController
     {
         $auto_models = AutoModel::all();
         return $auto_models;
+    }
+
+    public function getVisitors(Request $request){
+
+        $search =  $request->get('search');
+        
+        if ($search === ''){
+           $visitors = Visitor::orderby('firstname','asc')->select('id','firstname', 'lastname', 'dni')->limit(5)->get();
+        }else {
+            $arrSearch = explode(" ", $search, 2);
+
+            // if doesn't define the last name 
+            if (!isset($arrSearch[1])){
+                $arrSearch[] = '';
+            }
+
+            $visitors = Visitor::orderby('firstname','asc')
+                ->select('id','firstname', 'lastname', 'dni')
+                ->where('firstname', 'LIKE', "%$arrSearch[0]%")
+                ->where('lastname', 'LIKE', "%$arrSearch[1]%")
+                ->limit(5)->get();
+        }
+  
+        $response = array();
+        foreach($visitors as $visitor){
+           $response[] = array("id"=>$visitor->id,"value"=>$visitor->firstname . ' ' . $visitor->lastname, "dni" => $visitor->dni);
+        }
+  
+        return response()->json($response);
+    }
+
+    public function getVisitorAutos(Request $request){
+
+        $id =  $request->get('visitorID');
+
+        $autos = Auto::orderby('auto_model','asc')
+            ->select(
+                'autos.id as auto_id',
+                'autos.enrrolment as auto_enrrolment',
+                'auto_models.name as auto_model'
+            )
+            ->where('visitor_id', $id)
+            ->leftJoin('auto_models', 'autos.auto_model_id', '=', 'auto_models.id')
+            ->get();
+
+        $response = array();
+
+        foreach($autos as $auto){
+            $response[] = array(
+                "id"=>$auto->auto_id,
+                "enrrolment"=>$auto->auto_enrrolment,
+                "auto_model" => $auto->auto_model
+            );
+        }
+  
+        return response()->json($response);
     }
 }

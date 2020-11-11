@@ -17,16 +17,17 @@ class CreateReportsTable extends Migration
         Schema::create('reports', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->unsignedBigInteger('user_id')->unsigned()->nullable();
-            $table->unsignedBigInteger('visitor_id')->unsigned()->nullable();
+            $table->unsignedBigInteger('visitor_id')->unsigned();
+            $table->unsignedBigInteger('worker_id')->unsigned()->nullable();
+            $table->unsignedBigInteger('auto_id')->unsigned()->nullable();
             $table->foreign('user_id')->references('id')->on('users')->onDelete('set null');
-            $table->foreign('visitor_id')->references('id')->on('visitors')->onDelete('set null');
-            $table->date('date_attendance');
-            $table->time('entry_time');
-            $table->time('departure_time');
+            $table->foreign('visitor_id')->references('id')->on('visitors')->onDelete('cascade');
+            $table->foreign('worker_id')->references('id')->on('workers')->onDelete('set null');
+            $table->foreign('auto_id')->references('id')->on('autos')->onDelete('set null');
+            $table->timestamp('date_attendance');
             $table->timestamps();
             $table->softDeletes(); //Nueva línea, para el borrado lógico
         });
-
     }
 
     /**
