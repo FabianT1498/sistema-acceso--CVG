@@ -12,7 +12,7 @@
   @toastr_render
 
   <script src="{{ asset('js/insumo.js') }}"></script>
-  <script src="{{ asset('js/auto.js') }}"></script>
+  <script src="{{ asset('js/autos.js') }}"></script>
 @endsection
 
 @section('migasdepan')

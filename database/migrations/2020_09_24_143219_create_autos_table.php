@@ -20,8 +20,9 @@ class CreateAutosTable extends Migration
             $table->unsignedBigInteger('visitor_id')->unsigned()->nullable();
             $table->unsignedBigInteger('auto_model_id')->unsigned()->nullable();
             $table->foreign('visitor_id')->references('id')->on('visitors')->onDelete('cascade');
-            $table->foreign('auto_model_id')->references('id')->on('auto_models')->onDelete('cascade');
+            $table->foreign('auto_model_id')->references('id')->on('auto_models')->onDelete('set null');
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

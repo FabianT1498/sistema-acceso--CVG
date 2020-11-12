@@ -18,6 +18,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Auth;
 
 class VisitorController extends WebController
 {
@@ -37,7 +38,9 @@ class VisitorController extends WebController
 
         $visitors = null;
 
-        if($trashed){
+        $user_role = Auth::user()->role_id;
+
+        if($trashed && $user_role <= 2){
             $visitors = Visitor::onlyTrashed();
         } else {
             $visitors = Visitor::withTrashed();
@@ -82,26 +85,15 @@ class VisitorController extends WebController
         $search = request('search');
         $trashed = request('trashed');
 
-        $autos_registered = $request->has('enrrolment') 
-            ? sizeof($request->enrrolment) 
-            : 0;
+        $rules = [
+            'dni' => ['bail', 'required', 'unique:visitors,dni', 'max:10'],
+            'phone_number' => ['required', 'unique:visitors,phone_number'],
+            'image' => ['required', 'image' , 'mimes:jpeg,png,jpg,gif', 'max:2048'],
+        ];
 
         $validation = null;
 
-        if ($autos_registered > 0){
-            $validation = Validator::make($request->all(), [
-                'dni' => ['bail', 'required', 'unique:visitors,dni', 'max:10'],
-                'phone_number' => ['required', 'unique:visitors,phone_number'],
-                'enrrolment.*' => ['required', 'unique:autos,enrrolment', 'max:7'],
-                'image' => ['required', 'image' , 'mimes:jpeg,png,jpg,gif', 'max:2048'],
-            ]);    
-        } else {
-            $validation = Validator::make($request->all(), [
-                'dni' => ['bail', 'required', 'unique:visitors,dni', 'max:10'],
-                'phone_number' => ['required', 'unique:visitors,phone_number'],
-                'image' => ['required', 'image' , 'mimes:jpeg,png,jpg,gif', 'max:2048'],
-            ]);    
-        }
+        $validation = Validator::make($request->all(), $rules); 
 
         if ($validation->fails()) {
             toastr()->error(__('Error al crear el registro'));
@@ -137,15 +129,6 @@ class VisitorController extends WebController
             $visitor->photo()->save($photo);
         }
 
-        // Create autos register if there is at least one auto registered
-        for ($i = 0; $i < $autos_registered ; $i++) {
-            $auto = new Auto();
-            $auto->auto_model_id = $request->auto_model[$i];
-            $auto->color = $request->color[$i];
-            $auto->enrrolment = strtoupper($request->enrrolment[$i]);
-            $visitor->autos()->save($auto);
-        } 
-
         $vista = $this::READ;
         $registros = Visitor::where('id', $visitor->id);
         toastr()->success(__('Registro creado con éxito'));
@@ -177,14 +160,11 @@ class VisitorController extends WebController
         
         $photo = $visitor->photo()->first();
 
-        $autos = Auto::where('visitor_id', $id)
-            ->leftJoin('auto_models', 'autos.auto_model_id', '=', 'auto_models.id');
-
         $vista = $this::EDIT;
         $search = request('search');
         $trashed = (request('trashed')) ? true : false;
 
-        return view('visitor.edit', compact('vista', 'search', 'trashed', 'visitor', 'autos', 'photo'));
+        return view('visitor.edit', compact('vista', 'search', 'trashed', 'visitor', 'photo'));
     }
 
     /**
@@ -201,9 +181,8 @@ class VisitorController extends WebController
         $trashed = request('trashed');
 
         $visitor = Visitor::withTrashed()->where('id', $id)->first();
-        $autos = Auto::where('visitor_id', $id)->orderBy('id')->get();
-      
-        $validation = Validator::make($request->all(), [
+
+        $rules = [
             'dni' => [
                 'bail',
                 'required',
@@ -214,17 +193,14 @@ class VisitorController extends WebController
                 'required',
                 Rule::unique('visitors', 'phone_number')->ignore($visitor->id),
             ],
-            'enrrolment.*' => [
-                'required',
-                Rule::unique('autos', 'enrrolment')->ignore($autos),
-                'max:7'
-            ],
             'image' => [
                 'image',
                 'mimes:jpeg,png,jpg,gif',
                 'max:2048'
             ],
-        ]);    
+        ];
+              
+        $validation = Validator::make($request->all(), $rules);    
     
         if ($validation->fails()) {
             return back()
@@ -270,12 +246,6 @@ class VisitorController extends WebController
             $photo->update();
         }
 
-        foreach ($autos as $key => $auto) {
-            $auto->enrrolment = strtoupper($request->enrrolment[$key]);
-            $auto->color = $request->color[$key];
-            $auto->update();
-        }
-
         $vista = $this::READ;
         $search = request('search');
         $trashed = (request('trashed')) ? true : false;
@@ -305,12 +275,6 @@ class VisitorController extends WebController
 
 
         return redirect()->route('visitantes.index', compact('vista', 'search', 'trashed'));
-    }
-
-    public function auto_models()
-    {
-        $auto_models = AutoModel::all();
-        return $auto_models;
     }
 
     public function getVisitors(Request $request){

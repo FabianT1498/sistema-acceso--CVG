@@ -45,8 +45,9 @@ class AutoController extends WebController
         ];
 
         $autos = null;
+        $user_role = Auth::user()->role_id;
 
-        if($trashed){
+        if($trashed && $user_role <= 2){
             $autos = Auto::onlyTrashed()->select($columns);
         } else {
             $autos = Auto::select($columns);

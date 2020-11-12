@@ -54,14 +54,6 @@ $(document).ready(function() {
     });
   });
 
-  $(document).on('click', '.remove', function() {
-    $.count--;
-    $(this)
-      .closest('tr')
-      .remove();
- 
-  });
-
   $(document).on("click", ".browse", function() {
     var file = $(this).parents().find(".file");
     file.trigger("click");
@@ -83,38 +75,6 @@ $(document).ready(function() {
     reader.readAsDataURL(this.files[0]);
   });
 
-
-  function loadItems(number) {
-    var url = baseUrl + '/modelos-autos';
-    console.log(url);
-    $.get(
-      url,
-      {},
-      function(lstItems) {
- 
-        $.each(lstItems, function(indice, auto_model) {
-          var option;
-          if (indice === 0){
-            option = `
-              <option selected value="${auto_model.id}">
-                ${auto_model.name}
-              </option>
-            `;   
-          }
-          else {
-            option = `
-              <option value="${auto_model.id}">
-                ${auto_model.name}
-              </option>
-            `;
-          }
-            
-          $('#auto_model_' + number).append(option);
-        });
-      },
-      'json',
-    );
-  }
 });
 
 $(document).on('click', '#check_trashed', function() {

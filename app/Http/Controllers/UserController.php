@@ -121,8 +121,17 @@ class UserController extends WebController
     
         $worker_id = $request->get('worker_id');
 
+        ;
+
         $rules = [
-            'worker_id' => ['bail', 'required', 'exists:workers,id', 'unique:users,worker_id'],
+            'worker_id' => [
+                'bail',
+                'required',
+                'exists:workers,id',
+                Rule::unique('users', 'worker_id')->where(function ($query) {
+                    return $query->where('deleted_at', NULL);
+                })
+            ],
             'worker_dni' => [
                 'required',
                 Rule::exists('workers', 'dni')->where(function ($query) use ($worker_id) {
@@ -132,7 +141,9 @@ class UserController extends WebController
             ],
             'username' => [
                 'required',
-                'unique:users,username',
+                Rule::unique('users', 'username')->where(function ($query) {
+                    return $query->where('deleted_at', NULL);
+                })
             ],
             'email' => [
                 'required',
@@ -328,4 +339,5 @@ class UserController extends WebController
         toastr()->success(__('Registro eliminado con éxito'));
         return redirect()->route('usuarios.index', compact('vista', 'trashed', 'search'));
     }
+
 }

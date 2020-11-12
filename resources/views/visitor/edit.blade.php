@@ -93,29 +93,7 @@
                       @endif
                     </div>
                   </div>
-                  <div class="row">           
-                    <table class="table table-bordered table-striped" id="autos_table">
-                      <thead>
-                        <tr>
-                          <th>{{ __('Modelo de auto') }}</th>
-                          <th>{{ __('Color') }}</th>
-                          <th>{{ __('Placa') }}</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        @foreach ($autos->get() as $auto)
-                          <tr id="tr_{{$auto->id}}">
-                            <td>   
-                              {{$auto->name}}
-                            </td>
-                            <td><input id="color_{{ $loop->index }}" name="color[]" value="{{ $auto->color }}" type="text" class="form-control color" required ></td>
-                            <td><input style="text-transform: uppercase" id="enrrolment_{{ $loop->index }}" name="enrrolment[]" value="{{ $auto->enrrolment }}" type="text" class="form-control enrrolment" required ></td>
-                            
-                          </tr>
-                        @endforeach
-                      </tbody>
-                    </table>
-                  </div>
+                  
                   <!-- <a class="btn btn-primary btn-sm" id="add" title="AÑADIR">
                     <i class="icon ion-android-add px-1"></i>
                   </a> -->

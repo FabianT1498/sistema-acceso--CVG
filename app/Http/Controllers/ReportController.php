@@ -45,7 +45,9 @@ class ReportController extends WebController
 
         $reports = null;
 
-        if($trashed){
+        $user_role = Auth::user()->role_id;
+
+        if($trashed && $user_role <= 2){
             $reports = Report::onlyTrashed()->select($columns);
         } else {
             $reports = Report::select($columns);

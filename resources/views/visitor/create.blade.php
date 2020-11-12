@@ -90,22 +90,7 @@
                       <img src="" id="preview" class="img-thumbnail">
                     </div>
                   </div>
-                  <div class="row">           
-                    <table class="table table-bordered table-striped" id="autos_table">
-                      <thead>
-                        <tr>
-                          <th>{{ __('Modelo de auto') }}</th>
-                          <th>{{ __('Color') }}</th>
-                          <th>{{ __('Placa') }}</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                      </tbody>
-                    </table>
-                  </div>
-                  <a class="btn btn-primary btn-sm" id="add" title="AÑADIR">
-                    <i class="icon ion-android-add px-1"></i>
-                  </a>
+                  
                 </div>
                 <!-- /.card-body -->
                 <div class="card-footer">
