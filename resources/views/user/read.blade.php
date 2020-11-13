@@ -61,15 +61,19 @@
                   @foreach ($users as $user)
                     <tr>
                       <td>
-                        <a href="{{ route('usuarios.edit', $user->user_id) }}"
-                          onclick="event.preventDefault();
-                          document.getElementById('frm_user_{{ $user->user_id }}').submit();">
-                              {{ $user->firstname }}
-                        </a>
-                        <form id="frm_user_{{ $user->user_id }}" action="{{ route('usuarios.edit', $user->user_id) }}" class="d-none">
-                            @method('PUT')
-                            @csrf
-                        </form>
+                        @if ($trashed == 0)
+                          <a href="{{ route('usuarios.edit', $user->user_id) }}"
+                            onclick="event.preventDefault();
+                            document.getElementById('frm_user_{{ $user->user_id }}').submit();">
+                                {{ $user->firstname }}
+                          </a>
+                          <form id="frm_user_{{ $user->user_id }}" action="{{ route('usuarios.edit', $user->user_id) }}" class="d-none">
+                              @method('PUT')
+                              @csrf
+                          </form>
+                        @else
+                          {{ $user->firstname }}
+                        @endif
                       </td>
                       <td>{{ $user->lastname }}</td>
                       <td>{{ $user->dni }}</td>

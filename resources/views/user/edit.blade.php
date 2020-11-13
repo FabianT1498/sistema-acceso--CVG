@@ -56,24 +56,26 @@
                 <div class="card-body">
 
                 	<div class="form-group">
-                    <label for="workerSearch">{{ _('Nombre del trabajador') }}&nbsp;<sup class="text-danger">*</sup></label>
-                    <input id="workerSearch" name="worker_name" type="text" class="form-control" placeholder="{{ __('Ingrese Nombre') }}"  value="{{ $user->firstname . ' ' . $user->lastname }}" required>
+                    <label for="workerSearch">{{ _('Nombre del trabajador') }}</label>
+                    <p class="text-left">{{ $user->firstname . ' ' . $user->lastname }}</p>
                     <input type="hidden" id='workerID' name="worker_id" value="{{$user->worker_id}}" readonly>
                   </div>
 
                   <div class="form-group">
-                    <label for="workerDNI">{{ _('Cédula del trabajador') }}&nbsp;<sup class="text-danger">*</sup></label>
-                    <input id="workerDNI" name="worker_dni" type="text" class="form-control" style="text-transform:uppercase" placeholder="{{ __('Ingrese Cedula') }}" value="{{$user->dni}}" readonly required>
+                    <label for="workerDNI">{{ _('Cédula del trabajador') }}</label>
+                    <p class="text-left">{{$user->dni}}</p>
+                  </div>
+
+                  <div class="form-group">
+                    <label for="email">{{ _('Correo de la persona') }}&nbsp;</label>
+                    <p class="text-left">{{ $user->email }}</p>
                   </div>
 
                   <div class="form-group">
                     <label for="username">{{ _('Usuario de la persona') }}&nbsp;<sup class="text-danger">*</sup></label>
                     <input id="username" name="username" type="text" class="form-control" placeholder="{{ __('Ingrese Usuario') }}" value="{{ $user->username }}" required>
                   </div>
-                  <div class="form-group">
-                    <label for="email">{{ _('Correo de la persona') }}&nbsp;<sup class="text-danger">*</sup></label>
-                    <input id="email" name="email" type="email" class="form-control" placeholder="{{ __('Ingrese Correo') }}" value="{{ $user->email }}" required>
-                  </div>
+
                   <div class="form-group">
                     <label for="password">{{ _('Contraseña de la persona') }}&nbsp;<sup class="text-danger">*</sup></label>
                     <input id="password" name="password" type="password" class="form-control" placeholder="{{ __('Ingrese Contraseña') }}" >

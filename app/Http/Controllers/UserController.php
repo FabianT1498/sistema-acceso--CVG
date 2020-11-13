@@ -11,9 +11,14 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
+use DB;
+
+use App\Http\Requests\StoreUserRequest;
 
 class UserController extends WebController
 {
+  
      /**
      * Display a listing of the resource.
      *
@@ -24,17 +29,6 @@ class UserController extends WebController
         $vista = $this::READ;
         $search = request('search');
         $trashed = request('trashed');
-
-        /**
-         * 1.
-         *  1.1- Obtener los usuarios que son administradores, trabajadores, y recepcionista, si el usuario actual es super admin.
-         *  1.2- Obtener los usuarios trabajadores y recepcionista, si el usuario actual es admin.
-         * 2. Omitir a si mismo.
-         */
-
-        if (!Auth::user()){
-            // Devolver al login
-        }
 
         $user_id = Auth::id();
         $user_role = Auth::user()->role_id;
@@ -68,9 +62,17 @@ class UserController extends WebController
         }
 
         if (strlen($search) > 0){
-            $users = $users->where('workers.firstname', 'LIKE' ,"%$search%")
-                ->orWhere('workers.lastname', 'LIKE' ,"%$search%")
-                ->orWhere('workers.dni', 'LIKE' ,"%$search%");
+            
+            $splitName = explode(' ', $search, 2);
+            $first_name = $splitName[0];
+            $last_name = !empty($splitName[1]) ? $splitName[1] : '';
+
+            $users = $users->where(DB::raw('lower("firstname")'), "LIKE", "%".strtolower($first_name)."%")
+                ->orWhere(DB::raw('lower("dni")'), "LIKE", "%".strtolower($search)."%");
+
+            if ($last_name !== ''){
+               $users = $users->where(DB::raw('lower("lastname")'), "LIKE", "%".strtolower($last_name)."%");
+            }
         }
 
         $users = $users->where('users.id', '!=', $user_id);
@@ -98,30 +100,29 @@ class UserController extends WebController
     /**
      * Store a newly created resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
+     * @param  StoreUserRequest  $request
+     * @return Response
      */
-    public function store(Request $request)
+    public function store(StoreUserRequest $request)
     {
         $search = request('search');
         $trashed = request('trashed');
+        $vista = $this::EDIT;
 
+        /*
         $auth_user_role = Auth::user()->role_id;
         $new_user_role = (int) $request->get('role_id');
         
-        if (($new_user_role && $new_user_role <= 2)
+         if (($new_user_role && $new_user_role <= 2)
                 && $auth_user_role !== 1){
             toastr()->error(__('Error al crear el registro'));
-            return redirect()->route('usuarios.create', compact('trashed', 'vista', 'search'))
-                ->withErrors($validator)
-                ->withInput();    
-        }
+            return redirect()->back()
+                ->withInput($request->input());    
+        } */
 
-        $validation = null;
+        /* $validation = null;
     
         $worker_id = $request->get('worker_id');
-
-        ;
 
         $rules = [
             'worker_id' => [
@@ -159,7 +160,7 @@ class UserController extends WebController
                 'required',
                 'exists:roles,id'
             ]
-        ];
+        ]; 
 
         $validation = Validator::make($request->all(), $rules);    
 
@@ -168,8 +169,11 @@ class UserController extends WebController
             toastr()->error(__('Error al crear el registro'));
             return redirect()->route('usuarios.create', compact('trashed', 'vista', 'search'))
                         ->withErrors($validation)
-                        ->withInput();
+                        ->withInput($request->input());
         }
+        */
+
+        $validated = $request->validated();
 
         $user = new User();
         $user->username = $request->username;
@@ -236,15 +240,24 @@ class UserController extends WebController
     public function update(Request $request, $id)
     {
       
-        $user = User::withTrashed()
+        $user = null;
+        $worker_id = (int) $request->get('worker_id');
+
+        $vista = $this::READ;
+        $search = request('search');
+        $trashed = request('trashed');
+        
+        User::withTrashed()
             ->join('workers', 'workers.id', '=', 'users.worker_id')
             ->where('users.id', '=', $id)
             ->first();
 
-        $search = request('search');
-        $trashed = request('trashed');
+        if (!$user || $user->deleted_at || $user->worker_id !== $worker_id){
+            toastr()->error(__('Error al actualizar el registro'));
+            return redirect()->route('usuarios.index', compact('trashed', 'vista', 'search'));
+        }
 
-        $worker_id = (int) $request->get('worker_id');
+        
 
         $auth_user_role = Auth::user()->role_id;
         $new_user_role = (int) $request->get('role_id');
@@ -258,28 +271,13 @@ class UserController extends WebController
         }
 
         $rules = [
-            'worker_id' => [
-                'bail',
-                'required',
-                'exists:workers,id',
-                Rule::unique('users', 'worker_id')->ignore($user->id)
-            ],
-            'worker_dni' => [
-                'required',
-                Rule::exists('workers', 'dni')->where(function ($query) use ($worker_id) {
-                    $query->where('id', $worker_id);
-                }),
-                'max:10'
-            ],
             'username' => [
                 'required',
-                Rule::unique('users', 'username')->ignore($user->id)
-            ],
-            'email' => [
-                'required',
-                Rule::exists('workers', 'email')->where(function ($query) use ($worker_id) {
-                    $query->where('id', $worker_id);
-                }),
+                Rule::unique('users', 'username')
+                    ->ignore($user->id)
+                    ->where(function ($query) {
+                        return $query->where('deleted_at', NULL);
+                    })
             ],
             'role_id' => [
                 'required',
@@ -290,8 +288,7 @@ class UserController extends WebController
         $password = $request->password;
 
         if ($password && $password !== ''){
-            $rules['password'] = array('min:9', Rule::unique('users', 'password')->ignore($user->id));
-            $user->password = Hash::make($password);   
+            $rules['password'] = array('required', 'min:9');
         }
 
         $validator = Validator::make($request->all(), $rules);
@@ -305,7 +302,6 @@ class UserController extends WebController
         $user->username = $request->username;
         $user->password = Hash::make($request->password);
         $user->role_id = $request->role_id;
-        $user->worker_id = $request->worker_id;
         
         if(!$user->update())
         {

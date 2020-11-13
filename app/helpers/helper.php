@@ -29,4 +29,40 @@ function getRouteIsCrud($nameRoute){
 }
 
 
+function getSearchOptions(){
 
+	$name = request()->route()->uri;
+	
+	if ($name[0] === '/'){
+		$name = str_replace("/", "", $name);
+	}
+
+	$arrName = explode('/', $name, 2);
+
+	$options = null;
+
+	if ($arrName[0] === 'usuarios' || $arrName[0] === 'visitantes'){
+		$options = array(
+			'Nombre del usuario (ej. Juan)',
+			'Nombre y apellido del usuario (ej. Juan Perez)',
+			'Cedula del usuario (ej. V1014823 o E1014823)'
+		);
+	} else if ($arrName[0] === 'autos'){
+		$options = array(
+			'Nombre del dueño (ej. Juan)',
+			'Nombre y Apellido del dueño (ej. Juan Perez)',
+			'Cedula del dueño (ej. V1014823 o E1014823)',
+			'Matricula del auto (ej. ABC1246)',
+		);
+	} else if ($arrName[0] === 'reportes'){
+		$options = array(
+			'Nombre del visitante (ej. Juan)',
+			'Nombre y apellido del visitante (ej. Juan Perez)',
+			'Cedula del visitante (ej. V1014823 o E1014823)',
+			'Fecha de visita (ej. 04/14/2020 | mm-dd-AAAA)',
+		);
+	}
+
+	return $options;
+	 
+}

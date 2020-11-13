@@ -1,10 +1,17 @@
 @extends('layouts.app')
 
+@section('mascss')
+  <link rel="stylesheet" href="{{ asset('css/toastr.css') }}">
+@endsection
+
 @section('masjs')
   <script src="{{ asset('js/insumo.js') }}"></script>
 
   <!-- User.js -->
   <script src="{{ asset('js/user.js') }}"></script>
+
+  <script src="{{ asset('js/toastr.min.js') }}"></script>
+  @toastr_render
 @endsection
 
 @section('migasdepan')
@@ -53,28 +60,69 @@
                 <div class="card-body">
                 	<div class="form-group">
 						<label for="workerSearch">{{ _('Nombre del trabajador') }}&nbsp;<sup class="text-danger">*</sup></label>
-						<input id="workerSearch" name="worker_name" type="text" class="form-control" placeholder="{{ __('Ingrese Nombre') }}" required>
-						<input type="hidden" id='workerID' name="worker_id" readonly>
+						<input 
+							id="workerSearch"
+							name="worker_name"
+							type="text" 
+							class="form-control"
+							placeholder="{{ __('Ingrese Nombre') }}"
+							value="{{old('worker_name')}}"
+							required
+						>
+						<input type="hidden" id='workerID' name="worker_id" value="{{old('worker_id')}}" readonly>
                   	</div>
 
 					<div class="form-group">
 						<label for="workerDNI">{{ _('Cédula del trabajador') }}&nbsp;<sup class="text-danger">*</sup></label>
-						<input id="workerDNI" name="worker_dni" type="text" class="form-control" style="text-transform:uppercase" placeholder="{{ __('Ingrese Cedula') }}" readonly required>
+						<input 
+							id="workerDNI"
+							name="worker_dni"
+							type="text" 
+							class="form-control" 
+							style="text-transform:uppercase" 
+							placeholder="{{ __('Ingrese Cedula') }}" 
+							value="{{old('worker_dni')}}"
+							readonly 
+							required
+						>
 					</div>
 
 					<div class="form-group">
 						<label for="username">{{ _('Usuario de la persona') }}&nbsp;<sup class="text-danger">*</sup></label>
-						<input id="username" name="username" type="text" class="form-control" placeholder="{{ __('Ingrese Usuario') }}" required>
+						<input 
+							id="username" 
+							name="username" 
+							type="text" 
+							class="form-control" 
+							placeholder="{{ __('Ingrese Usuario') }}" 
+							value="{{old('username')}}"
+							required
+						>
 					</div>
 
 					<div class="form-group">
 						<label for="email">{{ _('Correo de la persona') }}&nbsp;<sup class="text-danger">*</sup></label>
-						<input id="email" name="email" type="email" class="form-control" placeholder="{{ __('Ingrese Correo') }}" required>
+						<input 
+							id="email"
+							name="email" 
+							type="email" 
+							class="form-control" 
+							placeholder="{{ __('Ingrese Correo') }}"
+							value="{{old('email')}}"
+							required
+						>
 					</div>
 
 					<div class="form-group">
 						<label for="password">{{ _('Contraseña de la persona') }}&nbsp;<sup class="text-danger">*</sup></label>
-						<input id="password" name="password" type="password" class="form-control" placeholder="{{ __('Ingrese Contraseña') }}" required>
+						<input 
+							id="password" 
+							name="password" 
+							type="password" 
+							class="form-control" 
+							placeholder="{{ __('Ingrese Contraseña') }}" 
+							required
+						>
 					</div>
 
 					<div class="form-group">

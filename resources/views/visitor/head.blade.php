@@ -29,13 +29,21 @@
                 </button>
               </div>
               @if (Auth::user()->role->name == "ADMIN" || Auth::user()->role->name == "SUPERADMIN")
-             <div class="form-check" style="padding-left: 5px">
-                <input class="form-check-input" type="checkbox" value="{{ ($trashed) ? $trashed : 0 }}" id="check_trashed" @if($trashed) checked="true" @endif  id="check_trashed" name="trashed">
-                <label class="form-check-label" for="check_trashed">
-                  Eliminados
-                </label>
-              </div>
+                <div class="form-check" style="padding-left: 5px">
+                  <input class="form-check-input" type="checkbox" value="{{ ($trashed) ? $trashed : 0 }}" id="check_trashed" @if($trashed) checked="true" @endif  id="check_trashed" name="trashed">
+                  <label class="form-check-label" for="check_trashed">
+                    Eliminados
+                  </label>
+                </div>
               @endif
+              <button 
+                type="button" 
+                class="btn btn-primary btn-circle btn-md ml-md-3"
+                data-toggle="modal" 
+                data-target="#helpModal"
+              > 
+						    <i class="icon fa fa-question"></i>
+					    </button>
             </div>
           </form>
         </nav>
@@ -43,3 +51,4 @@
     </div><!-- /.row -->
   </div><!-- /.container-fluid -->
 </div>
+@include('layouts.modal')

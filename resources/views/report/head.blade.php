@@ -36,6 +36,14 @@
                   </label>
                 </div>
               @endif
+              <button 
+                type="button" 
+                class="btn btn-primary btn-circle btn-md ml-md-3"
+                data-toggle="modal" 
+                data-target="#helpModal"
+              > 
+						    <i class="icon fa fa-question"></i>
+					    </button>
             </div>
           </form>
         </nav>
@@ -43,3 +51,4 @@
     </div><!-- /.row -->
   </div><!-- /.container-fluid -->
 </div>
+@include('layouts.modal')
