@@ -20,6 +20,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Auth;
 
+
 class VisitorController extends WebController
 {
 
@@ -34,22 +35,35 @@ class VisitorController extends WebController
     {
         $vista = $this::READ;
         $search = request('search');
-        $trashed = request('trashed');
+        $trashed = (int) request('trashed');
 
         $visitors = null;
 
         $user_role = Auth::user()->role_id;
 
-        if($trashed && $user_role <= 2){
+        if(($trashed && $trashed === 1) && $user_role <= 2){
             $visitors = Visitor::onlyTrashed();
         } else {
             $visitors = Visitor::withTrashed();
         }
 
         if (strlen($search) > 0){
-            $visitors = $visitors->where('visitors.firstname', 'LIKE' ,"%$search%")
-                ->orWhere('visitors.lastname', 'LIKE' ,"%$search%")
-                ->orwhere('visitors.dni', 'LIKE', "%$search%");
+
+            $splitName = explode(' ', $search, 2);
+            $first_name = $splitName[0];
+            $last_name = !empty($splitName[1]) ? $splitName[1] : '';
+
+            $visitors = $visitors->where(DB::raw('lower("firstname")'), "LIKE", "%".strtolower($first_name)."%")
+                ->orWhere(DB::raw('lower("dni")'), "LIKE", "%".strtolower($search)."%");
+
+            if ($last_name !== ''){
+               $visitors = $visitors->where(DB::raw('lower("lastname")'), "LIKE", "%".strtolower($last_name)."%");
+            }
+        }
+
+        // Trabajador
+        if ($user_role === 3){
+            $visitors = $visitors->where('created_by')
         }
         
         $visitors = $visitors->paginate(10); 

@@ -5,16 +5,18 @@ namespace App\Http\Controllers;
 
 use App\User;
 use App\Role;
-use Illuminate\Validation\Rule;
+
 use App\Http\Controllers\WebController;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Validator;
+
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use DB;
 
 use App\Http\Requests\StoreUserRequest;
+use App\Http\Requests\UpdateUserRequest;
+use App\Http\Requests\DestroyUserRequest;
 
 class UserController extends WebController
 {
@@ -107,83 +109,20 @@ class UserController extends WebController
     {
         $search = request('search');
         $trashed = request('trashed');
-        $vista = $this::EDIT;
-
-        /*
-        $auth_user_role = Auth::user()->role_id;
-        $new_user_role = (int) $request->get('role_id');
-        
-         if (($new_user_role && $new_user_role <= 2)
-                && $auth_user_role !== 1){
-            toastr()->error(__('Error al crear el registro'));
-            return redirect()->back()
-                ->withInput($request->input());    
-        } */
-
-        /* $validation = null;
-    
-        $worker_id = $request->get('worker_id');
-
-        $rules = [
-            'worker_id' => [
-                'bail',
-                'required',
-                'exists:workers,id',
-                Rule::unique('users', 'worker_id')->where(function ($query) {
-                    return $query->where('deleted_at', NULL);
-                })
-            ],
-            'worker_dni' => [
-                'required',
-                Rule::exists('workers', 'dni')->where(function ($query) use ($worker_id) {
-                    $query->where('id', $worker_id);
-                }),
-                'max:10'
-            ],
-            'username' => [
-                'required',
-                Rule::unique('users', 'username')->where(function ($query) {
-                    return $query->where('deleted_at', NULL);
-                })
-            ],
-            'email' => [
-                'required',
-                Rule::exists('workers', 'email')->where(function ($query) use ($worker_id) {
-                    $query->where('id', $worker_id);
-                }),
-            ],
-            'password' => [
-                'required',
-                'min: 9'
-            ],
-            'role_id' => [
-                'required',
-                'exists:roles,id'
-            ]
-        ]; 
-
-        $validation = Validator::make($request->all(), $rules);    
-
-        if ($validation->fails()) {
-            $vista = $this::EDIT;
-            toastr()->error(__('Error al crear el registro'));
-            return redirect()->route('usuarios.create', compact('trashed', 'vista', 'search'))
-                        ->withErrors($validation)
-                        ->withInput($request->input());
-        }
-        */
-
-        $validated = $request->validated();
+        $vista = $this::READ;
 
         $user = new User();
         $user->username = $request->username;
         $user->password = Hash::make($request->password);
         $user->role_id = $request->role_id;
         $user->worker_id = $request->worker_id;
-        $user->save();
+        
+        if (!$user->save()){
+            toastr()->error(__('Ocurrio un error al crear el registro'));
+        } else {
+            toastr()->success(__('Registro creado con éxito'));
+        }
 
-        $vista = $this::READ;
-        toastr()->success(__('Registro creado con éxito'));
         return redirect()->route('usuarios.index', compact('vista', 'trashed', 'search'));
     }
 
@@ -206,6 +145,15 @@ class UserController extends WebController
      */
     public function edit($id)
     {
+        $vista = $this::EDIT;
+        $search = request('search');
+        $trashed = request('trashed');
+
+        if (!User::where('id', $id)->first()){
+            toastr()->error(__('No existe este usuario'));
+            return redirect()->route('usuarios.index', compact('vista', 'trashed', 'search'));
+        }
+
         $columns = [
             'workers.firstname as firstname',
             'workers.lastname as lastname',
@@ -213,7 +161,7 @@ class UserController extends WebController
             'workers.dni as dni',
             'users.id as user_id',
             'users.username as username',
-            'users.worker_id as worker_id',
+            'users.password as password',
             'users.role_id as role_id'
         ];
 
@@ -224,9 +172,7 @@ class UserController extends WebController
             ->first();
         
         $roles = (\Auth::user()->role->name == "SUPERADMIN") ? Role::all() : Role::where('id', '>', 2)->get();
-        $vista = $this::EDIT;
-        $search = request('search');
-        $trashed = request('trashed');
+        
         return view('user.edit', compact('vista', 'trashed', 'search', 'user', 'roles'));
     }
 
@@ -237,85 +183,22 @@ class UserController extends WebController
      * @param  \App\User  $user
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(UpdateUserRequest $request, $id)
     {
       
-        $user = null;
-        $worker_id = (int) $request->get('worker_id');
-
         $vista = $this::READ;
         $search = request('search');
         $trashed = request('trashed');
         
-        User::withTrashed()
-            ->join('workers', 'workers.id', '=', 'users.worker_id')
-            ->where('users.id', '=', $id)
-            ->first();
-
-        if (!$user || $user->deleted_at || $user->worker_id !== $worker_id){
-            toastr()->error(__('Error al actualizar el registro'));
-            return redirect()->route('usuarios.index', compact('trashed', 'vista', 'search'));
-        }
-
-        
-
-        $auth_user_role = Auth::user()->role_id;
-        $new_user_role = (int) $request->get('role_id');
-        
-        if (($new_user_role && $new_user_role <= 2)
-                && $auth_user_role !== 1){
-            toastr()->error(__('Error al actualizar el registro'));
-            return redirect()->route('usuarios.index', compact('trashed', 'vista', 'search'))
-                ->withErrors($validator)
-                ->withInput();    
-        }
-
-        $rules = [
-            'username' => [
-                'required',
-                Rule::unique('users', 'username')
-                    ->ignore($user->id)
-                    ->where(function ($query) {
-                        return $query->where('deleted_at', NULL);
-                    })
-            ],
-            'role_id' => [
-                'required',
-                'exists:roles,id'
-            ]
-        ];
-
-        $password = $request->password;
-
-        if ($password && $password !== ''){
-            $rules['password'] = array('required', 'min:9');
-        }
-
-        $validator = Validator::make($request->all(), $rules);
-
-        if ($validator->fails()) {
-            return back()
-                        ->withErrors($validator)
-                        ->withInput();
-        }
-
-        $user->username = $request->username;
-        $user->password = Hash::make($request->password);
-        $user->role_id = $request->role_id;
-        
-        if(!$user->update())
+        $user = User::withTrashed()->where('id', '=', $id)->first();
+   
+        if(!$user->update($request->validated()))
         {
-            $search = request('search');
-            $trashed = request('trashed');
-            $registros = null;
             toastr()->error(__('Error al actualizar el registro'));
-            return redirect()->route('usuarios.index', compact('vista', 'trashed', 'search', 'registros'));
+        } else {
+            toastr()->success(__('Registro actualizado con éxito'));
         }
 
-        $vista = $this::READ;
-        $search = request('search');
-        $trashed = request('trashed');
-        toastr()->success(__('Registro actualizado con éxito'));
         return redirect()->route('usuarios.index', compact('vista', 'trashed', 'search'));
     }
 
@@ -325,9 +208,10 @@ class UserController extends WebController
      * @param  \App\User  $user
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy($id, DestroyUserRequest $request)
     {
         $user = User::withTrashed()->where('id', $id)->first();
+
         $user->delete();
         $vista = $this::READ;
         $search = request('search');
@@ -335,5 +219,4 @@ class UserController extends WebController
         toastr()->success(__('Registro eliminado con éxito'));
         return redirect()->route('usuarios.index', compact('vista', 'trashed', 'search'));
     }
-
 }

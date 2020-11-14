@@ -36,7 +36,7 @@ Route::group(['middleware' => ['auth', 'admin']], function () {
 
 	/********           USER         **********/
 	Route::resource('usuarios', 'UserController')->except(['destroy']);
-	Route::delete('usuarios/{id}/delete', 'UserController@destroy')->name('usuarios-destroy');
+	Route::delete('usuarios/{usuario}/delete', 'UserController@destroy')->name('usuarios-destroy');
 
 	/*********************************************/
 	/*********************************************/
