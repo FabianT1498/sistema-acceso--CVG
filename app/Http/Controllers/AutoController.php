@@ -21,6 +21,12 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Auth;
 
+use App\Http\Requests\StoreAutoRequest;
+use App\Http\Requests\UpdateAutoRequest;
+use App\Http\Requests\DestroyAutoRequest;
+use App\Http\Requests\EditAutoRequest;
+
+
 class AutoController extends WebController
 {
     //
@@ -33,10 +39,11 @@ class AutoController extends WebController
     {
         $vista = $this::READ;
         $search = request('search');
-        $trashed = request('trashed');
+        $trashed = (int) request('trashed');
 
         $columns = [
             'autos.id as auto_id',
+            'autos.user_id as auto_user_id',
             'autos.enrrolment as auto_enrrolment',
             'autos.created_at as auto_created_at',
             'auto_models.name as auto_model_name',
@@ -45,21 +52,50 @@ class AutoController extends WebController
         ];
 
         $autos = null;
-        $user_role = Auth::user()->role_id;
+        $auth_user_role = Auth::user()->role_id;
 
-        if($trashed && $user_role <= 2){
+        if($trashed && $auth_user_role <= 2){
             $autos = Auto::onlyTrashed()->select($columns);
         } else {
             $autos = Auto::select($columns);
         }
 
-        $autos = $autos->join('visitors', 'visitors.id', '=', 'autos.visitor_id')
-            ->join('auto_models', 'auto_models.id', '=', 'autos.auto_model_id');
+        $autos = $autos->join('visitors', 
+                function($query) use ($search){
+                    $query->on('visitors.id', '=', 'autos.visitor_id');
 
-        if (strlen($search) > 0){
-            $autos = $autos->where('autos.enrrolment', 'LIKE' ,"%$search%")
-                ->where('visitors.firstname', 'LIKE' ,"%$search%")
-                ->orWhere('visitors.lastname', 'LIKE' ,"%$search%");
+                    if (isset($search) && strlen($search) > 0 && $search[0] !== '#'){
+                        $search = strtolower($search);
+            
+                        $isDNI =  (strpos($search, 'v-') !== false || strpos($search, 'e-') !== false) ? true : false;
+            
+                        if ($isDNI){
+                            $query->where(DB::raw('lower(visitors.dni)'), "LIKE", "%".$search);
+                        } else {
+                            $splitName = explode(' ', $search, 2);
+                            $first_name = $splitName[0];
+                            $last_name = !empty($splitName[1]) ? $splitName[1] : '';
+        
+                            $query->where(DB::raw('lower(visitors.firstname)'), "LIKE", "%" . $first_name . "%");
+            
+                            if ($last_name !== ''){
+                                $query->where(DB::raw('lower(visitors.lastname)'), "LIKE", "%" . $last_name . "%");
+                            }
+                        }   
+                    }
+                }
+            )
+            ->join('auto_models', 'auto_models.id', '=', 'autos.auto_model_id');
+        
+        $isEnrrolment = (isset($search) && ($search[0] === '#' && strlen($search) === 8)) ? true : false;
+
+        if ($isEnrrolment){
+            $search =  strtolower(substr($search, 1));
+            $autos = $autos->where(DB::raw('lower(autos.enrrolment)'), "LIKE", "%".$search);
+        }
+
+        if ($auth_user_role === 3 && !$isEnrrolment){ // TRABAJADOR
+            $autos = $autos->where('autos.user_id', Auth::user()->id);
         }
         
         $autos = $autos->paginate(10); 
@@ -90,67 +126,23 @@ class AutoController extends WebController
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(StoreAutoRequest $request)
     {
-        //return $request->all();
-    
+      
         $vista = $this::CREATE;
         $search = request('search');
         $trashed = request('trashed');
 
-        $visitor_id  =  $request->get('visitor_id');
-
-        $rules = [
-            'visitor_id' => ['bail', 'required', 'exists:visitors,id'],
-            'visitor_dni' => [
-                'required',
-                Rule::exists('visitors', 'dni')->where(function ($query) use ($visitor_id) {
-                    $query->where('id', $visitor_id );
-                }),
-                'max:10'
-            ],
-            'auto_enrrolment' => ['required', 'unique:autos,enrrolment', 'max:7'],
-            'auto_color' => ['required']
-        ];
-
-        $auto_brand_chk = (int) $request->get('check_auto_brand');
-        $auto_model_chk = (int) $request->get('check_auto_model');
-        
-        if ($auto_brand_chk && $auto_model_chk 
-            && $auto_model_chk === 1 && $auto_brand_chk === 1){
-            // Cannot checked both checks
-            return redirect()->route('autos.create', compact('vista', 'search', 'trashed'))
-                ->withErrors(['checks inputs' => 'No puedes seleccionar ambos checkbox']);
-        } else if ($auto_brand_chk && $auto_brand_chk === 1){
-            $rules['auto_brand_input'] = array('required', 'unique:auto_brands,name', 'min:3');
-            $rules['auto_model_input'] = array('required', 'unique:auto_models,name', 'min:3');
-        } else if ($auto_model_chk && $auto_model_chk === 1){
-            $rules['auto_brand_select'] = array('required', 'exists:auto_brands,id');
-            $rules['auto_model_input'] = array('required', 'unique:auto_models,name', 'min:3');
-        } else {
-            $rules['auto_brand_select'] = array('required', 'exists:auto_brands,id');
-            $rules['auto_model_select'] = array('required', 'exists:auto_models,id');
-        }
-
-        $validation = Validator::make($request->all(), $rules);    
-
-        if ($validation->fails()) {
-            toastr()->error(__('Error al crear el registro'));
-            return redirect()->route('autos.create', compact('vista', 'search', 'trashed'))
-                ->withErrors($validation)
-                ->withInput();
-        }
-
-        
-        $auto_model = null;
-        $auto_brand = null;
-        
         $auto = new Auto();
-        $auto->enrrolment = $request->get('auto_enrrolment');
+        $auto->enrrolment =  strtoupper($request->get('auto_enrrolment'));
         $auto->color = $request->get('auto_color');
         $auto->visitor_id = $request->get('visitor_id');
+        $auto->user_id = Auth::user()->id;
 
-        if ($auto_brand_chk && $auto_brand_chk === 1){    
+        $auto_brand_chk = (int) $request->check_auto_brand;
+        $auto_model_chk = (int) $request->check_auto_model;
+
+        if (isset($auto_brand_chk) && $auto_brand_chk === 1){    
             $auto_brand = new AutoBrand();
             $auto_brand->name = $request->get('auto_brand_input');
             $auto_brand->save();
@@ -162,7 +154,7 @@ class AutoController extends WebController
 
             $auto->auto_model_id = $auto_model->id;
 
-        } else if ($auto_model_chk && $auto_model_chk === 1){
+        } else if (isset($auto_model_chk) && $auto_model_chk === 1){
             $auto_model = new AutoModel();
             $auto_model->name = $request->get('auto_model_input');
             $auto_model->auto_brand_id = $request->get('auto_brand_select');
@@ -173,9 +165,12 @@ class AutoController extends WebController
             $auto->auto_model_id = $request->get('auto_model_select');
         }
 
-        $auto->save();
+        if (!$auto->save()){
+            toastr()->error(__('Error al crear el registro'));
+        } else {
+            toastr()->success(__('Registro creado con exito'));
+        }
 
-        toastr()->success(__('Registro creado con éxito'));
         return redirect()->route('autos.index', compact('vista', 'trashed', 'search'));
     }
 
@@ -196,7 +191,7 @@ class AutoController extends WebController
      * @param  \App\User  $user
      * @return \Illuminate\Http\Response
      */
-    public function edit($id)
+    public function edit($id, EditAutoRequest $request)
     {
         
         $vista = $this::READ;
@@ -217,8 +212,6 @@ class AutoController extends WebController
             'auto_brands.name as auto_brand_name'
         ];
 
-        $auto = null;
-
         $auto = Auto::select($columns)
             ->join('visitors', 'visitors.id', '=', 'autos.visitor_id')
             ->join('auto_models', 'auto_models.id', '=', 'autos.auto_model_id')
@@ -226,18 +219,9 @@ class AutoController extends WebController
             ->where("autos.id", "=", $id)
             ->first();
 
-        if (!$auto){
-            toastr()->error(__('No existe este auto'));
-            return redirect()->route('autos.index', compact('vista', 'search'));
-        }
-
         $auto_brands = AutoBrand::orderBy('name', 'asc')->get();
 
         $auto_models = AutoModel::orderBy('name', 'asc')->where('auto_brand_id', $auto->auto_brand_id)->get();
-
-        $vista = $this::EDIT;
-        $search = request('search');
-        $trashed = (request('trashed')) ? true : false;
         
         return view('auto.edit', compact('vista', 'search', 'trashed', 'auto', 'auto_brands', 'auto_models'));
     }
@@ -249,7 +233,7 @@ class AutoController extends WebController
      * @param  \App\User  $user
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(UpdateAutoRequest $request, $id)
     {
         $vista = $this::READ;
         $search = request('search');
@@ -258,61 +242,13 @@ class AutoController extends WebController
 
         $auto = Auto::where('id', $id)->first();
 
-        if (!$auto){
-            toastr()->error(__('No se ha podido actualizar el auto'));
-            return redirect()->route('autos.index', compact('vista', 'search'));
-        }
-
-        $validation = null;
-       
-        $visitor_id  =  $request->get('visitor_id');
-
-        $rules = [
-            'visitor_id' => ['bail', 'required', 'exists:visitors,id'],
-            'visitor_dni' => [
-                'required',
-                Rule::exists('visitors', 'dni')->where(function ($query) use ($visitor_id) {
-                    $query->where('id', $visitor_id );
-                }),
-                'max:10'
-            ],
-            'auto_enrrolment' => ['required', Rule::unique('autos', 'enrrolment')->ignore($auto->id), 'max:7'],
-            'auto_color' => ['required']
-        ];
-
-        $auto_brand_chk = (int) $request->get('check_auto_brand');
-        $auto_model_chk = (int) $request->get('check_auto_model');
-        
-        if ($auto_brand_chk && $auto_model_chk 
-            && $auto_model_chk === 1 && $auto_brand_chk === 1){
-            // Cannot checked both checks
-            return redirect()->route('autos.index', compact('vista', 'search', 'trashed'))
-                ->withErrors(['checks inputs' => 'No puedes seleccionar ambos checkbox']);
-        } else if ($auto_brand_chk && $auto_brand_chk === 1){
-            $rules['auto_brand_input'] = array('required', 'unique:auto_brands,name', 'min:3');
-            $rules['auto_model_input'] = array('required', 'unique:auto_models,name', 'min:3');
-        } else if ($auto_model_chk && $auto_model_chk === 1){
-            $rules['auto_brand_select'] = array('required', 'exists:auto_brands,id');
-            $rules['auto_model_input'] = array('required', 'unique:auto_models,name', 'min:3');
-        } else {
-            $rules['auto_brand_select'] = array('required', 'exists:auto_brands,id');
-            $rules['auto_model_select'] = array('required', 'exists:auto_models,id');
-        }
-
-        $validation = Validator::make($request->all(), $rules);    
-
-        if ($validation->fails()) {
-            return back()
-                ->withErrors($validation)
-                ->withInput();
-        }
-
-        $auto_model = null;
-        $auto_brand = null;
-  
-        $auto->enrrolment = $request->get('auto_enrrolment');
+        $auto->enrrolment =  strtoupper($request->get('auto_enrrolment'));
         $auto->color = $request->get('auto_color');
         $auto->visitor_id = $request->get('visitor_id');
+
+
+        $auto_brand_chk = (int) $request->check_auto_brand;
+        $auto_model_chk = (int) $request->check_auto_model;
 
         if ($auto_brand_chk && $auto_brand_chk === 1){    
             $auto_brand = new AutoBrand();
@@ -339,12 +275,11 @@ class AutoController extends WebController
 
         if(!$auto->update())
         {
-
             toastr()->error(__('Error al actualizar el registro'));
-            return redirect()->route('autos.index', compact('vista', 'search', 'trashed', 'buscar'));
+        } else {
+            toastr()->success(__('Registro actualizado con éxito'));
         }
 
-        toastr()->success(__('Registro actualizado con éxito'));
         return redirect()->route('autos.index', compact('vista', 'search', 'trashed', 'buscar'));
     }
 
@@ -356,7 +291,7 @@ class AutoController extends WebController
      * @param  \App\User  $user
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy($id, DestroyAutoRequest $request)
     {
         
         $registros = null;

@@ -60,15 +60,19 @@
                   @foreach ($autos as $auto)
                     <tr id="tr_{{$auto->auto_id}}">
                       <td>
-                        <a href="{{ route('autos.edit', $auto->auto_id) }}"
-                          onclick="event.preventDefault();
-                          document.getElementById('frm_report_{{ $auto->auto_id }}').submit();">
-                              {{ $auto->auto_model_name }}
-                        </a>
-                        <form id="frm_report_{{ $auto->auto_id }}" action="{{ route('autos.edit', $auto->auto_id) }}" class="d-none">
-                            @method('PUT')
-                            @csrf
-                        </form>
+                        @if (Auth::user()->role_id !== 3 || $auto->auto_user_id === Auth::user()->id)
+                          <a href="{{ route('autos.edit', $auto->auto_id) }}"
+                            onclick="event.preventDefault();
+                            document.getElementById('frm_report_{{ $auto->auto_id }}').submit();">
+                                {{ $auto->auto_model_name }}
+                          </a>
+                          <form id="frm_report_{{ $auto->auto_id }}" action="{{ route('autos.edit', $auto->auto_id) }}" class="d-none">
+                              @method('PUT')
+                              @csrf
+                          </form>
+                        @else
+							{{ $auto->auto_model_name }}
+                        @endif
                       </td>
 					  <td>{{ $auto->auto_enrrolment }}</td>   
 					  <td>{{ $auto->visitor_firstname. ' ' .$auto->visitor_lastname }}</td> 

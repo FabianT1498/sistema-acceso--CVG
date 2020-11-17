@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Worker;
+use Illuminate\Support\Facades\DB;
 
 class WorkerController extends Controller
 {
@@ -12,21 +13,31 @@ class WorkerController extends Controller
 
         $search =  $request->get('search');
 
-        if ($search === ''){
-           $workers = Worker::orderby('firstname','asc')->select('id','firstname', 'lastname', 'dni')->limit(5)->get();
-        }else{
+        $columns = ['id','firstname', 'lastname', 'dni'];
+
+        $workers = Worker::orderby('firstname','asc')->select($columns);
+
+        if (strlen($search) > 0){
+            $search = strtolower($search);
+            $splitName = explode(' ', $search, 2);
+            $first_name = $splitName[0];
+            $last_name = !empty($splitName[1]) ? $splitName[1] : '';
+
+            $workers = $workers->where(DB::raw('lower("firstname")'), "LIKE", "%".$first_name."%");
             
-            $workers = Worker::orderby('firstname','asc')
-                ->select('id','firstname', 'lastname', 'dni')
-                ->where('firstname', 'LIKE', "%$search%")
-                ->limit(5)->get();
+            if ($last_name !== ''){
+                $workers = $workers->where(DB::raw('lower("lastname")'), "LIKE", "%".strtolower($last_name)."%");
+            }       
         }
-  
+
+        $workers = $workers->limit(5)->get();
+    
         $response = array();
+
         foreach($workers as $worker){
-           $response[] = array("id"=>$worker->id,"value"=>$worker->firstname . ' ' . $worker->lastname, "dni"=>$worker->dni);
+            $response[] = array("id"=>$worker->id,"value"=>$worker->firstname . ' ' . $worker->lastname, "dni"=>$worker->dni);
         }
-  
+        
         return response()->json($response);
     }
 }

@@ -93,34 +93,48 @@
 									>
 								</div>
 
-								<div class="form-group">
-									<label for="workerSearch">{{ _('Nombre del trabajador') }}&nbsp;<sup class="text-danger">*</sup></label>
-									<input 
-										id="workerSearch" 
-										name="worker_name" 
-										type="text" 
-										class="form-control" 
-										placeholder="{{ __('Ingrese Nombre') }}"
-										value="{{$report->worker_firstname.' '.$report->worker_lastname }}" 
-										required
-									>
-									<input type="hidden" id='workerID' name="worker_id" value="{{$report->worker_id}}" readonly>
-								</div>
+								@if (Auth::user()->role_id !== 3)
+									<div class="form-group">
+										<label for="workerSearch">{{ _('Nombre del trabajador') }}&nbsp;<sup class="text-danger">*</sup></label>
+										<input 
+											id="workerSearch" 
+											name="worker_name" 
+											type="text" 
+											class="form-control" 
+											placeholder="{{ __('Ingrese Nombre') }}"
+											value="{{$report->worker_firstname.' '.$report->worker_lastname }}" 
+											required
+										>
+										<input type="hidden" id='workerID' name="worker_id" value="{{$report->worker_id}}" readonly>
+									</div>
 
-								<div class="form-group">
-									<label for="workerDNI">{{ _('Cédula del trabajador') }}&nbsp;<sup class="text-danger">*</sup></label>
-									<input 
-										id="workerDNI"
-										name="worker_dni"
-										type="text"
-										class="form-control"
-										style="text-transform:uppercase"
-										placeholder="{{ __('Ingrese Cedula') }}"
-										value="{{$report->worker_dni}}"
-										readonly 
-										required
-									>
-								</div>
+									<div class="form-group">
+										<label for="workerDNI">{{ _('Cédula del trabajador') }}&nbsp;<sup class="text-danger">*</sup></label>
+										<input 
+											id="workerDNI"
+											name="worker_dni"
+											type="text"
+											class="form-control"
+											style="text-transform:uppercase"
+											placeholder="{{ __('Ingrese Cedula') }}"
+											value="{{$report->worker_dni}}"
+											readonly 
+											required
+										>
+									</div>
+								@else
+									<div class="form-group">
+										<label for="workerSearch">{{ _('Nombre del trabajador') }}&nbsp;<sup class="text-danger">*</sup></label>
+										<p class="text-left">{{$report->worker_firstname.' '.$report->worker_lastname }}</p>
+										<input type="hidden" name="worker_id" value="{{$report->worker_id}}" readonly required>
+									</div>
+
+									<div class="form-group">
+										<label for="workerDNI">{{ _('Cédula del trabajador') }}&nbsp;<sup class="text-danger">*</sup></label>
+										<p class="text-left">{{$report->worker_dni}}</p>
+										<input type="hidden" name="worker_dni" value="{{$report->worker_dni}}" readonly required>
+									</div>
+								@endif
 
 								<div class="form-group">
 									<label for="attendingDate">{{ _('Fecha y hora de asistencia:') }}&nbsp;</label>
@@ -139,7 +153,7 @@
 									<select id="autoSelect" name="auto_id" class="form-control">
 										<option value="-1">Ninguno</option>
 										@if($report->auto_id)
-											<option selected value="{{$report->auto_id}}">{{$report->auto_model_name. ' '. $report->auto_enrrolment}}</option>		
+											<option selected value="{{$report->auto_id}}">{{$report->auto_model_name. ' - '. $report->auto_enrrolment}}</option>		
 										@endif
 										@foreach ($autos as $auto)
 											<option value="{{$auto->auto_id}}">{{$auto->auto_model_name. ' '. $auto->auto_enrrolment}}</option>

@@ -17,10 +17,10 @@ class WorkersTable extends Migration
         //
         Schema::create('workers', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->string('firstname');
-            $table->string('lastname');
-            $table->string('dni')->unique();
-            $table->string('email')->unique();
+            $table->string('firstname', 50);
+            $table->string('lastname', 50);
+            $table->string('dni', 10)->unique();
+            $table->string('email', 50)->unique();
             $table->timestamp('email_verified_at')->nullable();
         });
     }

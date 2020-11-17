@@ -69,10 +69,10 @@ $(document).ready(function() {
     $( "#visitorSearch" ).autocomplete({
         source: function( request, response ) {
 
-            const url =  '/lista_visitantes';
+            const url = '/lista_visitantes';
             
             ajaxParams.url = url;
-            ajaxParams.data = {search: request.term};
+            ajaxParams.data = {search: request.term, route: 'autos'};
             ajaxParams.success = function(data) {
                 response( data );
             }
@@ -111,15 +111,20 @@ $(document).ready(function() {
 
     $(document).on('click', '#check_trashed', function() {
         $('#check_trashed').val(parseInt($('#check_trashed').val()) === 1 ? 0 : 1);
+        $('#searchForm').submit();
 
     });
 
     $(document).on('click', '#checkAutoBrand', function() {
 
-        $('#checkAutoBrand').val(parseInt($('#checkAutoBrand').val()) === 1 ? 0 : 1);
+        if ($('checkAutoModel').val() === "1"){
+            return false;
+        }
 
-        const status = parseInt($('#checkAutoBrand').val());
-        
+        const status = parseInt($('#checkAutoBrand').val()) === 1 ? 0 : 1;
+
+        $('#checkAutoBrand').val(status);
+
         // Disabling either model and brand auto select.
         $("#autoBrandSelect").prop('disabled', status ? true : false);
         $("#autoModelSelect").prop('disabled', status ? true : false);
@@ -131,7 +136,6 @@ $(document).ready(function() {
         // Set default value for selects
         $("#autoBrandSelect").val("");
         $("#autoModelSelect").val("");
-
 
         $('#checkAutoModel').prop('disabled', status ? true : false );
 
@@ -151,7 +155,7 @@ $(document).ready(function() {
                         name="auto_brand_input" 
                         type="text" 
                         class="form-control" 
-                        placeholder="Ingrese el nombre de la marca" 
+                        placeholder="Ingrese el nombre de la marca del automovil" 
                         required>
                 `
             );
@@ -164,7 +168,7 @@ $(document).ready(function() {
                         name="auto_model_input" 
                         type="text" 
                         class="form-control" 
-                        placeholder="Ingrese el nombre del modelo" 
+                        placeholder="Ingrese el nombre del modelo del automovil" 
                         required>
                 `
             );
@@ -180,14 +184,14 @@ $(document).ready(function() {
     });
 
     $(document).on('click', '#checkAutoModel', function() {
-        
+    
         if ($('#checkAutoBrand').val() == 1){
             return false;
         }
 
-        $('#checkAutoModel').val(parseInt($('#checkAutoModel').val()) === 1 ? 0 : 1);
+        const status = parseInt($('#checkAutoModel').val()) === 1 ? 0 : 1
 
-        const status = parseInt($('#checkAutoModel').val());
+        $('#checkAutoModel').val(status);
 
         // Disabling either model and brand auto select.
         $("#autoModelSelect").prop('disabled', status ? true : false);
@@ -197,6 +201,8 @@ $(document).ready(function() {
     
         // Set default value for selects
         $("#autoModelSelect").val("");
+
+        $('#checkAutoBrand').prop('disabled', status ? true : false );
 
         const autoModelGroup = $("#autoModelGroup");
 
@@ -212,7 +218,7 @@ $(document).ready(function() {
                         name="auto_model_input" 
                         type="text" 
                         class="form-control" 
-                        placeholder="Ingrese el nombre del modelo" 
+                        placeholder="Ingrese el nombre del modelo de automovil" 
                         required>
                 `
             );

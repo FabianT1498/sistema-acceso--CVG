@@ -75,16 +75,30 @@
                     <input id="visitorDNI" name="visitor_dni" type="text" class="form-control" style="text-transform:uppercase" placeholder="{{ __('Ingrese Cedula') }}" readonly required>
                   </div>
                   
-                  <div class="form-group">
-                    <label for="workerSearch">{{ _('Nombre del trabajador') }}&nbsp;<sup class="text-danger">*</sup></label>
-                    <input id="workerSearch" name="worker_name" type="text" class="form-control" placeholder="{{ __('Ingrese Nombre') }}" required>
-                    <input type="hidden" id='workerID' name="worker_id" readonly>
-                  </div>
+                  @if (Auth::user()->role_id !== 3)
+                    <div class="form-group">
+                      <label for="workerSearch">{{ _('Nombre del trabajador') }}&nbsp;<sup class="text-danger">*</sup></label>
+                      <input id="workerSearch" name="worker_name" type="text" class="form-control" placeholder="{{ __('Ingrese Nombre') }}" required>
+                      <input type="hidden" id='workerID' name="worker_id" readonly>
+                    </div>
 
-                  <div class="form-group">
-                    <label for="workerDNI">{{ _('Cédula del trabajador') }}&nbsp;<sup class="text-danger">*</sup></label>
-                    <input id="workerDNI" name="worker_dni" type="text" class="form-control" style="text-transform:uppercase" placeholder="{{ __('Ingrese Cedula') }}" readonly required>
-                  </div>
+                    <div class="form-group">
+                      <label for="workerDNI">{{ _('Cédula del trabajador') }}&nbsp;<sup class="text-danger">*</sup></label>
+                      <input id="workerDNI" name="worker_dni" type="text" class="form-control" style="text-transform:uppercase" placeholder="{{ __('Ingrese Cedula') }}" readonly required>
+                    </div>
+                  @else
+                    <div class="form-group">
+                      <label for="workerSearch">{{ _('Nombre del trabajador') }}&nbsp;<sup class="text-danger">*</sup></label>
+                      <p class="text-left">{{Auth::user()->worker->firstname . ' ' . Auth::user()->worker->lastname}}</p>
+                      <input type="hidden" name="worker_id" value="{{Auth::user()->worker_id}}" readonly required>
+                    </div>
+
+                    <div class="form-group">
+                      <label for="workerDNI">{{ _('Cédula del trabajador') }}&nbsp;<sup class="text-danger">*</sup></label>
+                      <p class="text-left">{{Auth::user()->worker->dni}}</p>
+                      <input type="hidden" name="worker_dni" value="{{Auth::user()->worker->dni}}" readonly required>
+                    </div>
+                  @endif
                   
                   <div class="form-group">
                     <label for="attendingDate">{{ _('Fecha y hora de asistencia:') }}&nbsp;</label>

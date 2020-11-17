@@ -15,10 +15,13 @@ class CreateVisitorsTable extends Migration
     {
         Schema::create('visitors', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->string('firstname');
-            $table->string('lastname');
-            $table->string('dni')->unique();
-            $table->string('phone_number')->unique();
+            $table->string('firstname', 50);
+            $table->string('lastname', 50);
+            $table->string('dni', 10);
+            $table->string('phone_number', 15);
+            $table->unsignedBigInteger('user_id')->unsigned();
+            
+            $table->foreign('user_id')->references('id')->on('users');
             $table->softDeletes(); //Nueva línea, para el borrado lógico
             $table->timestamps();
         });

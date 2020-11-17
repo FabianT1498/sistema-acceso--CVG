@@ -30,7 +30,7 @@ class UserController extends WebController
     {
         $vista = $this::READ;
         $search = request('search');
-        $trashed = request('trashed');
+        $trashed = (int) request('trashed');
 
         $user_id = Auth::id();
         $user_role = Auth::user()->role_id;
@@ -116,6 +116,7 @@ class UserController extends WebController
         $user->password = Hash::make($request->password);
         $user->role_id = $request->role_id;
         $user->worker_id = $request->worker_id;
+        $user->user_id = Auth::user()->id;
         
         if (!$user->save()){
             toastr()->error(__('Ocurrio un error al crear el registro'));

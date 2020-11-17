@@ -18,6 +18,12 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Auth;
 
+use App\Http\Requests\StoreReportRequest;
+use App\Http\Requests\UpdateReportRequest;
+use App\Http\Requests\DestroyReportRequest;
+use App\Http\Requests\EditReportRequest;
+use App\Http\Requests\GeneratePDFRequest;
+
 use PDF;
 
 class ReportController extends WebController
@@ -32,12 +38,13 @@ class ReportController extends WebController
     {
         $vista = $this::READ;
         $search = request('search');
-        $trashed = request('trashed');
+        $trashed = (int) request('trashed');
 
         $columns = [
             'reports.*',
             'visitors.firstname as visitor_firstname',
             'visitors.lastname as visitor_lastname',
+            'visitors.dni as visitor_dni',
             'workers.firstname as worker_firstname',
             'workers.lastname as worker_lastname',
             'users.username as user_username'
@@ -45,21 +52,46 @@ class ReportController extends WebController
 
         $reports = null;
 
-        $user_role = Auth::user()->role_id;
+        $auth_user_role = Auth::user()->role_id;
 
-        if($trashed && $user_role <= 2){
+        if($trashed  && $auth_user_role <= 2){
             $reports = Report::onlyTrashed()->select($columns);
         } else {
             $reports = Report::select($columns);
         }
 
-        $reports = $reports->join('visitors', 'visitors.id', '=', 'reports.visitor_id')
+        $reports = $reports->join('visitors',
+                function($query) use ($search){
+                    $query->on('visitors.id', '=', 'reports.visitor_id');
+                    
+                    if (isset($search) && strlen($search) > 0){
+                        $search = strtolower($search);
+            
+                        $isDNI =  (strpos($search, 'v-') !== false || strpos($search, 'e-') !== false) ? true : false;
+            
+                        if ($isDNI){
+                            $query->where(DB::raw('lower(visitors.dni)'), "LIKE", "%".$search);
+                        } else {
+                            $splitName = explode(' ', $search, 2);
+                            $first_name = $splitName[0];
+                            $last_name = !empty($splitName[1]) ? $splitName[1] : '';
+        
+                            $query->where(DB::raw('lower(visitors.firstname)'), "LIKE", "%" . $first_name . "%");
+            
+                            if ($last_name !== ''){
+                                $query->where(DB::raw('lower(visitors.lastname)'), "LIKE", "%" . $last_name . "%");
+                            }
+                        }   
+                    }
+                }
+            )
             ->join('workers', 'workers.id', '=', 'reports.worker_id')
             ->join('users', 'users.id', '=', 'reports.user_id');
 
-        if (strlen($search) > 0){
-            $reports = $reports->where('visitors.firstname', 'LIKE' ,"%$search%")
-                ->orWhere('visitors.lastname', 'LIKE' ,"%$search%");
+
+        if ($auth_user_role === 3){ // TRABAJADOR
+            $reports = $reports->where('reports.user_id', Auth::user()->id)
+                ->orWhere('reports.worker_id', Auth::user()->worker_id);
         }
         
         $reports = $reports->paginate(10); 
@@ -87,89 +119,32 @@ class ReportController extends WebController
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(StoreReportRequest $request)
     {
         
         $vista = $this::CREATE;
         $search = request('search');
         $trashed = request('trashed');
 
-        $validation = null;
-       
-        $visitor_id  =  $request->get('visitor_id');
-        $worker_id = $request->get('worker_id');
-
-        $rules = [
-            'visitor_id' => ['bail', 'required', 'exists:visitors,id'],
-            'visitor_dni' => [
-                'required',
-                Rule::exists('visitors', 'dni')->where(function ($query) use ($visitor_id) {
-                    $query->where('id', $visitor_id );
-                }),
-                'max:10'
-            ],
-            'worker_id' => ['required', 'exists:workers,id'],
-            'worker_dni' => [
-                'required',
-                Rule::exists('workers', 'dni')->where(function ($query) use ($worker_id) {
-                    $query->where('id', $worker_id);
-                }),
-                'max:10'
-            ],
-            'attending_date' => [
-                'required',
-                'date_format:Y-m-d H:i',
-            ]
-        ];
-
-        $auto_id = (int) $request->get('auto_id');
-
-        if (!is_null($auto_id) && $auto_id >= 0){
-            $rules[] = array(
-                'auto_id' => [
-                    Rule::exists('autos', 'id')->where(function ($query) use ($visitor_id) {
-                        $query->where('visitor_id', $visitor_id);
-                    })   
-                ]
-            );
-        }
-
-        $validation = Validator::make($request->all(), $rules);    
-
-        if ($validation->fails()) {
-            toastr()->error(__('Error al crear el registro'));
-            return redirect()->route('reportes.create', compact('vista', 'search', 'trashed'))
-                ->withErrors($validation)
-                ->withInput();
-        }
-
         $attending_date = date('Y-m-d H:i:s', strtotime($request->get('attending_date')));
 
         // Create report record
         $report = new Report();
         $report->user_id = Auth::id(); 
-        $report->visitor_id = $request->get('visitor_id');
-        $report->worker_id = $request->get('worker_id');
-        $report->auto_id = !is_null($auto_id) && $auto_id >= 0 ? $auto_id : null;
-        $report->date_attendance =  $attending_date;
-        $report->save();
-        
-        $vista = $this::READ;
-        $reports = Report::select(
-            'reports.*',
-            'visitors.firstname as visitor_firstname',
-            'visitors.lastname as visitor_lastname',
-            'workers.firstname as worker_firstname',
-            'workers.lastname as worker_lastname',
-            'users.username as user_username'
-        )
-            ->join('visitors', 'visitors.id', '=', 'reports.visitor_id')
-            ->join('workers', 'workers.id', '=', 'reports.worker_id')
-            ->join('users', 'users.id', '=', 'reports.user_id')
-            ->paginate(10);
+        $report->visitor_id = $request->visitor_id;
+        $report->worker_id = $request->worker_id;
 
-        toastr()->success(__('Registro creado con éxito'));
-        return redirect()->route('reportes.index', compact('vista', 'trashed', 'search', 'reports'));
+        $auto_id = (int) $request->auto_id;
+        $report->auto_id = (isset($auto_id) && $auto_id >= 0) ? $auto_id : null;
+        $report->date_attendance =  $attending_date;
+        
+        if (!$report->save()){
+            toastr()->error(__('Error al crear el registro'));
+        } else {
+            toastr()->success(__('Registro creado con éxito'));
+        }
+                
+        return redirect()->route('reportes.index', compact('vista', 'trashed', 'search'));
     }
 
     /**
@@ -189,7 +164,7 @@ class ReportController extends WebController
      * @param  \App\User  $user
      * @return \Illuminate\Http\Response
      */
-    public function edit($id)
+    public function edit($id , EditReportRequest $request)
     {
         
         $columns = [
@@ -216,20 +191,15 @@ class ReportController extends WebController
             ->where("reports.id", "=", $id)
             ->first();
 
-        if (!$report){
-            toastr()->error(__('No existe este reporte'));
-            return redirect()->route('reportes.index', compact('vista', 'search'));
-        }
-
         $autos = Auto::select(
-            'autos.id as auto_id',
-            'autos.enrrolment as auto_enrrolment',
-            'auto_models.name as auto_model_name'
-        )
-        ->join('auto_models', 'auto_models.id', '=', 'autos.auto_model_id')
-        ->where('autos.visitor_id', '=', $report->visitor_id)
-        ->where('autos.id', '!=', $report->auto_id)
-        ->get();
+                'autos.id as auto_id',
+                'autos.enrrolment as auto_enrrolment',
+                'auto_models.name as auto_model_name'
+            )
+            ->join('auto_models', 'auto_models.id', '=', 'autos.auto_model_id')
+            ->where('autos.visitor_id', '=', $report->visitor_id)
+            ->where('autos.id', '!=', $report->auto_id)
+            ->get();
 
         $vista = $this::EDIT;
         $search = request('search');
@@ -245,7 +215,7 @@ class ReportController extends WebController
      * @param  \App\User  $user
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(UpdateReportRequest $request, $id)
     {
         $vista = $this::READ;
         $search = request('search');
@@ -253,76 +223,22 @@ class ReportController extends WebController
         $buscar = true;
 
         $report = Report::withTrashed()->where('id', $id)->first();
-
-        if (!$report){
-            toastr()->error(__('No se ha podido actualizar el reporte'));
-            return redirect()->route('reportes.index', compact('vista', 'search'));
-        }
-
-        $validation = null;
        
-        $visitor_id  =  $request->get('visitor_id');
-        $worker_id = $request->get('worker_id');
-
-        $rules = [
-            'visitor_id' => ['bail', 'required', 'exists:visitors,id'],
-            'visitor_dni' => [
-                'required',
-                Rule::exists('visitors', 'dni')->where(function ($query) use ($visitor_id) {
-                    $query->where('id', $visitor_id );
-                }),
-                'max:10'
-            ],
-            'worker_id' => ['required', 'exists:workers,id'],
-            'worker_dni' => [
-                'required',
-                Rule::exists('workers', 'dni')->where(function ($query) use ($worker_id) {
-                    $query->where('id', $worker_id);
-                }),
-                'max:10'
-            ],
-            'attending_date' => [
-                'required',
-                'date_format:Y-m-d H:i',
-            ]
-        ];
-
-        $auto_id = (int) $request->get('auto_id');
-
-        if (!is_null($auto_id) && $auto_id >= 0){
-            $rules[] = array(
-                'auto_id' => [
-                    Rule::exists('autos', 'id')->where(function ($query) use ($visitor_id) {
-                        $query->where('visitor_id', $visitor_id);
-                    })   
-                ]
-            );
-        }
-
-        $validation = Validator::make($request->all(), $rules);    
-
-        if ($validation->fails()) {
-            return back()
-                ->withErrors($validation)
-                ->withInput();
-        }
-
         $attending_date = date('Y-m-d H:i:s', strtotime($request->attending_date));
 
-        $report->user_id = Auth::id(); 
         $report->visitor_id = $request->visitor_id;
         $report->worker_id = $request->worker_id;
-        $report->auto_id = !is_null($auto_id) && $auto_id >= 0 ? $auto_id : null;
+        $auto_id = (int) $request->auto_id;
+        $report->auto_id = (isset($auto_id) && $auto_id >= 0) ? $auto_id : null;
         $report->date_attendance =  $attending_date;
 
         if(!$report->update())
         {
-
             toastr()->error(__('Error al actualizar el registro'));
-            return redirect()->route('reportes.index', compact('vista', 'search', 'trashed', 'buscar'));
+        } else {
+            toastr()->success(__('Registro actualizado con éxito'));
         }
 
-        toastr()->success(__('Registro actualizado con éxito'));
         return redirect()->route('reportes.index', compact('vista', 'search', 'trashed', 'buscar'));
     }
 
@@ -343,24 +259,18 @@ class ReportController extends WebController
         // Delete visitor
         $report = Report::withTrashed()->where('id', $id)->first();
         $report->delete();
+
         toastr()->success(__('Registro eliminado con éxito'));
 
         return redirect()->route('reportes.index', compact('vista', 'search', 'trashed'));
     }
 
-    public function generatePDF($id){
+    public function generatePDF($id, GeneratePDFRequest $request){
 
         $registros = null;
         $vista = $this::READ;
         $search = request('search');
     
-        $report = Report::where('id', $id)->first();
-
-        if (!$report){
-            toastr()->error(__('No existe este reporte'));
-            return redirect()->route('reportes.index', compact('vista', 'search'));
-        }
-
         $columns = [
             'reports.date_attendance as date_attendance',
             'visitors.firstname as visitor_firstname',
@@ -388,10 +298,12 @@ class ReportController extends WebController
         $pass->user_id = Auth::id(); 
         $pass->report_id = $id;
         $pass->save();
+
+        $file_name = $record->visitor_firstname. '_' . $record->visitor_lastname.'_'. $record->date_attendance . '.pdf';
   
         $pdf = PDF::loadView('report.pass', compact('record'));
 
-        return $pdf->download('pase_entrada.pdf');
+        return $pdf->download($file_name);
 
     }
 

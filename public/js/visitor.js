@@ -6,7 +6,7 @@ $(function() {
       '2': { pattern: /[a-z]|[A-Z]|[0-9]/ },
       '9': { pattern: /\d/, optional: true },
       '#': { pattern: /\d/, recursive: true },
-      C: { pattern: /[VE]/, fallback: 'V' },
+      C: { pattern: /[VE|ve]/, fallback: 'V' },
     },
   };
 
@@ -79,6 +79,7 @@ $(document).ready(function() {
 
 $(document).on('click', '#check_trashed', function() {
   $('#check_trashed').val($('#check_trashed').val() == 1 ? 0 : 1);
+  $('#searchForm').submit();
 });
 
 

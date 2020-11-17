@@ -3,10 +3,10 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule;
-use App\Visitor;
 
-class DestroyVisitorRequest extends FormRequest
+use App\Report;
+
+class DestroyReportRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -17,9 +17,9 @@ class DestroyVisitorRequest extends FormRequest
     {
         $auth_user_role = $this->user()->role_id;
 
-        $visitor = Visitor::find($this->route('id'));
+        $report = Report::find($this->route('id'));
 
-        return (($visitor && !$visitor->deleted_at) && $auth_user_role <= 2);
+        return (($report && !$report->deleted_at) && $auth_user_role <= 2);
     }
 
     /**

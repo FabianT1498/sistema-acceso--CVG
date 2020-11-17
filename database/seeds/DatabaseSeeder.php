@@ -18,7 +18,7 @@ class DatabaseSeeder extends Seeder
          $this->call(VisitorSeeder::class);
          $this->call(AutoBrandSeeder::class);
          $this->call(AutoModelSeeder::class);
-         $this->call(AutoSeeder::class);
+        // $this->call(AutoSeeder::class);
          
     }
 }

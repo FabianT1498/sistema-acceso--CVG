@@ -20,6 +20,10 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Auth;
 
+use App\Http\Requests\StoreVisitorRequest;
+use App\Http\Requests\UpdateVisitorRequest;
+use App\Http\Requests\DestroyVisitorRequest;
+use App\Http\Requests\EditVisitorRequest;
 
 class VisitorController extends WebController
 {
@@ -39,31 +43,36 @@ class VisitorController extends WebController
 
         $visitors = null;
 
-        $user_role = Auth::user()->role_id;
+        $auth_user_role = Auth::user()->role_id;
 
-        if(($trashed && $trashed === 1) && $user_role <= 2){
+        if(($trashed && $trashed === 1) && $auth_user_role <= 2){
             $visitors = Visitor::onlyTrashed();
         } else {
             $visitors = Visitor::withTrashed();
         }
 
         if (strlen($search) > 0){
+            $search = strtolower($search);
 
-            $splitName = explode(' ', $search, 2);
-            $first_name = $splitName[0];
-            $last_name = !empty($splitName[1]) ? $splitName[1] : '';
+            $isDNI =  (strpos($search, 'v-') !== false || strpos($search, 'e-') !== false) ? true : false;
 
-            $visitors = $visitors->where(DB::raw('lower("firstname")'), "LIKE", "%".strtolower($first_name)."%")
-                ->orWhere(DB::raw('lower("dni")'), "LIKE", "%".strtolower($search)."%");
+            if ($isDNI){
+                $visitors = $visitors->where(DB::raw('lower("dni")'), "LIKE", "%".$search);
+            } else {
+                $splitName = explode(' ', $search, 2);
+                $first_name = $splitName[0];
+                $last_name = !empty($splitName[1]) ? $splitName[1] : '';
 
-            if ($last_name !== ''){
-               $visitors = $visitors->where(DB::raw('lower("lastname")'), "LIKE", "%".strtolower($last_name)."%");
-            }
+                $visitors = $visitors->where(DB::raw('lower("firstname")'), "LIKE", "%".$first_name."%");
+
+                if ($last_name !== ''){
+                   $visitors = $visitors->where(DB::raw('lower("lastname")'), "LIKE", "%".strtolower($last_name)."%");
+                }
+            }   
         }
 
-        // Trabajador
-        if ($user_role === 3){
-            $visitors = $visitors->where('created_by')
+        if ($auth_user_role === 3 && ((isset($isDNI) && !$isDNI) || !isset($isDNI))){ // TRABAJADOR
+            $visitors = $visitors->where('visitors.user_id', Auth::user()->id);
         }
         
         $visitors = $visitors->paginate(10); 
@@ -91,62 +100,41 @@ class VisitorController extends WebController
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(StoreVisitorRequest $request)
     {
         
-
-        $vista = $this::CREATE;
+        $vista = $this::READ;
         $search = request('search');
         $trashed = request('trashed');
 
-        $rules = [
-            'dni' => ['bail', 'required', 'unique:visitors,dni', 'max:10'],
-            'phone_number' => ['required', 'unique:visitors,phone_number'],
-            'image' => ['required', 'image' , 'mimes:jpeg,png,jpg,gif', 'max:2048'],
-        ];
+        $visitor = new Visitor($request->validated());
+        $visitor->user_id = Auth::user()->id;
 
-        $validation = null;
+        // Get image file
+        $image = $request->file('image');
+     
+        // Make a image name based on user name and current timestamp
+        $name = Str::slug( $request->firstname. '_' . $request->lastname.'_'. time() );
 
-        $validation = Validator::make($request->all(), $rules); 
+        // Define folder path
+        $folder = '/images/';
 
-        if ($validation->fails()) {
-            toastr()->error(__('Error al crear el registro'));
-            return redirect()->route('visitantes.create', compact('vista', 'search', 'trashed'))
-                ->withErrors($validation)
-                ->withInput();
+        // Make a file path where image will be stored [ folder path + file name + file extension]
+        $filePath = $folder . $name. '.' . $image->getClientOriginalExtension();
+
+        // Upload image
+        $this->uploadOne($image, $folder, 'public', $name);
+
+        $photo = new Photo();
+        $photo->path = $filePath;
+        
+        if (!$visitor->save() || !$visitor->photo()->save($photo)){
+            toastr()->error(__('Ocurrio un error al crear el registro'));
+        } else {
+            toastr()->success(__('Registro creado con éxito'));
         }
-
-        // Create visitor record
-        $visitor = new Visitor();
-        $visitor->firstname = $request->firstname;
-        $visitor->lastname = $request->lastname;
-        $visitor->dni = $request->dni;
-        $visitor->phone_number = $request->phone_number;
-        $visitor->save();
-
-        // Check if a profile image has been uploaded
-        if ($request->has('image')) {
-            // Get image file
-            $image = $request->file('image');
-            // Make a image name based on user name and current timestamp
-            $name = Str::slug($visitor->firstname.$visitor->lastname.'_'.time());
-            // Define folder path
-            $folder = '/images/';
-            // Make a file path where image will be stored [ folder path + file name + file extension]
-            $filePath = $folder . $name. '.' . $image->getClientOriginalExtension();
-            // Upload image
-            $this->uploadOne($image, $folder, 'public', $name);
-
-            // set the visitor_id and path on database photo
-            $photo = new Photo();
-            $photo->path = $filePath;
-            $visitor->photo()->save($photo);
-        }
-
-        $vista = $this::READ;
-        $registros = Visitor::where('id', $visitor->id);
-        toastr()->success(__('Registro creado con éxito'));
-        return redirect()->route('visitantes.index', compact('vista', 'trashed', 'search', 'registros'));
+         
+        return redirect()->route('visitantes.index', compact('vista', 'trashed', 'search'));
     }
 
     /**
@@ -166,17 +154,15 @@ class VisitorController extends WebController
      * @param  \App\User  $user
      * @return \Illuminate\Http\Response
      */
-    public function edit($id)
+    public function edit($id, EditVisitorRequest $request)
     {
         $visitor = Visitor::withTrashed()->where('id',$id)->first();
-
-        // This retrieve just one photo
-        
+     
         $photo = $visitor->photo()->first();
 
         $vista = $this::EDIT;
-        $search = request('search');
-        $trashed = (request('trashed')) ? true : false;
+        $search = $request['search'];
+        $trashed = ($request['trashed']) ? true : false;
 
         return view('visitor.edit', compact('vista', 'search', 'trashed', 'visitor', 'photo'));
     }
@@ -188,55 +174,19 @@ class VisitorController extends WebController
      * @param  \App\User  $user
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(UpdateVisitorRequest $request, $id)
     {
-        $vista = $this::EDIT;
         $search = request('search');
-        $trashed = request('trashed');
-
+        $trashed = (request('trashed')) ? true : false;
+   
         $visitor = Visitor::withTrashed()->where('id', $id)->first();
-
-        $rules = [
-            'dni' => [
-                'bail',
-                'required',
-                Rule::unique('visitors', 'dni')->ignore($visitor->id),
-                'max:10'
-            ],
-            'phone_number' => [
-                'required',
-                Rule::unique('visitors', 'phone_number')->ignore($visitor->id),
-            ],
-            'image' => [
-                'image',
-                'mimes:jpeg,png,jpg,gif',
-                'max:2048'
-            ],
-        ];
-              
-        $validation = Validator::make($request->all(), $rules);    
-    
-        if ($validation->fails()) {
-            return back()
-                ->withErrors($validation)
-                ->withInput();
-        }
 
         $visitor->firstname = $request->firstname;
         $visitor->lastname = $request->lastname;
-        $visitor->dni = $request->dni;
+        $visitor->dni = strtoupper($request->dni);
         $visitor->phone_number = $request->phone_number;
 
-        if(!$visitor->update())
-        {
-            $search = request('search');
-            $trashed = (request('trashed')) ? true : false;
-            $buscar = true;
-            toastr()->error(__('Error al actualizar el registro'));
-            return redirect()->route('visitantes.index', compact('vista', 'search', 'trashed', 'buscar'));
-        }
-
-        // Check if a profile image has been uploaded
+        // Check if a new profile image has been uploaded
         if ($request->has('image')) {
 
             $photo = Photo::where('visitor_id', $visitor->id)->first();
@@ -246,26 +196,33 @@ class VisitorController extends WebController
 
             // Get image file
             $image = $request->file('image');
+
             // Make a image name based on user name and current timestamp
-            $name = Str::slug($visitor->firstname.$visitor->lastname.'_'.time());
+            $name = Str::slug( $request->firstname. '_' . $request->lastname.'_'. time() );
+
             // Define folder path
             $folder = '/images/';
+
             // Make a file path where image will be stored [ folder path + file name + file extension]
             $filePath = $folder . $name. '.' . $image->getClientOriginalExtension();
+
             // Upload image
             $this->uploadOne($image, $folder, 'public', $name);
 
-            // set the visitor_id and path on database photo
+            // set the new path on database photo
             $photo->path = $filePath;
+
             $photo->update();
         }
 
-        $vista = $this::READ;
-        $search = request('search');
-        $trashed = (request('trashed')) ? true : false;
-        $buscar = true;
-        toastr()->success(__('Registro actualizado con éxito'));
-        return redirect()->route('visitantes.index', compact('vista', 'search', 'trashed', 'buscar'));
+        if(!$visitor->update() || (isset($photo) && !$photo->update()))
+        {
+            toastr()->error(__('Error al actualizar el registro'));
+        } else {
+            toastr()->success(__('Registro actualizado con éxito'));
+        }
+
+        return redirect()->route('visitantes.index', compact('search', 'trashed'));
     }
 
     /**
@@ -274,45 +231,52 @@ class VisitorController extends WebController
      * @param  \App\User  $user
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy($id, DestroyVisitorRequest $request)
     {
         
-        $registros = null;
-        $vista = $this::READ;
-        $search = request('search');
-        $trashed = request('trashed');
+        $search = $request['search'];
+        $trashed = $request['trashed'] ? true : false;
 
         // Delete visitor
         $visitor = Visitor::withTrashed()->where('id', $id)->first();
         $visitor->delete();
         toastr()->success(__('Registro eliminado con éxito'));
 
-
-        return redirect()->route('visitantes.index', compact('vista', 'search', 'trashed'));
+        return redirect()->route('visitantes.index', compact('search', 'trashed'));
     }
 
     public function getVisitors(Request $request){
 
         $search =  $request->get('search');
-        
+
+        $columns = ['id','firstname', 'lastname', 'dni'];
+
         if ($search === ''){
-           $visitors = Visitor::orderby('firstname','asc')->select('id','firstname', 'lastname', 'dni')->limit(5)->get();
-        }else {
-            $arrSearch = explode(" ", $search, 2);
-
-            // if doesn't define the last name 
-            if (!isset($arrSearch[1])){
-                $arrSearch[] = '';
-            }
-
+            $visitors = Visitor::orderby('firstname','asc')->select($columns);
+        } else {
+            $splitName = explode(' ', $search, 2);
+            $first_name = $splitName[0];
+            $last_name = !empty($splitName[1]) ? $splitName[1] : '';
+    
             $visitors = Visitor::orderby('firstname','asc')
-                ->select('id','firstname', 'lastname', 'dni')
-                ->where('firstname', 'LIKE', "%$arrSearch[0]%")
-                ->where('lastname', 'LIKE', "%$arrSearch[1]%")
-                ->limit(5)->get();
+                ->select($columns)
+                ->where(DB::raw('lower("firstname")'), "LIKE", "%".strtolower($first_name)."%");
+    
+            if ($last_name !== ''){
+                $visitors = $visitors->where(DB::raw('lower("lastname")'), "LIKE", "%".strtolower($last_name)."%");
+            }
         }
-  
+
+        $route = $request->get('route');
+
+        if (Auth::user()->role_id === 3 && (isset($route) && $route === 'autos')){
+            $visitors = $visitors->where('user_id', Auth::user()->id);
+        }
+
+        $visitors = $visitors->limit(5)->get();
+
         $response = array();
+
         foreach($visitors as $visitor){
            $response[] = array("id"=>$visitor->id,"value"=>$visitor->firstname . ' ' . $visitor->lastname, "dni" => $visitor->dni);
         }

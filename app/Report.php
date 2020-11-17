@@ -18,8 +18,8 @@ class Report extends Model
 
 	protected $dates = [
         'date_attendance',
-    ];
-
+	];
+	
     //
 	public function user(){
 		return $this->belongsTo(User::class);

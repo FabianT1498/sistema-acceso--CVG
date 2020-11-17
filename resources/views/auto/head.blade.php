@@ -19,7 +19,7 @@
               </div>
             </div>
           </form>
-          <form class="form-inline ml-3" action="{{ route('autos.index') }}">
+          <form id="searchForm" class="form-inline ml-3" action="{{ route('autos.index') }}">
             <div class="input-group input-group-sm">
               <input type="hidden" name="buscar" value="true">
               <input id="search" name="search" class="form-control form-control-navbar" type="search" placeholder="{{ __('Buscar') }}" aria-label="Search" value="{{ $search }}">

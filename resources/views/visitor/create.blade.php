@@ -79,6 +79,7 @@
                     <input id="phone_number" name="phone_number" type="text" class="form-control" placeholder="{{ __('Ingrese numero') }}" required>
                   </div>
                   <div class="form-group">
+                    <label for="file">{{ _('Foto del visitante') }}&nbsp;<sup class="text-danger">*</sup></label>
                     <input type="file" name="image" class="file" accept="image/*">
                     <div class="input-group my-3">
                       <input type="text" class="form-control" disabled placeholder="Upload File" id="file" required>

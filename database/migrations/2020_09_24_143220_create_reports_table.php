@@ -16,11 +16,12 @@ class CreateReportsTable extends Migration
         //
         Schema::create('reports', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->unsignedBigInteger('user_id')->unsigned()->nullable();
+            $table->unsignedBigInteger('user_id')->unsigned();
             $table->unsignedBigInteger('visitor_id')->unsigned();
             $table->unsignedBigInteger('worker_id')->unsigned()->nullable();
             $table->unsignedBigInteger('auto_id')->unsigned()->nullable();
-            $table->foreign('user_id')->references('id')->on('users')->onDelete('set null');
+
+            $table->foreign('user_id')->references('id')->on('users');
             $table->foreign('visitor_id')->references('id')->on('visitors')->onDelete('cascade');
             $table->foreign('worker_id')->references('id')->on('workers')->onDelete('set null');
             $table->foreign('auto_id')->references('id')->on('autos')->onDelete('set null');

@@ -12,6 +12,16 @@ class Visitor extends Model
 {
     use SoftDeletes;
     //
+
+    public function __construct(array $attributes = array()){
+        parent::__construct($attributes);
+
+        $this->firstname = isset($attributes['firstname']) ? $attributes['firstname'] : '';
+        $this->lastname = isset($attributes['lastname']) ? $attributes['lastname'] : '';
+        $this->dni = isset($attributes['dni']) ? strtoupper($attributes['dni']) : '';
+        $this->phone_number = isset($attributes['phone_number']) ? $attributes['phone_number'] : '';
+    }
+
 	protected $fillable = ['name', 'dni', 'phone_number'];
 		
 	public function reports(){

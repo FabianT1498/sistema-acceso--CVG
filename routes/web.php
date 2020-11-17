@@ -76,7 +76,8 @@ Route::group(['middleware' => ['auth', 'worker']], function () {
 
 Route::group(['middleware' => ['auth', 'receptionist']], function () {
 	
-
+		/********           WORKER         **********/	
+		Route::post('lista_trabajadores', 'WorkerController@getWorkers');
 });
 
 /*********************************************/
@@ -110,8 +111,6 @@ Route::group(['middleware' => ['auth']], function () {
 	Route::resource('autos', 'AutoController')->except(['destroy']);
 	Route::post('/autos_modelos', 'AutoController@getAutoModels');
 
-	/********           WORKER         **********/	
-	Route::post('lista_trabajadores', 'WorkerController@getWorkers');
 	
 	Route::get('/home', function(){
 		if(Auth::user())
