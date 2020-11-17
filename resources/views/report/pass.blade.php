@@ -15,6 +15,7 @@
 			font-size: 16px;
         }
 
+		/* 9.30 cm x 7.19 cm */
         .container {
 			margin: 0 auto;
 			padding: 1rem;

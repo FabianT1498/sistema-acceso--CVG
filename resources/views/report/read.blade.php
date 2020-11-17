@@ -60,15 +60,19 @@
                   @foreach ($reports as $report)
                     <tr id="tr_{{$report->id}}">
                       <td>
-                        <a href="{{ route('reportes.edit', $report->id) }}"
-                          onclick="event.preventDefault();
-                          document.getElementById('frm_report_{{ $report->id }}').submit();">
-                              {{ $report->visitor_firstname. ' ' .$report->visitor_lastname }}
-                        </a>
-                        <form id="frm_report_{{ $report->id }}" action="{{ route('reportes.edit', $report->id) }}" class="d-none">
-                            @method('PUT')
-                            @csrf
-                        </form>
+                        @if($trashed == 0)
+                          <a href="{{ route('reportes.edit', $report->id) }}"
+                            onclick="event.preventDefault();
+                            document.getElementById('frm_report_{{ $report->id }}').submit();">
+                                {{ $report->visitor_firstname. ' ' .$report->visitor_lastname }}
+                          </a>
+                          <form id="frm_report_{{ $report->id }}" action="{{ route('reportes.edit', $report->id) }}" class="d-none">
+                              @method('PUT')
+                              @csrf
+                          </form>
+                        @else
+                          {{ $report->visitor_firstname. ' ' .$report->visitor_lastname }}
+                        @endif
                       </td>
                       <td>{{ $report->worker_firstname. ' ' .$report->worker_lastname }}</td>
                       <td>{{ $report->user_username }}</td>

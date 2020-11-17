@@ -60,7 +60,7 @@
                   @foreach ($autos as $auto)
                     <tr id="tr_{{$auto->auto_id}}">
                       <td>
-                        @if (Auth::user()->role_id !== 3 || $auto->auto_user_id === Auth::user()->id)
+                        @if ($trashed == 0 && (Auth::user()->role_id !== 3 || $auto->auto_user_id === Auth::user()->id))
                           <a href="{{ route('autos.edit', $auto->auto_id) }}"
                             onclick="event.preventDefault();
                             document.getElementById('frm_report_{{ $auto->auto_id }}').submit();">
@@ -74,8 +74,8 @@
 							{{ $auto->auto_model_name }}
                         @endif
                       </td>
-					  <td>{{ $auto->auto_enrrolment }}</td>   
-					  <td>{{ $auto->visitor_firstname. ' ' .$auto->visitor_lastname }}</td> 
+                      <td>{{ $auto->auto_enrrolment }}</td>   
+                      <td>{{ $auto->visitor_firstname. ' ' .$auto->visitor_lastname }}</td> 
                       <td>{{ $auto->auto_created_at }}</td>               
                       <td>
                         @if ($trashed == 0 && (Auth::user()->role->name == "ADMIN" || Auth::user()->role->name == "SUPERADMIN"))

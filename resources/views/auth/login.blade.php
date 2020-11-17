@@ -7,7 +7,7 @@
             <nav class="navbar navbar-expand-lg navbar-light bg-info">
               <a class="navbar-brand" href="#">
                   <img class="rounded-circle" src="{{ asset('img/logocvg.png') }}" alt="">
-                  &nbsp;&nbsp;&nbsp;&nbsp;Control de Insumos de Transporte ( COINTRA )
+                  &nbsp;&nbsp;&nbsp;&nbsp;Control interno de visitantes ( COINVI )
               </a>
             </nav>
         </div>

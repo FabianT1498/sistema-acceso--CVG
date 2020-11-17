@@ -41,14 +41,12 @@ class VisitorController extends WebController
         $search = request('search');
         $trashed = (int) request('trashed');
 
-        $visitors = null;
-
         $auth_user_role = Auth::user()->role_id;
 
-        if(($trashed && $trashed === 1) && $auth_user_role <= 2){
+        if($trashed === 1 && $auth_user_role <= 2){
             $visitors = Visitor::onlyTrashed();
         } else {
-            $visitors = Visitor::withTrashed();
+            $visitors = Visitor::select('*');
         }
 
         if (strlen($search) > 0){
@@ -239,6 +237,8 @@ class VisitorController extends WebController
 
         // Delete visitor
         $visitor = Visitor::withTrashed()->where('id', $id)->first();
+
+        $visitor->reports()->each(function($report){$report->delete();});
         $visitor->delete();
         toastr()->success(__('Registro eliminado con éxito'));
 

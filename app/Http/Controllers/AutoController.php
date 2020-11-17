@@ -2,19 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use App\Visitor;
-use App\Worker;
-use App\Report;
-use App\PassRecord;
 use App\Auto;
 use App\AutoBrand;
 use App\AutoModel;
 
-
-use Illuminate\Validation\Rule;
 use App\Http\Controllers\WebController;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -51,7 +44,6 @@ class AutoController extends WebController
             'visitors.lastname as visitor_lastname',
         ];
 
-        $autos = null;
         $auth_user_role = Auth::user()->role_id;
 
         if($trashed && $auth_user_role <= 2){

@@ -60,7 +60,7 @@
                   @foreach ($visitors as $visitor)
                     <tr id="tr_{{$visitor->id}}">
                       <td>
-                        @if (Auth::user()->role_id !== 3 || $visitor->user_id === Auth::user()->id)
+                        @if ($trashed == 0 && (Auth::user()->role_id !== 3 || $visitor->user_id === Auth::user()->id))
                           <a href="{{ route('visitantes.edit', $visitor->id) }}"
                             onclick="event.preventDefault();
                             document.getElementById('frm_registro_{{ $visitor->id }}').submit();">
