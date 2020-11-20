@@ -2,7 +2,7 @@
 @import url('https://fonts.googleapis.com/css?family=Nunito');
 
 // Variables
-//@import 'variables';
+@import 'variables';
 
 // Bootstrap
 //@import '~bootstrap/scss/bootstrap';
@@ -19,5 +19,49 @@
   border-radius: 25px; 
   font-size: 10px; 
   text-align: center; 
+}
+
+/* Loading animation for Ajax requests*/
+.loading {
+  font-size: 0;
+  display: inline-block;
+  border: 2px solid $blue;
+  width: 25px;
+  height: 25px;
+  border-radius: 50%;
+  border-left-color: transparent;
+  animation: rotate 1.4s ease 0.5s infinite;
+  background-color: transparent;
+  transition: all .5s;
+}
+
+@keyframes rotate {
+  0% {
+    transform: rotate(360deg);
+  }
+}
+
+.success {
+  position: relative;
+  animation: bounce .3s ease-in;
+  border: 2px solid $blue;
+}
+
+@keyframes bounce {
+  0% {
+    transform: scale(0.9);
+  }
+}
+
+.success::before {
+  content: '';
+  display: block;
+  width: 15px;
+  height: 15px;
+  position: absolute;
+  background: url(../fonts/tick.svg) no-repeat;
+  top: 3px;
+  left: 50%;
+  margin-left: -7.5px;
 }
 

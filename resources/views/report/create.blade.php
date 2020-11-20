@@ -64,17 +64,33 @@
                 @method('POST')
                 <div class="card-body">
 
-                  <div class="form-group">
-                    <label for="visitorSearch">{{ _('Nombre del visitante') }}&nbsp;<sup class="text-danger">*</sup></label>
-                    <input id="visitorSearch" name="visitor_name" type="text" class="form-control" placeholder="{{ __('Ingrese Nombre') }}" required>
-                    <input type="hidden" id='visitorID' name="visitor_id" readonly>
+                  <div class="form-row">
+                    <div class="form-group col-md-4">
+                      <label for="visitorDNI">{{ _('Cédula del visitante') }}&nbsp;<sup class="text-danger">*</sup></label>   
+                      <div class="form-inline">
+                        <input 
+                          id="visitorDNI" 
+                          name="visitor_dni" 
+                          type="text" 
+                          class="form-control" 
+                          style="text-transform:uppercase" 
+                          placeholder="{{ __('Ingrese Cedula') }}"
+                          aria-describedby="dniHelpBlock" 
+                          required
+                        >
+                        <div class="loading ml-md-4"></div> 
+                      </div>
+                      <input type="hidden" id='visitorID' name="visitor_id" readonly>
+                      <small id="dniHelpBlock" class="form-text text-muted">
+                        El número de cedula debe iniciar con V o E.
+                      </small>
+                    </div>
+                    <div class="form-group col-md-6">
+                      <p id="visitorName">Hola mundo</p>
+                    </div>
+
                   </div>
-                  
-                  <div class="form-group">
-                    <label for="visitorDNI">{{ _('Cédula del visitante') }}&nbsp;<sup class="text-danger">*</sup></label>
-                    <input id="visitorDNI" name="visitor_dni" type="text" class="form-control" style="text-transform:uppercase" placeholder="{{ __('Ingrese Cedula') }}" readonly required>
-                  </div>
-                  
+
                   @if (Auth::user()->role_id !== 3)
                     <div class="form-group">
                       <label for="workerSearch">{{ _('Nombre del trabajador') }}&nbsp;<sup class="text-danger">*</sup></label>

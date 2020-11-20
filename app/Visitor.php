@@ -22,7 +22,14 @@ class Visitor extends Model
         $this->phone_number = isset($attributes['phone_number']) ? $attributes['phone_number'] : '';
     }
 
-	protected $fillable = ['name', 'dni', 'phone_number'];
+    protected $fillable = ['name', 'dni', 'phone_number'];
+    
+    public static function isDNIFormat(string $nacionality, string $dni){
+
+        return ((strlen($nacionality) === 1 && (strlen($dni) > 0 && strlen($dni) < 10)) 
+                    && ($nacionality === 'V' || $nacionality === 'E') 
+                            && is_numeric(dni));
+    }
 		
 	public function reports(){
     	return $this->hasMany(Report::class);

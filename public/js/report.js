@@ -6,11 +6,11 @@ $(function() {
         '2': { pattern: /[a-z]|[A-Z]|[0-9]/ },
         '9': { pattern: /\d/, optional: true },
         '#': { pattern: /\d/, recursive: true },
-        C: { pattern: /[VE]/, fallback: 'V' },
+        C: { pattern: /[VE|ve]/, fallback: 'V' },
       },
     };
   
-    $('#dni').mask('C-19999999', options);
+    $('#visitorDNI').mask('C-19999999', options);
 });
 
 $(document).ready(function() {
@@ -29,6 +29,7 @@ $(document).ready(function() {
     }
 
     $( "#visitorSearch, #workerSearch" ).autocomplete({
+        delay: 500,
         source: function( request, response ) {
 
             const url = $( "#visitorSearch" ).is( ":focus" ) 

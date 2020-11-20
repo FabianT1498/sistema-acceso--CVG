@@ -246,41 +246,29 @@ class VisitorController extends WebController
     }
 
     public function getVisitors(Request $request){
+        $dni = $request->get('dni');
+        $nacionality = $request->get('nacionality');
+        $response = array();
 
-        $search =  $request->get('search');
+        if (isset($dni) && isset($nacionality)){
 
-        $columns = ['id','firstname', 'lastname', 'dni'];
+            $nacionality = strtoupper($nacionality);
 
-        if ($search === ''){
-            $visitors = Visitor::orderby('firstname','asc')->select($columns);
-        } else {
-            $splitName = explode(' ', $search, 2);
-            $first_name = $splitName[0];
-            $last_name = !empty($splitName[1]) ? $splitName[1] : '';
-    
-            $visitors = Visitor::orderby('firstname','asc')
-                ->select($columns)
-                ->where(DB::raw('lower("firstname")'), "LIKE", "%".strtolower($first_name)."%");
-    
-            if ($last_name !== ''){
-                $visitors = $visitors->where(DB::raw('lower("lastname")'), "LIKE", "%".strtolower($last_name)."%");
+            if (Visitor::isDNIFormat($nacionality, $dni)){
+                
+                $dni = $nacionality . '-' . $dni;
+                $columns = ['id','firstname', 'lastname'];
+                
+                $visitor = Visitor::select($columns)
+                    ->where('dni', $dni)
+                    ->first();
+                
+                if ($visitor){
+                    $response[] = array("id" => $visitor->id,"value" => $visitor->firstname . ' ' . $visitor->lastname);
+                }
             }
         }
 
-        $route = $request->get('route');
-
-        if (Auth::user()->role_id === 3 && (isset($route) && $route === 'autos')){
-            $visitors = $visitors->where('user_id', Auth::user()->id);
-        }
-
-        $visitors = $visitors->limit(5)->get();
-
-        $response = array();
-
-        foreach($visitors as $visitor){
-           $response[] = array("id"=>$visitor->id,"value"=>$visitor->firstname . ' ' . $visitor->lastname, "dni" => $visitor->dni);
-        }
-  
         return response()->json($response);
     }
 
