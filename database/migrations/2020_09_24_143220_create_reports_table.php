@@ -26,6 +26,8 @@ class CreateReportsTable extends Migration
             $table->foreign('worker_id')->references('id')->on('workers')->onDelete('set null');
             $table->foreign('auto_id')->references('id')->on('autos')->onDelete('set null');
             $table->timestamp('date_attendance');
+            $table->time('entry_time');
+            $table->time('departure_time');
             $table->timestamps();
             $table->softDeletes(); //Nueva línea, para el borrado lógico
         });

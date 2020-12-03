@@ -7,6 +7,10 @@ use App\Worker;
 use App\Report;
 use App\PassRecord;
 use App\Auto;
+use App\AutoBrand;
+use App\AutoModel;
+use App\Photo;
+
 
 use Illuminate\Validation\Rule;
 use App\Http\Controllers\WebController;
@@ -28,6 +32,9 @@ use PDF;
 
 class ReportController extends WebController
 {
+
+   
+
     //
      /**
      * Display a listing of the resource.
@@ -126,17 +133,74 @@ class ReportController extends WebController
         $search = request('search');
         $trashed = request('trashed');
 
-        $attending_date = date('Y-m-d H:i:s', strtotime($request->get('attending_date')));
+        $visitor_id  = (int) $request->visitor_id;
+        $worker_id  = (int) $request->worker_id;
+        $auto_option = (int) $request->auto_option;
+
+        $validated = $request->validated();
 
         // Create report record
         $report = new Report();
-        $report->user_id = Auth::id(); 
-        $report->visitor_id = $request->visitor_id;
         $report->worker_id = $request->worker_id;
+        $report->date_attendance =  $validated['attending_date'];
+        $report->entry_time =  $validated['entry_time'];
+        $report->departure_time =  $validated['departure_time'];
+        $report->user_id = Auth::id();
 
-        $auto_id = (int) $request->auto_id;
-        $report->auto_id = (isset($auto_id) && $auto_id >= 0) ? $auto_id : null;
-        $report->date_attendance =  $attending_date;
+        if ($visitor_id === -1){
+
+            $visitor = new Visitor($validated);
+            $visitor->user_id = Auth::id();
+
+            // Make a image name based on user name and current timestamp
+            $name = Str::slug( $validated['visitor_firstname']. '_' . $validated['visitor_lastname'].'_'. time() );
+            $photo = new Photo();
+            $photo->storePhoto($validated['image'], $name);
+
+            $visitor->save();
+            $visitor->photo()->save($photo);
+
+            $report->visitor_id = $visitor->id;
+        } else {
+            $report->visitor_id = $request->visitor_id;
+        }
+
+        if ($auto_option){
+
+            $auto_brand = AutoBrand::where('name', $validated['auto_brand'])
+                ->first();
+                
+            $auto_model = AutoModel::where('name', $validated['auto_model'])
+                ->first();
+     
+            if (!$auto_model){
+                if (!$auto_brand){
+                    $auto_brand = new AutoBrand();
+                    $auto_brand->name = $validated['auto_brand'];
+                    $auto_brand->save();
+                }
+
+                $auto_model = new AutoModel();
+                $auto_model->name = $validated['auto_model'];
+                $auto_model->auto_brand_id = $auto_brand->id;
+                $auto_model->save();
+            }
+
+            $auto_id = (int) $request->auto_id;
+
+            if ($auto_id === -1){
+                $auto = new Auto();
+                $auto->enrrolment = $validated['auto_enrrolment'];
+                $auto->user_id = Auth::user()->id;
+                $auto->auto_model_id = $auto_model->id;
+                $auto->color = $validated['auto_color'];
+                $auto->save();
+
+                $report->auto_id = $auto->id;
+            } else {
+                $report->auto_id = $auto_id;   
+            }
+        }
         
         if (!$report->save()){
             toastr()->error(__('Error al crear el registro'));

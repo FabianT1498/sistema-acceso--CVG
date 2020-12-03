@@ -100,6 +100,7 @@ class VisitorController extends WebController
      */
     public function store(StoreVisitorRequest $request)
     {
+       
         
         $vista = $this::READ;
         $search = request('search');
@@ -245,18 +246,17 @@ class VisitorController extends WebController
         return redirect()->route('visitantes.index', compact('search', 'trashed'));
     }
 
-    public function getVisitors(Request $request){
+    public function getVisitor(Request $request){
         $dni = $request->get('dni');
-        $nacionality = $request->get('nacionality');
+
         $response = array();
 
-        if (isset($dni) && isset($nacionality)){
+        if (isset($dni)){
 
-            $nacionality = strtoupper($nacionality);
+            $dni = strtoupper($dni);
 
-            if (Visitor::isDNIFormat($nacionality, $dni)){
+            if (Visitor::isDNIFormat($dni)){
                 
-                $dni = $nacionality . '-' . $dni;
                 $columns = ['id','firstname', 'lastname'];
                 
                 $visitor = Visitor::select($columns)

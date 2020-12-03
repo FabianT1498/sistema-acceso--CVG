@@ -77,7 +77,7 @@ Route::group(['middleware' => ['auth', 'worker']], function () {
 Route::group(['middleware' => ['auth', 'receptionist']], function () {
 	
 		/********           WORKER         **********/	
-		Route::post('lista_trabajadores', 'WorkerController@getWorkers');
+		Route::post('trabajador', 'WorkerController@getWorker');
 });
 
 /*********************************************/
@@ -100,7 +100,7 @@ Route::group(['middleware' => ['auth']], function () {
 
 	/********           VISITOR         **********/
 	Route::resource('visitantes', 'VisitorController')->except(['destroy']);
-	Route::post('/lista_visitantes', 'VisitorController@getVisitors');
+	Route::post('/visitante', 'VisitorController@getVisitor');
 	Route::post('/autos_visitante', 'VisitorController@getVisitorAutos');
 
 	/********           REPORT         **********/
@@ -110,6 +110,8 @@ Route::group(['middleware' => ['auth']], function () {
 	/********           AUTO         **********/
 	Route::resource('autos', 'AutoController')->except(['destroy']);
 	Route::post('/autos_modelos', 'AutoController@getAutoModels');
+	Route::post('/autos_marcas', 'AutoController@getAutoBrands');
+	Route::post('/auto', 'AutoController@getAuto');
 
 	
 	Route::get('/home', function(){

@@ -14,22 +14,22 @@ class AutoModelSeeder extends Seeder
     {
         //
     	AutoModel::create([
-    		'name' => 'Mazda 12',
+    		'name' => 'MAZDA 12',
     		'auto_brand_id' => 1
     		]);
 
     	AutoModel::create([
-    		'name' => 'Mazda 15',
+    		'name' => 'MAZDA 15',
     		'auto_brand_id' => 1
     		]);
 
     	AutoModel::create([
-    		'name' => 'Sedans UV',
+    		'name' => 'SEDANS UV',
     		'auto_brand_id' => 2
     		]);
 
     	AutoModel::create([
-    		'name' => 'Sedans UV2.0',
+    		'name' => 'RAPID V2',
     		'auto_brand_id' => 2
     		]);
     }

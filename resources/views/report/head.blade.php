@@ -5,7 +5,7 @@
         <nav class="main-header navbar navbar-expand navbar-white navbar-light border-bottom-0 col-12">
           <span class="text-dark d-inline h4 pt-2 mr-0">
             <a href="{{ route('reportes.index') }}" title="">
-              <small><i class="nav-icon icon ion-android-contacts">&nbsp;</i></small>{{ __('Reportes') }}
+              <small><i class="nav-icon icon ion-android-contacts">&nbsp;</i></small>{{ __('Visita') }}
             </a>
           </span>
           <form class="form-inline ml-0" action="{{ route('reportes.create') }}">

@@ -25,23 +25,23 @@ class StoreVisitorRequest extends FormRequest
     public function rules()
     {
         return [
-            'firstname' => [
+            'visitor_firstname' => [
                 'bail',
                 'required',
                 'max:50',
             ],    
-            'lastname' => [
+            'visitor_lastname' => [
                 'required',
                 'max:50', 
             ],
-            'dni' => [                
+            'visitor_dni' => [                
                 'required',
                 Rule::unique('visitors', 'dni')->where(function ($query) {
                     return $query->where('deleted_at', NULL);
                 }),
                 'max:10'
             ],
-            'phone_number' => [
+            'visitor_phone_number' => [
                 'required',
                 Rule::unique('visitors', 'phone_number')->where(function ($query) {
                     return $query->where('deleted_at', NULL);

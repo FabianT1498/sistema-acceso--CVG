@@ -16,19 +16,19 @@ class Visitor extends Model
     public function __construct(array $attributes = array()){
         parent::__construct($attributes);
 
-        $this->firstname = isset($attributes['firstname']) ? $attributes['firstname'] : '';
-        $this->lastname = isset($attributes['lastname']) ? $attributes['lastname'] : '';
-        $this->dni = isset($attributes['dni']) ? strtoupper($attributes['dni']) : '';
-        $this->phone_number = isset($attributes['phone_number']) ? $attributes['phone_number'] : '';
+        $this->firstname = isset($attributes['visitor_firstname']) ? $attributes['visitor_firstname'] : '';
+        $this->lastname = isset($attributes['visitor_lastname']) ? $attributes['visitor_lastname'] : '';
+        $this->dni = isset($attributes['visitor_dni']) ? strtoupper($attributes['visitor_dni']) : '';
+        $this->phone_number = isset($attributes['visitor_phone_number']) ? $attributes['visitor_phone_number'] : '';
     }
 
     protected $fillable = ['name', 'dni', 'phone_number'];
     
-    public static function isDNIFormat(string $nacionality, string $dni){
+    public static function isDNIFormat(string $dni){
 
-        return ((strlen($nacionality) === 1 && (strlen($dni) > 0 && strlen($dni) < 10)) 
-                    && ($nacionality === 'V' || $nacionality === 'E') 
-                            && is_numeric(dni));
+        return ((strlen($dni) > 2 && strlen($dni) <= 10) 
+                && ($dni[0] === 'V' || $dni[0] === 'E')
+                        && is_numeric(substr($dni, 2)));
     }
 		
 	public function reports(){

@@ -61,38 +61,35 @@
               <form method='POST' action="{{ route('visitantes.store') }}"  role="form"  enctype="multipart/form-data">
                 @csrf
                 @method('POST')
-                <div class="card-body">
-                  <div class="form-group">
-                    <label for="firstname">{{ _('Nombre de la persona') }}&nbsp;<sup class="text-danger">*</sup></label>
-                    <input id="firstname" name="firstname" type="text" class="form-control" placeholder="{{ __('Ingrese Nombre') }}" required>
-                  </div>
-                  <div class="form-group">
-                    <label for="lastname">{{ _('Apellido de la persona') }}&nbsp;<sup class="text-danger">*</sup></label>
-                    <input id="lastname" name="lastname" type="text" class="form-control" placeholder="{{ __('Ingrese Apellido') }}" required>
-                  </div>
-                  <div class="form-group">
-                    <label for="dni">{{ _('Cédula de la persona') }}&nbsp;<sup class="text-danger">*</sup></label>
-                    <input id="dni" name="dni" type="text" class="form-control" style="text-transform:uppercase" placeholder="{{ __('Ingrese Cedula') }}" required>
-                  </div>
-                  <div class="form-group">
-                    <label for="phone_number">{{ _('Telefono') }}&nbsp;<sup class="text-danger">*</sup></label>
-                    <input id="phone_number" name="phone_number" type="text" class="form-control" placeholder="{{ __('Ingrese numero') }}" required>
-                  </div>
-                  <div class="form-group">
-                    <label for="file">{{ _('Foto del visitante') }}&nbsp;<sup class="text-danger">*</sup></label>
-                    <input type="file" name="image" class="file" accept="image/*">
-                    <div class="input-group my-3">
-                      <input type="text" class="form-control" disabled placeholder="Upload File" id="file" required>
-                      <div class="input-group-append">
-                        <button type="button" class="browse btn btn-primary">Browse...</button>
+
+                <div class="card">
+                  <div class="card-body">
+                    <h3 class="h3 mb-md-5 text-center title-subline">Cedula del visitante</h3>
+                    <div class="form-group row mb-md-4">
+                      <label class="col-md-3 col-form-label" for="visitorDNI">{{ _('Cédula del visitante:') }}&nbsp;<sup class="text-danger">*</sup></label>
+                      <div class="col-md-3">
+                        <input 
+                          id="visitorDNI" 
+                          name="visitor_dni" 
+                          type="text" 
+                          class="form-control" 
+                          style="text-transform:uppercase" 
+                          placeholder="{{ __('Ingrese Cedula') }}"
+                          value="{{ old('visitor_dni') }}"
+                          autocomplete="off"  
+                          required
+                        > 
+                        <input type="hidden" id="visitorID" name="visitor_id" value="{{ old('visitor_id') ? old('visitor_id') : -1  }}" readonly>
                       </div>
-                    </div>
-                    <div class="ml-2 col-sm-4">
-                      <img src="" id="preview" class="img-thumbnail">
+                      <div id="visitorLoader"class="col-md-1">
+                        <div class="mt-md-2 loading d-none"></div> 
+                      </div>
+                      <div id="visitorResult" class="col-md-5"></div>     
                     </div>
                   </div>
-                  
                 </div>
+
+                @include('visitor.inputs')
                 <!-- /.card-body -->
                 <div class="card-footer">
                   <button type="submit" class="btn btn-success">{{ __('Crear Registro') }}</button>
@@ -101,17 +98,6 @@
             </div>
             <!-- /.card -->
           </div>
-
-
-
-
-
-
-
-
-
-
-
         </div>
         <!-- /.row -->
       </div><!-- /.container-fluid -->
@@ -119,4 +105,6 @@
     <!-- /.content -->
   </div>
   <!-- /.content-wrapper -->
+
+  @include('layouts.error-modal')
 @endsection

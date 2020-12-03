@@ -5,7 +5,7 @@
 @import 'variables';
 
 // Bootstrap
-//@import '~bootstrap/scss/bootstrap';
+/* @import '~bootstrap/scss/bootstrap'; */
 
 .file {
   visibility: hidden;
@@ -15,11 +15,21 @@
 .btn-circle.btn-md { 
   width: 25px; 
   height: 25px; 
-  padding: 7px 7px; 
   border-radius: 25px; 
-  font-size: 10px; 
-  text-align: center; 
+  font-size: 15px;
+  position: relative;
+
+  & > i {
+    
+    position: absolute;
+    left: 50%;
+    margin-left: -6px;
+    top: 4px;
+  
+  }
 }
+
+
 
 /* Loading animation for Ajax requests*/
 .loading {
@@ -41,10 +51,41 @@
   }
 }
 
-.success {
+%loading-result {
   position: relative;
   animation: bounce .3s ease-in;
   border: 2px solid $blue;
+  
+  &::before {
+    content: '';
+    display: block;
+    width: 15px;
+    height: 15px;
+    position: absolute;
+    top: 3px;
+    left: 50%;
+    margin-left: -7.5px;
+  }
+}
+
+@mixin loading-result-icon($url) {
+  background: url($url) no-repeat; 
+}
+
+.success, .not-found {
+  @extend %loading-result;
+}
+
+.success:before {
+  @include loading-result-icon('../fonts/tick.svg');
+}
+
+.not-found:before {
+  @include loading-result-icon('../fonts/close.svg');
+  width: 13px;
+  height: 13px;
+  top: 3px;
+  margin-left: -6.5px;
 }
 
 @keyframes bounce {
@@ -53,15 +94,15 @@
   }
 }
 
-.success::before {
-  content: '';
+
+/**FORMS*/
+.title-subline:after {
   display: block;
-  width: 15px;
-  height: 15px;
-  position: absolute;
-  background: url(../fonts/tick.svg) no-repeat;
-  top: 3px;
-  left: 50%;
-  margin-left: -7.5px;
+  height: 1px;
+  background-color: $blue;
+  content: ' ';
+  width: 100px;
+  margin: 0 auto;
+  margin-top: 10px;
 }
 

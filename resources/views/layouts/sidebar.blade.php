@@ -42,7 +42,7 @@
 		<li class="nav-item {{ setActive('reportes') }}">
 			<a href="{{ route('reportes.index') }}" class="nav-link {{ setActive('reportes') }}">
 				<i class="nav-icon icon fa fa-file"></i>
-				<p>{{ __('REPORTES') }}</p>
+				<p>{{ __('VISITAS') }}</p>
 			</a>
 		</li>
 

@@ -15,32 +15,26 @@ class WorkerSeeder extends Seeder
     Worker::create([
         "firstname" => "fabian",
         "lastname" => 'trillo',
-        "dni" => "2798434",
+        "dni" => "V-26382781",
         "email" => "fabian@cvg.gob.ve",
     ]);
     Worker::create([
         "firstname" => "jesus",
         "lastname" => 'ruiz',
-        "dni" => "27296976",
+        "dni" => "V-26382782",
         "email" => "jesus@cvg.gob.ve",
     ]);
     Worker::create([
-      "firstname" => "pedro",
-      "lastname" => 'perez',
-      "dni" => "25393650",
-      "email" => "pedro@gmail.com",
+      "firstname" => "maria",
+      "lastname" => 'malave',
+      "dni" => "V-13090073",
+      "email" => "maria@gmail.com",
     ]);
     Worker::create([
-      "firstname" => "ibrahim",
-      "lastname" => 'diaz',
-      "dni" => "25392354",
-      "email" => "ibrahim@gmail.com",
-    ]);
-    Worker::create([
-      "firstname" => "alex",
-      "lastname" => 'lopz',
-      "dni" => "253936233",
-      "email" => "alex@gmail.com",
+      "firstname" => "Bassil",
+      "lastname" => 'Da costa',
+      "dni" => "E-1577392",
+      "email" => "bassil@gmail.com",
     ]);
   }
 }

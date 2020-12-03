@@ -299,27 +299,98 @@ class AutoController extends WebController
         return redirect()->route('autos.index', compact('vista', 'search', 'trashed'));
     }
 
+    public function getAuto(Request $request){
+
+        $enrrolment = $request->get('enrrolment');
+
+        $response = array();
+
+        if (isset($enrrolment)){
+            
+            $columns = ['autos.id as auto_id', 'autos.color as color', 'auto_models.name as model', 'auto_models.id as auto_model_id'];
+            
+            $auto = Auto::select($columns)
+                ->join('auto_models', 'auto_models.id', '=', 'autos.auto_model_id')
+                ->where('enrrolment', $enrrolment)
+                ->first();
+            
+            if ($auto){
+                $response[] = array(
+                    "auto_id" => $auto->auto_id,
+                    "model" => $auto->model,
+                    "auto_model_id" => $auto->auto_model_id,
+                    "color" => $auto->color
+                );
+            }
+        }
+
+        return response()->json($response);
+    }
+
     public function getAutoModels(Request $request){
 
-        $auto_brand_id =  $request->get('auto_brand_id');
+        $search =  $request->has('search') ? $request->get('search') : '';
+        $auto_brand = $request->has('auto_brand') ? $request->get('auto_brand') : '';
 
-        $auto_models = AutoModel::orderby('name','asc')
-            ->select(
-                'auto_models.id as auto_model_id',
-                'auto_models.name as auto_model_name'
-            )
-            ->where('auto_brand_id', $auto_brand_id)
-            ->get();
+        $columns = [
+            'auto_models.id as auto_model_id',
+            'auto_models.name as auto_model',
+            'auto_brands.id as auto_brand_id',
+            'auto_brands.name as auto_brand',
+        ];
 
+        $auto_models = AutoModel::orderby('auto_models.name','asc')->select($columns);
+        
+        $auto_models = $auto_models->join('auto_brands', function($query) use ($auto_brand){
+            $query->on('auto_brands.id', '=', 'auto_models.auto_brand_id');
+            
+            if (strlen($auto_brand) > 0){
+                $query->where("auto_brands.name", $auto_brand);
+            }
+        });
+        
+        
+        if (strlen($search) > 0){      
+            $auto_models = $auto_models->where("auto_models.name", "LIKE", "%".$search."%");
+        }
+
+        $auto_models = $auto_models->limit(5)->get();
+    
         $response = array();
 
         foreach($auto_models as $auto_model){
             $response[] = array(
-                "id"=>$auto_model->auto_model_id,
-                "value"=>$auto_model->auto_model_name
+                "auto_model_id"=>$auto_model->auto_model_id,
+                "auto_model"=>ucfirst($auto_model->auto_model),
+                "auto_brand_id"=>$auto_model->auto_brand_id,
+                "auto_brand"=>ucfirst($auto_model->auto_brand),
+                "value"=>ucfirst($auto_model->auto_model)
             );
         }
-  
+        
+        return response()->json($response);
+    }
+    
+    public function getAutoBrands(Request $request){
+
+        $search =  $request->get('search');
+
+        $columns = ['id','name'];
+
+        $auto_brands = AutoBrand::orderby('name','asc')->select($columns);
+
+        if (strlen($search) > 0){
+            $auto_brands = $auto_brands->where("name", "LIKE", "%".$search."%");
+        }
+
+        $auto_brands = $auto_brands->limit(5)->get();
+    
+        $response = array();
+
+        foreach($auto_brands as $auto_brand){
+            $response[] = array("id"=>$auto_brand->id, "value"=>ucfirst($auto_brand->name));
+        }
+        
         return response()->json($response);
     }
 }

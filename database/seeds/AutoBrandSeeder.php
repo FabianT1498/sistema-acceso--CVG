@@ -14,10 +14,10 @@ class AutoBrandSeeder extends Seeder
     {
         //
     	AutoBrand::create([
-    		'name' => 'Toyoya',
+    		'name' => 'TOYOTA',
     		]);
     	AutoBrand::create([
-    		'name' => 'Hyundai',
+    		'name' => 'HYUNDAI',
     		]);
     }
 }
