@@ -19,9 +19,7 @@ class EditAutoRequest extends FormRequest
         
         $auto = Auto::find($this->route('auto'));
 
-        return (($auto && !$auto->deleted_at) 
-                && ($auth_user_role !== 3 
-                        || ($auto->user_id === $auth_user_id)));
+        return (($auto && !$auto->deleted_at) && $auth_user_role !== 3);
     }
 
     /**

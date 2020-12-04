@@ -17,12 +17,8 @@ class StoreAutoRequest extends FormRequest
     public function authorize()
     {
         $auth_user_role = $this->user()->role_id;
-        $visitor_id = (int) $this->visitor_id;
-
-        $visitor = Visitor::where('id', $visitor_id)->first();
      
-        return (($visitor && !$visitor->deleted_at) && ($auth_user_role !== 3 
-            || ($visitor->user_id === $this->user()->id)));
+        return (($visitor && !$visitor->deleted_at) && $auth_user_role !== 3);
     }
 
     /**
@@ -35,38 +31,46 @@ class StoreAutoRequest extends FormRequest
         $visitor_id = $this->visitor_id;
 
         $rules = [
-            'visitor_id' => ['bail', 'required', 'exists:visitors,id'],
-            'visitor_dni' => [
-                'required',
-                Rule::exists('visitors', 'dni')->where(function ($query) use ($visitor_id) {
-                    $query->where('id', $visitor_id );
-                }),
-                'max:10'
-            ],
             'auto_enrrolment' => [
                 'required',
-                Rule::unique('autos', 'enrrolment')->where(function ($query) {
-                    return $query->where('deleted_at', NULL);
-                }),
+                'unique:autos,enrrolment',
                 'max:7'
             ],
-            'auto_color' => ['required']
+            'auto_color' => ['required'],
+            'auto_brand' => ['required'],
+            'auto_model' => ['required'],
         ];
 
-        $auto_brand_chk = (int) $this->check_auto_brand;
-        $auto_model_chk = (int) $this->check_auto_model;
-        
-        if (isset($auto_brand_chk) && $auto_brand_chk === 1){
-            $rules['auto_brand_input'] = array('required', 'unique:auto_brands,name', 'min:3');
-            $rules['auto_model_input'] = array('required', 'unique:auto_models,name', 'min:3');
-        } else if (isset($auto_model_chk) && $auto_model_chk === 1){
-            $rules['auto_brand_select'] = array('required', 'exists:auto_brands,id');
-            $rules['auto_model_input'] = array('required', 'unique:auto_models,name', 'min:3');
-        } else {
-            $rules['auto_brand_select'] = array('required', 'exists:auto_brands,id');
-            $rules['auto_model_select'] = array('required', 'exists:auto_models,id');
-        }
-        
         return $rules;
+    }
+
+    /**
+     * Get the error messages for the defined validation rules.
+     *
+     * @return array
+     */
+    public function messages()
+    {
+
+        $messages = [
+            'auto_enrrolment.unique' => 'La matricula de este auto ya fue registrada'
+        ];
+
+        return $messages;
+    }
+
+    /**
+     * Prepare the data for validation.
+     *
+     * @return void
+     */
+    protected function prepareForValidation()
+    {
+ 
+        $inputs['auto_enrrolment'] = strtoupper($this->auto_enrrolment);
+        $inputs['auto_model'] = strtoupper($this->auto_model);
+        $inputs['auto_brand'] = strtoupper($this->auto_brand);
+        
+        $this->merge($inputs);
     }
 }

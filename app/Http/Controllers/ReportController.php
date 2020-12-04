@@ -33,8 +33,6 @@ use PDF;
 class ReportController extends WebController
 {
 
-   
-
     //
      /**
      * Display a listing of the resource.
@@ -52,53 +50,40 @@ class ReportController extends WebController
             'visitors.firstname as visitor_firstname',
             'visitors.lastname as visitor_lastname',
             'visitors.dni as visitor_dni',
-            'workers.firstname as worker_firstname',
-            'workers.lastname as worker_lastname',
             'users.username as user_username'
         ];
 
-        $reports = null;
+        if ($auth_user_role !== 3){ 
+            $columns[] = 'workers.firstname as worker_firstname';
+            $columns[] = 'workers.lastname as worker_lastname';
+            $columns[] = 'workers.dni as worker_dni';
+        }
 
         $auth_user_role = Auth::user()->role_id;
 
-        if($trashed  && $auth_user_role <= 2){
-            $reports = Report::onlyTrashed()->select($columns);
-        } else {
-            $reports = Report::select($columns);
-        }
-
+        $reports = Report::select($columns);
+    
         $reports = $reports->join('visitors',
                 function($query) use ($search){
                     $query->on('visitors.id', '=', 'reports.visitor_id');
                     
-                    if (isset($search) && strlen($search) > 0){
-                        $search = strtolower($search);
-            
-                        $isDNI =  (strpos($search, 'v-') !== false || strpos($search, 'e-') !== false) ? true : false;
-            
-                        if ($isDNI){
-                            $query->where(DB::raw('lower(visitors.dni)'), "LIKE", "%".$search);
-                        } else {
-                            $splitName = explode(' ', $search, 2);
-                            $first_name = $splitName[0];
-                            $last_name = !empty($splitName[1]) ? $splitName[1] : '';
-        
-                            $query->where(DB::raw('lower(visitors.firstname)'), "LIKE", "%" . $first_name . "%");
-            
-                            if ($last_name !== ''){
-                                $query->where(DB::raw('lower(visitors.lastname)'), "LIKE", "%" . $last_name . "%");
-                            }
-                        }   
+                    if (isset($search) && strlen($search) > 2){
+                        $search = strtoupper($search);
+                        $query->where("visitors.dni", $search);
                     }
                 }
             )
             ->join('workers', 'workers.id', '=', 'reports.worker_id')
             ->join('users', 'users.id', '=', 'reports.user_id');
+        
+        $status = request('status');
 
+        if (isset($status) && $status !== "TODOS"){
+            $reports = $reports->where('reports.status', $status);
+        }
 
         if ($auth_user_role === 3){ // TRABAJADOR
-            $reports = $reports->where('reports.user_id', Auth::user()->id)
-                ->orWhere('reports.worker_id', Auth::user()->worker_id);
+            $reports = $reports->where('reports.worker_id', Auth::user()->worker_id);
         }
         
         $reports = $reports->paginate(10); 

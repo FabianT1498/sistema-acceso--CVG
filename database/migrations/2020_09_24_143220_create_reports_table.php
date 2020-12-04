@@ -20,6 +20,7 @@ class CreateReportsTable extends Migration
             $table->unsignedBigInteger('visitor_id')->unsigned();
             $table->unsignedBigInteger('worker_id')->unsigned()->nullable();
             $table->unsignedBigInteger('auto_id')->unsigned()->nullable();
+            $table->string('status', 1);
 
             $table->foreign('user_id')->references('id')->on('users');
             $table->foreign('visitor_id')->references('id')->on('visitors')->onDelete('cascade');
