@@ -5,16 +5,11 @@ namespace App\Http\Controllers;
 
 use App\Visitor;
 use App\Role;
-use App\Auto;
-use App\AutoModel;
 use App\Photo;
-use App\Traits\UploadTrait;
 
-use Illuminate\Validation\Rule;
 use App\Http\Controllers\WebController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -27,8 +22,6 @@ use App\Http\Requests\EditVisitorRequest;
 
 class VisitorController extends WebController
 {
-
-    use UploadTrait;
 
      /**
      * Display a listing of the resource.
@@ -55,7 +48,7 @@ class VisitorController extends WebController
             $isDNI =  (strpos($search, 'v-') !== false || strpos($search, 'e-') !== false) ? true : false;
 
             if ($isDNI){
-                $visitors = $visitors->where(DB::raw('lower("dni")'), "LIKE", "%".$search);
+                $visitors = $visitors->where(DB::raw('lower("dni")'), $search);
             } else {
                 $splitName = explode(' ', $search, 2);
                 $first_name = $splitName[0];
@@ -67,10 +60,6 @@ class VisitorController extends WebController
                    $visitors = $visitors->where(DB::raw('lower("lastname")'), "LIKE", "%".strtolower($last_name)."%");
                 }
             }   
-        }
-
-        if ($auth_user_role === 3 && ((isset($isDNI) && !$isDNI) || !isset($isDNI))){ // TRABAJADOR
-            $visitors = $visitors->where('visitors.user_id', Auth::user()->id);
         }
         
         $visitors = $visitors->paginate(10); 
@@ -106,27 +95,16 @@ class VisitorController extends WebController
         $search = request('search');
         $trashed = request('trashed');
 
-        $visitor = new Visitor($request->validated());
+        $validated = $request->validated();
+
+        $visitor = new Visitor($validated);
         $visitor->user_id = Auth::user()->id;
 
-        // Get image file
-        $image = $request->file('image');
-     
         // Make a image name based on user name and current timestamp
-        $name = Str::slug( $request->firstname. '_' . $request->lastname.'_'. time() );
-
-        // Define folder path
-        $folder = '/images/';
-
-        // Make a file path where image will be stored [ folder path + file name + file extension]
-        $filePath = $folder . $name. '.' . $image->getClientOriginalExtension();
-
-        // Upload image
-        $this->uploadOne($image, $folder, 'public', $name);
-
+        $name = Str::slug( $validated['visitor_firstname']. '_' . $validated['visitor_lastname'].'_'. time() );
         $photo = new Photo();
-        $photo->path = $filePath;
-        
+        $photo->storePhoto($validated['image'], $name);
+
         if (!$visitor->save() || !$visitor->photo()->save($photo)){
             toastr()->error(__('Ocurrio un error al crear el registro'));
         } else {
@@ -177,13 +155,15 @@ class VisitorController extends WebController
     {
         $search = request('search');
         $trashed = (request('trashed')) ? true : false;
+
+        $validated = $request->validated();
    
         $visitor = Visitor::withTrashed()->where('id', $id)->first();
 
-        $visitor->firstname = $request->firstname;
-        $visitor->lastname = $request->lastname;
-        $visitor->dni = strtoupper($request->dni);
-        $visitor->phone_number = $request->phone_number;
+        $visitor->firstname = $validated['visitor_firstname'];
+        $visitor->lastname = $validated['visitor_lasttname'];
+        $visitor->dni = $validated['visitor_dni'];
+        $visitor->phone_number = $validated['visitor_phone_number'];
 
         // Check if a new profile image has been uploaded
         if ($request->has('image')) {
@@ -193,25 +173,8 @@ class VisitorController extends WebController
             // Delete existing image
             Storage::disk('public')->delete($photo->path);
 
-            // Get image file
-            $image = $request->file('image');
-
-            // Make a image name based on user name and current timestamp
-            $name = Str::slug( $request->firstname. '_' . $request->lastname.'_'. time() );
-
-            // Define folder path
-            $folder = '/images/';
-
-            // Make a file path where image will be stored [ folder path + file name + file extension]
-            $filePath = $folder . $name. '.' . $image->getClientOriginalExtension();
-
-            // Upload image
-            $this->uploadOne($image, $folder, 'public', $name);
-
-            // set the new path on database photo
-            $photo->path = $filePath;
-
-            $photo->update();
+            $name = Str::slug( $validated['visitor_firstname']. '_' . $validated['visitor_lastname'].'_'. time() );
+            $photo->storePhoto($validated['image'], $name);
         }
 
         if(!$visitor->update() || (isset($photo) && !$photo->update()))
@@ -238,10 +201,36 @@ class VisitorController extends WebController
 
         // Delete visitor
         $visitor = Visitor::withTrashed()->where('id', $id)->first();
+        
+        if ($visitor && $visitor->delete()){
+            toastr()->success(__('Visitante desactivado con éxito'));
+        } else {
+            toastr()->error(__('No se pudo desactivar el visitante'));
+        }
+    
+        return redirect()->route('visitantes.index', compact('search', 'trashed'));
+    }
 
-        $visitor->reports()->each(function($report){$report->delete();});
-        $visitor->delete();
-        toastr()->success(__('Registro eliminado con éxito'));
+    /**
+     * Restore the specified resource from storage.
+     *
+     * @param  \App\User  $user
+     * @return \Illuminate\Http\Response
+     */
+    public function restore($id, RestoreVisitorRequest $request)
+    {
+        
+        $search = $request['search'];
+        $trashed = $request['trashed'] ? true : false;
+
+        // Restore visitor
+        $visitor = Visitor::onlyTrashed()->where('id', $id)->first();
+
+        if ($visitor && $visitor->restore()){
+            toastr()->success(__('Visitante reactivado con éxito'));
+        } else {
+            toastr()->error(__('No se pudo reactivar el visitante'));
+        }
 
         return redirect()->route('visitantes.index', compact('search', 'trashed'));
     }
@@ -272,7 +261,7 @@ class VisitorController extends WebController
         return response()->json($response);
     }
 
-    public function getVisitorAutos(Request $request){
+    /* public function getVisitorAutos(Request $request){
 
         $id =  $request->get('visitorID');
 
@@ -297,5 +286,5 @@ class VisitorController extends WebController
         }
   
         return response()->json($response);
-    }
+    } */
 }

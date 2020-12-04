@@ -184,9 +184,50 @@ $(document).ready(function () {
         }
     }
 
+    $("#visitorDNI").keyup(delay(function (e) {
+
+        if ((this.value.length < 7 || (e.which < 48 || e.which > 57)) && e.which !== 8) {
+            return;
+        }
     
-
-
+        ajaxParams.url = '/visitante';
+        ajaxParams.data = { dni: this.value.toUpperCase() };
+    
+        const loader = $('#visitorLoader > div').first();
+        const resultMsg = $('#visitorResult');
+    
+        ajaxParams.beforeSend = function () {
+            loader.removeClass(['d-none', 'success', 'not-found']);
+        }
+    
+        ajaxParams.success = function (data) {
+            if (data.length === 0) {
+                const html = `
+                    <p class="text-info d-inline">Este visitante no ha sido registrado, presione el boton para registrarlo</p>
+                    <button id="addVisitor" class="btn btn-primary btn-circle btn-md ml-md-2" type="button"><i class="nav-icon icon fa fa-plus"></i></button>
+                `;
+                loader.addClass('not-found');
+                resultMsg.html(html);
+    
+                $('#addVisitor').on('click', function(){
+                    loadVisitorInputs();
+                    $('#visitorPhoneNumber').mask('0000-0000000', {translation:{'0': { pattern: /\d/ }}});
+                });
+    
+            } else {
+                loader.addClass('success');
+                resultMsg.html(`<p class="text-uppercase mt-md-2">${data[0].value}</p>`);
+                $('#visitorID').val(data[0].id);
+                $('#visitorData').html('');
+            }
+        }
+    
+        $('#visitorID').val('-1');
+    
+        // Fetch data
+        $.ajax(ajaxParams);
+      }, 500));
+    
     $("#workerDNI").keyup(delay(function (e) {
 
         if ((this.value.length < 7 || (e.which < 48 || e.which > 57)) && e.which !== 8) {

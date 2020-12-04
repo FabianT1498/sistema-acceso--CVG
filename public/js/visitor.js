@@ -7,7 +7,6 @@ $(function() {
       '9': { pattern: /\d/, optional: true },
       '#': { pattern: /\d/, recursive: true },
       C: { pattern: /[VE|ve]/, fallback: 'V' },
-      
     },
   };
 
@@ -19,51 +18,7 @@ $(document).ready(function() {
 
   $.count = 0;
 
-  $("#visitorDNI").keyup(delay(function (e) {
-
-    if ((this.value.length < 7 || (e.which < 48 || e.which > 57)) && e.which !== 8) {
-        return;
-    }
-
-
-
-    ajaxParams.url = '/visitante';
-    ajaxParams.data = { dni: this.value.toUpperCase() };
-
-    const loader = $('#visitorLoader > div').first();
-    const resultMsg = $('#visitorResult');
-
-    ajaxParams.beforeSend = function () {
-        loader.removeClass(['d-none', 'success', 'not-found']);
-    }
-
-    ajaxParams.success = function (data) {
-        if (data.length === 0) {
-            const html = `
-                <p class="text-info d-inline">Este visitante no ha sido registrado, presione el boton para registrarlo</p>
-                <button id="addVisitor" class="btn btn-primary btn-circle btn-md ml-md-2" type="button"><i class="nav-icon icon fa fa-plus"></i></button>
-            `;
-            loader.addClass('not-found');
-            resultMsg.html(html);
-
-            $('#addVisitor').on('click', function(){
-                loadVisitorInputs();
-                $('#visitorPhoneNumber').mask('0000-0000000', {translation:{'0': { pattern: /\d/ }}});
-            });
-
-        } else {
-            loader.addClass('success');
-            resultMsg.html(`<p class="text-uppercase mt-md-2">${data[0].value}</p>`);
-            $('#visitorID').val(data[0].id);
-            $('#visitorData').html('');
-        }
-    }
-
-    $('#visitorID').val('-1');
-
-    // Fetch data
-    $.ajax(ajaxParams);
-  }, 500));
+  
 
   function dynamic_field(number) {
     html = `
@@ -123,22 +78,6 @@ $(document).ready(function() {
     // read the image file as a data URL.
     reader.readAsDataURL(e.target.files[0]);
   });
-
-  /* $('input[type="file"]').change(function(e) {
-    var fileName = e.target.files[0].name;
-    $("#file").val(fileName);
-
-    var reader = new FileReader();
-    
-    reader.onload = function(e) {
-
-      // get loaded data and render thumbnail.
-      document.getElementById("preview").src = e.target.result;
-    };
-
-    // read the image file as a data URL.
-    reader.readAsDataURL(this.files[0]);
-  }); */
 
 });
 

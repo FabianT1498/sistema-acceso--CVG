@@ -92,7 +92,7 @@
 
               <div class="card" id="visitorData">
                 @if (old('visitor_id') === '-1')
-                  @include('visitor.inputs')
+                  @include('visitor.inputs', ['is_form_report'=>true])
                 @endif
               </div>
 

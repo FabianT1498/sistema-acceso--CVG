@@ -24,36 +24,60 @@ class StoreVisitorRequest extends FormRequest
      */
     public function rules()
     {
-        return [
-            'visitor_firstname' => [
-                'bail',
+        $rules = [
+            'visitor_firstname' => ['required','max:50'],
+            'visitor_lastname' => ['required','max:50'],
+            'visitor_dni' => [
                 'required',
-                'max:50',
-            ],    
-            'visitor_lastname' => [
-                'required',
-                'max:50', 
-            ],
-            'visitor_dni' => [                
-                'required',
-                Rule::unique('visitors', 'dni')->where(function ($query) {
-                    return $query->where('deleted_at', NULL);
-                }),
+                'unique:visitors,dni',
                 'max:10'
             ],
             'visitor_phone_number' => [
                 'required',
-                Rule::unique('visitors', 'phone_number')->where(function ($query) {
-                    return $query->where('deleted_at', NULL);
-                }),
+                'unique:visitors,phone_number',
                 'max:15'
             ],
             'image' => [
                 'required',
                 'image' ,
                 'mimes:jpeg,png,jpg,gif',
-                'max:2048'
-            ],
+                'max:512'
+            ]
         ];
+
+        return $rules;
+    }
+
+    /**
+     * Get the error messages for the defined validation rules.
+     *
+     * @return array
+     */
+    public function messages()
+    {
+       
+        $messages = [
+            'visitor_dni.unique' => 'La cedula del visitante ya fue registrada',
+            'visitor_phone_number.unique' => 'El telefono del visitante ya fue registrado',
+            'image.required' => 'Es necesario que suba la imagen del visitante',
+            'image.max' =>'El peso maximo de la imagen es de 512 KB'
+        ];
+        
+        return $messages;
+    }
+
+    /**
+     * Prepare the data for validation.
+     *
+     * @return void
+     */
+    protected function prepareForValidation()
+    {
+        
+        $inputs = [
+            'visitor_dni' => strtoupper($this->visitor_dni),
+        ];
+
+        $this->merge($inputs);
     }
 }

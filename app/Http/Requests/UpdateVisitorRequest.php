@@ -39,38 +39,66 @@ class UpdateVisitorRequest extends FormRequest
         $visitor_id = $this->route('visitante');
 
         return [
-            'firstname' => [
+            'visitor_firstname' => [
                 'bail',
                 'required',
                 'max:50',
             ],    
-            'lastname' => [
+            'visitor_lastname' => [
                 'required',
                 'max:50', 
             ],
-            'dni' => [                
+            'visitor_dni' => [                
                 'required',
                 Rule::unique('visitors', 'dni')
-                    ->ignore($visitor_id)
-                    ->where(function ($query) {
-                        return $query->where('deleted_at', NULL);
-                    }),
+                    ->ignore($visitor_id),
                 'max:10'
             ],
-            'phone_number' => [
+            'visitor_phone_number' => [
                 'required',
                 Rule::unique('visitors', 'phone_number')
-                    ->ignore($visitor_id)          
-                    ->where(function ($query) {
-                        return $query->where('deleted_at', NULL);
-                    }),
+                    ->ignore($visitor_id),
                 'max:15'
             ],
             'image' => [
                 'image' ,
                 'mimes:jpeg,png,jpg,gif',
-                'max:2048'
+                'max:512'
             ],
         ];
     }
+
+    /**
+     * Get the error messages for the defined validation rules.
+     *
+     * @return array
+     */
+    public function messages()
+    {
+       
+        $messages = [
+            'visitor_dni.unique' => 'La cedula del visitante ya fue registrada',
+            'visitor_phone_number.unique' => 'El telefono del visitante ya fue registrado',
+            'image.required' => 'Es necesario que suba la imagen del visitante',
+            'image.max' =>'El peso maximo de la imagen es de 512 KB'
+        ];
+        
+        return $messages;
+    }
+
+    /**
+     * Prepare the data for validation.
+     *
+     * @return void
+     */
+    protected function prepareForValidation()
+    {
+        
+        $inputs = [
+            'visitor_dni' => strtoupper($this->visitor_dni),
+        ];
+
+        $this->merge($inputs);
+    }
 }
+
