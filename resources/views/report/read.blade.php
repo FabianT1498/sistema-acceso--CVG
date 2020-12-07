@@ -10,7 +10,6 @@
   <script src="{{ asset('js/dataTables.bootstrap4.js') }}"></script>
   <script src="{{ asset('js/toastr.min.js') }}"></script>
   @toastr_render
-
   <script src="{{ asset('js/insumo.js') }}"></script>
   <script src="{{ asset('js/report.js') }}"></script>
 @endsection
@@ -57,7 +56,7 @@
                     <th>{{ __('Hora de salida') }}</th>
                     <th>{{ __('Estatus') }}</th>
 
-                    @if (Auth::user()->role_id > 2)
+                    @if (Auth::user()->role_id === 4)
                       <th>{{ __('Opciones') }}</th>
                     @endif
                   </tr>
@@ -77,24 +76,27 @@
                       <td>{{ date('H:i', strtotime($report->departure_time)) }}</td>
                       <td>{{ $report->status }}</td>
                                     
-                      @if(Auth::user()->role_id === 4 && $report->status === "CONFIRMADA")
-                        <td>
-                            <a title="{{ __('Generar PDF') }}" href="#" onclick="
-                              event.preventDefault();
-                              confirm('{{ __("Usted va a generar un reporte, esto quedará registrado. ¿Desea continuar?") }}') ?
-                                document.getElementById('frm_pdf_{{ $report->id }}').submit() : false;"
-                            >
-                              <small>
-                                <small class="text-info"><i class="fa fa-file-pdf fa-2x"></i></small>
-                              </small>
-                            </a>
-                            <form method="GET" id="frm_pdf_{{ $report->id }}" action="{{ route('reportes.generar_pase', $report->id) }}" class="d-none">
-                                @csrf
-                                <input type="hidden" name="search" value="{{ $search }}">
-                            </form>           
-                        </td>
+                      @if(Auth::user()->role_id === 4)
+                        @if($report->status === "CONFIRMADA")
+                          <td>
+                              <a title="{{ __('Generar PDF') }}" href="#" onclick="
+                                event.preventDefault();
+                                confirm('{{ __("Usted va a generar un reporte, esto quedará registrado. ¿Desea continuar?") }}') ?
+                                  document.getElementById('frm_pdf_{{ $report->id }}').submit() : false;"
+                              >
+                                <small>
+                                  <small class="text-info"><i class="fa fa-file-pdf fa-2x"></i></small>
+                                </small>
+                              </a>
+                              <form method="GET" id="frm_pdf_{{ $report->id }}" action="{{ route('reportes.generar_pase', $report->id) }}" class="d-none">
+                                  @csrf
+                                  <input type="hidden" name="search" value="{{ $search }}">
+                              </form>           
+                          </td>
+                        @else
+                          <td>&nbsp;</td>
+                        @endif
                       @endif
-                      
                     </tr>
                   @endforeach
                 </tbody>

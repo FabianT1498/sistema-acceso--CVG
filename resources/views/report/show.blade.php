@@ -10,7 +10,7 @@
   <script src="{{ asset('js/toastr.min.js') }}"></script>
 
   @toastr_render
-  <script src="{{ asset('js/insumo.js') }}"></script>
+  <script src="{{ asset('js/report.js') }}"></script>
 @endsection
 
 @section('migasdepan')

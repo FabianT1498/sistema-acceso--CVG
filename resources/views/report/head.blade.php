@@ -55,6 +55,7 @@
                     name="start_date" 
                     placeholder=""
                     value=""
+                    autocomplete="off"
                   >
 
                   <label class="mr-3" for="startDate">{{ _('Hasta:') }}</label>
@@ -65,6 +66,7 @@
                     name="finish_date" 
                     placeholder=""
                     value=""
+                    autocomplete="off"
                   > 
                 </div>
               </div>
