@@ -16,12 +16,11 @@ class UpdateAutoRequest extends FormRequest
     public function authorize()
     {
         $auth_user_role = $this->user()->role_id;
-        $auth_user_id = $this->user()->id;
         
         $auto = Auto::find($this->route('auto'));
 
         return (($auto && !$auto->deleted_at) 
-                && $auth_user_role !== 3);
+                && $auth_user_role === 4);
     }
 
     /**
@@ -33,16 +32,8 @@ class UpdateAutoRequest extends FormRequest
     {
         $auto_id = $this->route('auto');
     
-        $rules = [
-            'auto_enrrolment' => [
-                'required',
-                Rule::unique('autos', 'enrrolment')
-                    ->ignore($auto_id),
-                'max:7'
-            ],
+        $rules = [       
             'auto_color' => ['required'],
-            'auto_brand' => ['required'],
-            'auto_model' => ['required']
         ];
 
         return $rules;
@@ -57,17 +48,17 @@ class UpdateAutoRequest extends FormRequest
     {
 
         $messages = [
-            'auto_enrrolment.unique' => 'La matricula de este auto ya fue registrada'
+            'auto_color.required' => 'Indique el color del auto por favor'
         ];
 
         return $messages;
     }
 
-    /**
+    /* /**
      * Prepare the data for validation.
      *
      * @return void
-     */
+     *
     protected function prepareForValidation()
     {
  
@@ -76,5 +67,5 @@ class UpdateAutoRequest extends FormRequest
         $inputs['auto_brand'] = strtoupper($this->auto_brand);
         
         $this->merge($inputs);
-    }
+    } */
 }

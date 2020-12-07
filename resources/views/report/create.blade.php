@@ -11,7 +11,9 @@
 
   @toastr_render
   <script src="{{ asset('js/insumo.js') }}"></script>
+  <script src="{{ asset('js/utilities.js') }}"></script>
   <script src="{{ asset('js/report.js') }}"></script>
+  <script src="{{ asset('js/autos.js') }}"></script>
   <script src="{{ asset('js/visitor.js') }}"></script>
 @endsection
 
@@ -166,6 +168,33 @@
                     </div>
                   </div>
 
+                  <div class="form-row mb-md-4">
+                    <div class="form-group col-md-3">
+                      <label for="building">{{ _('Edificio:') }}&nbsp;<sup class="text-danger">*</sup></label>
+                      <input 
+                        type="text" 
+                        class="form-control" 
+                        id="building" 
+                        name="building" 
+                        placeholder="Edificio"
+                        value="{{ old('building') }}"
+                        required
+                      >                   
+                    </div>
+                    <div class="form-group col-md-3">
+                      <label for="department">{{ _('Departamento:') }}&nbsp;<sup class="text-danger">*</sup></label>
+                      <input 
+                        type="text" 
+                        class="form-control" 
+                        id="department" 
+                        name="department" 
+                        value="{{ old('department') }}"
+                        placeholder="Departamento"
+                        required
+                      >                   
+                    </div>
+                  </div>
+
                   <div class="form-group row mb-md-4">
                     <label class="col-md-4 col-form-label" for="thereIsAutoOpt">{{ _('El visitante ha aparcado un auto:') }}</label>  
                     <div class="form-check form-check-inline">
@@ -192,7 +221,10 @@
                     </div>                  
                   </div>
                   
-                  <div class="form-group" id="autoData"> 
+                  <div class="form-group" id="autoData">
+                    @if (old('auto_option') === '1')
+                      @include('auto.inputs')
+                    @endif
                   </div>
                 </div>
 

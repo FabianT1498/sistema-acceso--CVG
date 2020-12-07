@@ -31,9 +31,9 @@ class WorkerSeeder extends Seeder
       "email" => "maria@gmail.com",
     ]);
     Worker::create([
-      "firstname" => "Bassil",
-      "lastname" => 'Da costa',
-      "dni" => "E-1577392",
+      "firstname" => "Andre",
+      "lastname" => 'Da silva',
+      "dni" => "V-26382783",
       "email" => "bassil@gmail.com",
     ]);
   }

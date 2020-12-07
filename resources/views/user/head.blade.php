@@ -5,7 +5,7 @@
 		<nav class="main-header navbar navbar-expand navbar-white navbar-light border-bottom-0 col-12">
 		  <span class="text-dark d-inline h4 pt-2 mr-0">
 			<a href="{{ route('usuarios.index') }}" title="">
-			  <small><i class="nav-icon icon ion-android-contacts">&nbsp;</i></small>{{ __('USUARIOS') }}
+			  <small><i class="nav-icon icon fa fa-user">&nbsp;</i></small>{{ __('USUARIOS') }}
 			</a>
 		  </span>
 		  <form class="form-inline ml-0" action="{{ route('usuarios.create') }}">
@@ -22,7 +22,7 @@
 		  <form class="form-inline ml-3" id="searchForm" action="{{ route('usuarios.index') }}">
 				<div class="input-group input-group-sm">
 					<input type="hidden" name="buscar" value="true">
-					<input id="search" name="search" class="form-control form-control-navbar" type="search" placeholder="{{ __('Buscar') }}" aria-label="Search" value="{{ $search }}">
+					<input id="search" name="search" class="form-control form-control-navbar" autocomplete="off" type="search" placeholder="{{ __('Buscar') }}" aria-label="Search" value="{{ $search }}">
 					<div class="input-group-append">
 						<button class="btn btn-navbar" type="submit">
 						<i class="fas fa-search"></i>
@@ -32,7 +32,7 @@
 						<div class="form-check ml-md-3" style="padding-left: 5px">
 							<input class="form-check-input" type="checkbox" value="{{ ($trashed) ? $trashed : 0 }}" id="check_trashed" @if($trashed) checked="true" @endif  id="check_trashed" name="trashed">
 							<label class="form-check-label" for="check_trashed">
-								Eliminados
+								Inactivos
 							</label>
 						</div>
 					@endif

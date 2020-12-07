@@ -3,9 +3,10 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
-use App\Auto;
 
-class EditAutoRequest extends FormRequest
+use App\User;
+
+class RestoreUserRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -15,10 +16,11 @@ class EditAutoRequest extends FormRequest
     public function authorize()
     {
         $auth_user_role = $this->user()->role_id;
-  
-        $auto = Auto::find($this->route('auto'));
 
-        return (($auto && !$auto->deleted_at) && $auth_user_role === 4);
+        $user = User::onlyTrashed()->where('id', $this->route('usuario'))->first();
+
+        return ($user && ($auth_user_role === 1 || 
+            ($user->role_id > 2 && $auth_user_role === 2)));
     }
 
     /**

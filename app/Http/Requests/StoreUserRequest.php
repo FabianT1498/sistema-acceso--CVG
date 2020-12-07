@@ -32,12 +32,8 @@ class StoreUserRequest extends FormRequest
 
         return [
             'worker_id' => [
-                'bail',
                 'required',
-                'exists:workers,id',
-                Rule::unique('users', 'worker_id')->where(function ($query) {
-                    return $query->where('deleted_at', NULL);
-                })
+                'unique:users,worker_id'
             ],
             'worker_dni' => [
                 'required',
@@ -48,24 +44,57 @@ class StoreUserRequest extends FormRequest
             ],
             'username' => [
                 'required',
-                Rule::unique('users', 'username')->where(function ($query) {
-                    return $query->where('deleted_at', NULL);
-                })
+                'unique:users,username',
             ],
-            'email' => [
+            /* 'email' => [
                 'required',
                 Rule::exists('workers', 'email')->where(function ($query) use ($worker_id) {
                     $query->where('id', $worker_id);
                 }),
-            ],
+            ], */
             'password' => [
                 'required',
-                'min: 9'
+                'min: 5'
             ],
             'role_id' => [
                 'required',
                 'exists:roles,id'
             ]
         ];
+    }
+
+    /**
+     * Get the error messages for the defined validation rules.
+     *
+     * @return array
+     */
+    public function messages()
+    {
+ 
+        $messages = [
+            'worker_dni.exists' => 'El trabajador ingresado no existe',
+            'worker_dni.max' => 'La cedula del trabajador debe tener como maximo 10 caracteres',
+            'username.unique' => 'El nombre de usuario debe ser unico',
+            //'email.exists' => 'El correo no le corresponde al trabajador',
+            'password.min' => 'La contraseña debe tener al menos 5 caracteres',
+            'worker_id.unique' => 'Este trabajador ya posee un usuario'
+        ];
+
+        return $messages;
+    }
+
+    /**
+     * Prepare the data for validation.
+     *
+     * @return void
+     */
+    protected function prepareForValidation()
+    {
+
+        $inputs = [
+            //'email' => strtolower($this->email),
+        ];
+        
+        $this->merge($inputs);
     }
 }

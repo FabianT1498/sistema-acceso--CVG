@@ -63,68 +63,8 @@
                 @csrf
                 @method('POST')
                 <div class="card-body">
-
-                  <div class="form-group">
-                    <label for="visitorSearch">{{ _('Nombre del visitante') }}&nbsp;<sup class="text-danger">*</sup></label>
-                    <input id="visitorSearch" name="visitor_name" type="text" class="form-control" placeholder="{{ __('Ingrese Nombre') }}" required>
-                    <input type="hidden" id='visitorID' name="visitor_id" readonly>
-                  </div>
-                  
-                  <div class="form-group">
-                    <label for="visitorDNI">{{ _('Cédula del visitante') }}&nbsp;<sup class="text-danger">*</sup></label>
-                    <input id="visitorDNI" name="visitor_dni" type="text" class="form-control" style="text-transform:uppercase" placeholder="{{ __('Ingrese Cedula') }}" readonly required>
-                  </div>
-
-                  <div class="form-group">
-                    <label for="autoBrand">{{ _('Marca del automovil') }}&nbsp;<sup class="text-danger">*</sup></label>
-                    <select id="autoBrandSelect" name="auto_brand_select" class="form-control" required>
-                      <option hidden disabled selected value> -- selecciona una marca -- </option>
-                      @foreach ($auto_brands as $auto_brand)
-                          <option value="{{$auto_brand->id}}">{{$auto_brand->name}}</option> 
-                      @endforeach
-                    </select>
-                  </div>
-
-                  <div class="form-check mb-md-3">
-                    <input class="form-check-input" type="checkbox" id="checkAutoBrand" name="check_auto_brand" value="0">
-                    <label class="form-check-label" for="checkAutoBrand">
-                      La marca no se encuentra en la lista
-                    </label>
-                  </div>
-
-                  <div class="form-group d-none" id="autoBrandGroup">
-                  </div>
-                  
-                  <div class="form-group">
-                    <label for="autoModel">{{ _('Modelo del automovil') }}&nbsp;<sup class="text-danger">*</sup></label>
-                    <select id="autoModelSelect" name="auto_model_select" class="form-control" required>
-                      <option hidden disabled selected value> -- selecciona un modelo -- </option>
-                    </select>
-                  </div>
-
-                  <div class="form-check mb-md-3">
-                    <input class="form-check-input" type="checkbox" id="checkAutoModel" name="check_auto_model" value="0">
-                    <label class="form-check-label" for="checkAutoModel">
-                        El modelo no se encuentra en la lista
-                      </label>   
-                  </div>
-
-                  <div class="form-group d-none" id="autoModelGroup">
-                  </div>
-
-                  <div class="form-group">
-                    <label for="autoEnrrolment">{{ _('Matricula del auto') }}&nbsp;<sup class="text-danger">*</sup></label>
-                    <input id="autoEnrrolment" name="auto_enrrolment" type="text" class="form-control" style="text-transform:uppercase" placeholder="{{ __('Ingrese Matricula') }}" required>
-                  </div>
-
-                  <div class="form-group">
-                    <label for="autoColor">{{ _('Color del auto') }}&nbsp;<sup class="text-danger">*</sup></label>
-                    <select id="autoColor" name="auto_color" class="form-control" required>
-                      <option hidden disabled selected value> -- selecciona un color -- </option>
-                    </select>
-                  </div>
+                  @include('auto.inputs')
                 </div>
-
                 <!-- /.card-body -->
                 <div class="card-footer">
                   <button type="submit" class="btn btn-success">{{ __('Crear Registro') }}</button>

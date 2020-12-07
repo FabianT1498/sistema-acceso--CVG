@@ -4,6 +4,7 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Hash;
 use App\User;
 
 class UpdateUserRequest extends FormRequest
@@ -34,14 +35,6 @@ class UpdateUserRequest extends FormRequest
         $user_id = $this->route('usuario');
 
         $rules = [
-            'username' => [
-                'required',
-                Rule::unique('users', 'username')
-                    ->ignore($user_id)
-                    ->where(function ($query) {
-                        return $query->where('deleted_at', NULL);
-                    })
-            ],
             'role_id' => [
                 'required',
                 'exists:roles,id'
@@ -49,9 +42,25 @@ class UpdateUserRequest extends FormRequest
         ];
 
         if ($this->password && $this->password !== ''){
-            $rules['password'] = array('required', 'min:9');
+            $rules['password'] = array('required', 'min:5');
         }
 
         return $rules;
+    }
+
+    /**
+     * Prepare the data for validation.
+     *
+     * @return void
+     */
+    protected function prepareForValidation()
+    {
+        $inputs = [];
+
+        if (isset($this->password) && $this->password !== ''){
+            $inputs['password'] = Hash::make($this->password);
+        }
+
+        $this->merge($inputs);
     }
 }

@@ -32,15 +32,11 @@ class VisitorController extends WebController
     {
         $vista = $this::READ;
         $search = request('search');
-        $trashed = (int) request('trashed');
-
+   
         $auth_user_role = Auth::user()->role_id;
 
-        if($trashed === 1 && $auth_user_role <= 2){
-            $visitors = Visitor::onlyTrashed();
-        } else {
-            $visitors = Visitor::select('*');
-        }
+        $visitors = Visitor::select('*');
+        
 
         if (strlen($search) > 0){
             $search = strtolower($search);
@@ -64,7 +60,7 @@ class VisitorController extends WebController
         
         $visitors = $visitors->paginate(10); 
 
-        return view('visitor.read', compact('vista', 'trashed', 'search', 'visitors'));
+        return view('visitor.read', compact('vista', 'search', 'visitors'));
     }
 
     /**
@@ -160,9 +156,9 @@ class VisitorController extends WebController
    
         $visitor = Visitor::withTrashed()->where('id', $id)->first();
 
-        $visitor->firstname = $validated['visitor_firstname'];
+        /* $visitor->firstname = $validated['visitor_firstname'];
         $visitor->lastname = $validated['visitor_lasttname'];
-        $visitor->dni = $validated['visitor_dni'];
+        $visitor->dni = $validated['visitor_dni']; */
         $visitor->phone_number = $validated['visitor_phone_number'];
 
         // Check if a new profile image has been uploaded
@@ -173,7 +169,7 @@ class VisitorController extends WebController
             // Delete existing image
             Storage::disk('public')->delete($photo->path);
 
-            $name = Str::slug( $validated['visitor_firstname']. '_' . $validated['visitor_lastname'].'_'. time() );
+            $name = Str::slug( $visitor->firstname. '_' . $visitor->lastname.'_'. time() );
             $photo->storePhoto($validated['image'], $name);
         }
 

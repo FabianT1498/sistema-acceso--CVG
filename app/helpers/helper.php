@@ -41,25 +41,25 @@ function getSearchOptions(){
 
 	$options = null;
 
-	if ($arrName[0] === 'usuarios' || $arrName[0] === 'visitantes'){
+	if ($arrName[0] === 'usuarios'){
 		$options = array(
-			'Nombre del usuario (ej. Juan)',
-			'Nombre y apellido del usuario (ej. Juan Perez)',
+			'Nombre del usuario (ej. juan123)',
 			'Cedula del usuario (ej. v-1014823 o e-1014823)'
 		);
 	} else if ($arrName[0] === 'autos'){
 		$options = array(
-			'Nombre del dueño (ej. Juan)',
-			'Nombre y Apellido del dueño (ej. Juan Perez)',
-			'Cedula del dueño (ej. v-1014823 o e-1014823)',
-			'Número de matricula del auto (ej. #ABC1246)',
+			'Número de matricula del auto (ej. ABC1246)',
 		);
-	} else if ($arrName[0] === 'reportes'){
+	} else if ($arrName[0] === 'reportes' || $arrName[0] === 'mis-visitas'){
 		$options = array(
-			'Nombre del visitante (ej. Juan)',
 			'Nombre y apellido del visitante (ej. Juan Perez)',
 			'Cedula del visitante (ej. v-1014823 o e-1014823)',
-			'Fecha de visita (ej. 04/14/2020 | mm-dd-AAAA)',
+			'Intervalo de tiempo de visitas',
+		);
+	} else if($arrName[0] === 'visitantes'){
+		$options = array(
+			'Nombre y apellido del visitante (ej. Juan Perez)',
+			'Cedula del visitante (ej. v-1014823 o e-1014823)',
 		);
 	}
 

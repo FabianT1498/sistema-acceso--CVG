@@ -42,7 +42,13 @@ $(function () {
 
 $(document).ready(function () {
 
-    let errors = false;
+    const delay = function (fn, ms) {
+        let timer = 0
+        return function (...args) {
+            clearTimeout(timer)
+            timer = setTimeout(fn.bind(this, ...args), ms || 0)
+        }
+    }
 
     const ajaxParams = {
         url: '',
@@ -113,6 +119,7 @@ $(document).ready(function () {
     const loadAutoInputs = function () {
 
         const html = `
+            <h3 class="h3 mb-md-5 text-center title-subline">Datos del auto</h3>
             <div class="form-row mb-md-4">
                 <div class="form-group col-md-3">
                     <label for="autoEnrrolment">Matricula del auto:&nbsp;<sup class="text-danger">*</sup></label>
@@ -155,7 +162,7 @@ $(document).ready(function () {
                 <div id="autoLoader" class="col-md-1 pt-md-3">
                     <div class="mt-md-4 loading d-none"></div> 
                 </div>
-                <div id="autoResult" class="col-md-2"></div>  
+                <div id="autoResult" class="col-md-2 pt-md-3"></div>  
             </div>
                 
             <div class="form-row">
@@ -174,14 +181,6 @@ $(document).ready(function () {
         `;
 
         $('#autoData').html(html);
-    }
-
-    const delay = function (fn, ms) {
-        let timer = 0
-        return function (...args) {
-            clearTimeout(timer)
-            timer = setTimeout(fn.bind(this, ...args), ms || 0)
-        }
     }
 
     $("#visitorDNI").keyup(delay(function (e) {
@@ -266,61 +265,16 @@ $(document).ready(function () {
 
     }, 500));
 
-    $( "#autoData" ).on( "keyup", "#autoEnrrolment", delay(function (e) {
+    
 
-        if (this.value.length < 7) {
-            return;
-        }
-
-        ajaxParams.url = '/auto';
-        ajaxParams.data = { enrrolment: this.value.toUpperCase() };
-
-        const loader = $('#autoLoader > div').first();
-        const autoModel = $("#autoModel");
-        const autoColor = $("#autoColor");
-        const autoIDInput = $('#AutoID');
-        const autoModelIDInput = $('#AutoModelID');
-
-        const resultMsg = $('#autoResult');
-     
-        ajaxParams.beforeSend = function () {
-            loader.removeClass(['d-none', 'success']);
-            resultMsg.html('');
-        }
-
-        ajaxParams.success = function (data) {
-            if (data.length === 0) {
-                loader.addClass('d-none');
-                autoModel.prop('disabled', false);
-                autoColor.prop('disabled', false);
-            } else {
-                resultMsg.html(`<p class="text-uppercase mt-md-2">Auto registrado</p>`);
-                loader.addClass('success');
-                autoModel.prop('disabled', true);
-                autoColor.prop('disabled', true);
-                autoModel.val(data[0].model);
-                autoColor.val(data[0].color);
-                autoIDInput.val(data[0].auto_id)
-                autoModelIDInput.val(data[0].auto_model_id)
-            }
-        }
-
-        autoIDInput.val('-1');
-
-        // Fetch data
-        $.ajax(ajaxParams);
-    }, 500))
-
-    $( "#autoData" ).on( "focus", "#autoModel", function(e) {
-        
-        $( this ).autocomplete({
+        $( "#department" ).autocomplete({
             delay: 500,
             source: function( request, response ) {
             
-                ajaxParams.url = '/autos_modelos';
+                ajaxParams.url = '/departamentos';
                 ajaxParams.data = {
                     search: request.term.toUpperCase(),
-                    auto_brand: $('#autoBrand').val().toUpperCase()
+                    building: $('#building').val().toUpperCase()
                 };
                 ajaxParams.beforeSend = function () {return;}
                 ajaxParams.success = function(data) {
@@ -328,7 +282,7 @@ $(document).ready(function () {
                     response(data);
                 }
     
-                $('#autoModelID').val('-1');
+                $('#buildingID').val('-1');
           
                 // Fetch data
                 $.ajax(ajaxParams);
@@ -337,24 +291,22 @@ $(document).ready(function () {
             },
             select: function (event, ui) {
                 
-                $('#autoModel').val(ui.item.auto_model);
-                $('#autoModelID').val(ui.item.auto_model_id);
+                $('#building').val(ui.item.building);
+                $('#buildingID').val(ui.item.building_id);
                 
-                $('#autoBrand').val(ui.item.auto_brand);
-                $('#autoBrandID').val(ui.item.auto_brand_id);
+                $('#department').val(ui.item.department);
+                $('#departmentID').val(ui.item.department_id);
                 
                 return false;
             }
         });
-      });
+     
 
-    $( "#autoData" ).on( "focus", "#autoBrand", function(e) {
-        
-        $( this ).autocomplete({
+        $( "#building" ).autocomplete({
             delay: 500,
             source: function( request, response ) {
             
-                ajaxParams.url = '/autos_marcas';
+                ajaxParams.url = '/edificios';
                 ajaxParams.data = {search: request.term.toUpperCase()};
                 ajaxParams.beforeSend = function () {return;}
                 ajaxParams.success = function(data) {
@@ -362,7 +314,7 @@ $(document).ready(function () {
                     response(data);
                 }
     
-                $('#autoBrandID').val('-1');
+                $('#buildingID').val('-1');
           
                 // Fetch data
                 $.ajax(ajaxParams);
@@ -371,50 +323,88 @@ $(document).ready(function () {
             },
             select: function (event, ui) {
                 
-                $('#autoBrand').val(ui.item.value);
-                $('#autoBrandID').val(ui.item.id);
+                $('#building').val(ui.item.value);
+                $('#buildingID').val(ui.item.id);
             
                 return false;
             }
         });
-      });
-
+        
+    // DATE RANGE PICKER LOCALES
+    const locale = {
+        "format": "DD-MM-YYYY",
+        "separator": "-",
+        "applyLabel": "Aplicar",
+        "cancelLabel": "Cancelar",
+        "daysOfWeek": [
+            "Dom",
+            "Lu",
+            "Ma",
+            "Mi",
+            "Ju",
+            "Vi",
+            "Sa"
+        ],
+        "monthNames": [
+            "Enero",
+            "Febrero",
+            "Marzo",
+            "Abril",
+            "Mayo",
+            "Junio",
+            "Julio",
+            "Agosto",
+            "Septiembre",
+            "Octubre",
+            "Noviembre",
+            "Diciembre"
+        ],
+        "firstDay": 1
+    }
+    
     $('#attendingDate').daterangepicker({
         singleDatePicker: true,
         minYear: moment().year(),
         maxYear: parseInt(moment().format('YYYY'), 10) + 1,
         minDate: moment().format('DD-MM-YYYY'),
         drops: 'up',
-        locale: {
-            "format": "DD-MM-YYYY",
-            "separator": "-",
-            "applyLabel": "Aplicar",
-            "cancelLabel": "Cancelar",
-            "daysOfWeek": [
-                "Dom",
-                "Lu",
-                "Ma",
-                "Mi",
-                "Ju",
-                "Vi",
-                "Sa"
-            ],
-            "monthNames": [
-                "Enero",
-                "Febrero",
-                "Marzo",
-                "Abril",
-                "Mayo",
-                "Junio",
-                "Julio",
-                "Agosto",
-                "Septiembre",
-                "Octubre",
-                "Noviembre",
-                "Diciembre"
-            ],
-            "firstDay": 1
+        locale: locale
+    });
+
+    
+    $('#startDate, #finishDate').daterangepicker({
+        singleDatePicker: true,
+        drops: 'down',
+        showDropdowns: true,
+        locale: locale,
+        autoUpdateInput:false,
+        autoApply: true
+    }).on('apply.daterangepicker', function(ev, picker) {
+
+        $(this).val(picker.endDate.format('DD-MM-YYYY'));
+        const id = $(this).attr('id');
+        const selectedTime = picker.endDate.format('DD-MM-YYYY');
+
+        if (id === 'startDate') {
+            const beforeTime = moment(selectedTime, 'DD-MM-YYYY');
+            const afterTime = moment($('#finishDate').val(), 'DD-MM-YYYY');
+            if (!beforeTime.isBefore(afterTime)) {
+                $('#finishDate').val(selectedTime);
+            }
+        } else {
+            const beforeTime = moment($('#startDate').val(), 'DD-MM-YYYY');
+            const afterTime = moment(selectedTime, 'DD-MM-YYYY');
+
+            if (afterTime.isBefore(beforeTime)) {
+                $('#startDate').val(selectedTime);
+            }
         }
+    });
+  ;
+
+    $('#searchBtn').click(function(){
+
+        $('#searchForm').submit();
     });
 
     $('input.time-picker').daterangepicker({
@@ -461,8 +451,7 @@ $(document).ready(function () {
         }
     });
 
-    $(document).on('click', '#check_trashed', function () {
-        $('#check_trashed').val($('#check_trashed').val() == 1 ? 0 : 1);
+    $(document).on('change', '#statusSelect', function () {
         $('#searchForm').submit();
     });
 

@@ -33,22 +33,17 @@ class AutoController extends WebController
         $trashed = (int) request('trashed');
 
         $columns = [
-            'autos.id as auto_id',
-            'autos.user_id as auto_user_id',
-            'autos.enrrolment as auto_enrrolment',
-            'autos.created_at as auto_created_at',
-            'auto_models.name as auto_model_name',
+            'autos.*',
+            'auto_models.name as auto_model',
+            'auto_brands.name as auto_brand'
         ];
 
         $auth_user_role = Auth::user()->role_id;
 
-        if($trashed && $auth_user_role <= 2){
-            $autos = Auto::onlyTrashed()->select($columns);
-        } else {
-            $autos = Auto::select($columns);
-        }
-
-        $autos = $autos->join('auto_models', 'auto_models.id', '=', 'autos.auto_model_id');
+        $autos = Auto::select($columns);
+        
+        $autos = $autos->join('auto_models', 'auto_models.id', '=', 'autos.auto_model_id')
+            ->join('auto_brands', 'auto_brands.id', '=', 'auto_models.auto_brand_id');
         
         if (isset($search) && strlen($search) === 7){
             $search = strtoupper($search);
@@ -149,13 +144,11 @@ class AutoController extends WebController
         $trashed = request('trashed');
 
         $columns = [
-            'autos.id as auto_id',
-            'autos.enrrolment as auto_enrrolment',
-            'autos.color as auto_color',
-            'autos.auto_model_id as auto_model_id',
-            'auto_models.name as auto_model_name',
-            'auto_models.auto_brand_id as auto_brand_id',
-            'auto_brands.name as auto_brand_name'
+            'autos.*',
+            'autos.auto_model_id as model_id',
+            'auto_models.name as model',
+            'auto_models.auto_brand_id as brand_id',
+            'auto_brands.name as brand'
         ];
 
         $auto = Auto::select($columns)
@@ -185,8 +178,9 @@ class AutoController extends WebController
 
         $validated = $request->validated();
 
-        $auto->enrrolment =  $validated['auto_enrrolment'];
         $auto->color = $validated['auto_color'];
+        
+        /* $auto->enrrolment =  $validated['auto_enrrolment'];
 
         $auto_brand = AutoBrand::where('name', $validated['auto_brand'])
                 ->first();
@@ -205,7 +199,7 @@ class AutoController extends WebController
             $auto_model->name = $validated['auto_model'];
             $auto_model->auto_brand_id = $auto_brand->id;
             $auto_model->save();
-        }
+        } */
       
         if(!$auto->update())
         {
@@ -219,13 +213,13 @@ class AutoController extends WebController
 
     //
 
-    /**
+    /* *
      * Remove the specified resource from storage.
      *
      * @param  \App\User  $user
      * @return \Illuminate\Http\Response
      **/
-    /* public function destroy($id, DestroyAutoRequest $request)
+    public function destroy($id, DestroyAutoRequest $request)
     {
         
         $registros = null;
@@ -239,7 +233,7 @@ class AutoController extends WebController
         toastr()->success(__('Auto desactivado con éxito'));
 
         return redirect()->route('autos.index', compact('vista', 'search', 'trashed'));
-    } */
+    } 
     
 
     /**
@@ -248,7 +242,7 @@ class AutoController extends WebController
      * @param  \App\User  $user
      * @return \Illuminate\Http\Response
      */
-    /* public function restore($id)
+    public function restore($id)
     {
         
         $search = $request['search'];
@@ -264,7 +258,7 @@ class AutoController extends WebController
         }
 
         return redirect()->route('autos.index', compact('search', 'trashed'));
-    } */
+    } 
 
     public function getAuto(Request $request){
 
@@ -274,10 +268,18 @@ class AutoController extends WebController
 
         if (isset($enrrolment)){
             
-            $columns = ['autos.id as auto_id', 'autos.color as color', 'auto_models.name as model', 'auto_models.id as auto_model_id'];
+            $columns = [
+                'autos.id as auto_id',
+                'autos.color as color',
+                'auto_models.name as model',
+                'auto_models.id as auto_model_id',
+                'auto_brands.name as brand',
+                'auto_brands.id as auto_brand_id'
+            ];
             
             $auto = Auto::select($columns)
                 ->join('auto_models', 'auto_models.id', '=', 'autos.auto_model_id')
+                ->join('auto_brands', 'auto_brands.id', '=', 'auto_models.auto_brand_id')
                 ->where('enrrolment', $enrrolment)
                 ->first();
             
@@ -286,6 +288,8 @@ class AutoController extends WebController
                     "auto_id" => $auto->auto_id,
                     "model" => $auto->model,
                     "auto_model_id" => $auto->auto_model_id,
+                    "brand" => $auto->brand,
+                    "auto_brand_id" => $auto->auto_brand_id,
                     "color" => $auto->color
                 );
             }

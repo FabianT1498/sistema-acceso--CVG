@@ -44,7 +44,7 @@
 		}
 
 		.item {
-			margin-bottom: 1.3rem;
+			margin-bottom: 0.5rem;
 		}
 
 
@@ -60,7 +60,7 @@
 
 				<div class="right">
 					<span>Fecha de emision:</span>
-					&nbsp;{{ date('Y-m-d H:i:s') }}
+					&nbsp;{{ date('Y-m-d H:i') }}
 				</div>		
 			</div>
 
@@ -91,7 +91,40 @@
 			<div class="clearfix item">
 				<div class="left">
 					<span>Fecha de asistencia:</span>
-					&nbsp;{{$record->date_attendance}}
+					&nbsp;{{date('d-m-Y', strtotime($record->date_attendance))}}
+				</div>
+			</div>
+
+			<div class="clearfix item">
+				<div class="left">
+					<span>Hora de entrada:</span>
+					&nbsp;{{ date('H:i', strtotime($record->entry_time)) }}
+				</div>
+				<div class="right">
+					<span>Hora de salida</span>
+					&nbsp;{{ date('H:i', strtotime($record->departure_time)) }}
+				</div>
+			</div>
+
+			<div class="clearfix item">
+				<div class="left">
+					<span>Edificio</span>
+					&nbsp;{{ $record->building }}
+				</div>
+				<div class="right">
+					<span>Departamento</span>
+					&nbsp;{{ $record->department }}
+				</div>
+			</div>
+
+			<div class="clearfix item">
+				<div class="left">
+					<span>Autorizado por:</span>
+					&nbsp;{{ Auth::user()->worker->firstname . ' ' . Auth::user()->worker->lastname }}
+				</div>
+				<div class="right">
+					<span>Cedula:</span>
+					&nbsp;{{Auth::user()->worker->dni}}
 				</div>
 			</div>
 

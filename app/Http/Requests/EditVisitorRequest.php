@@ -17,16 +17,10 @@ class EditVisitorRequest extends FormRequest
     {
         $auth_user_role = $this->user()->role_id;
 
-        $auth_user_id = null;
-
-        if( $auth_user_role === 3 ){
-            $auth_user_id = $this->user()->id;
-        }
-        
         $visitor = Visitor::find($this->route('visitante'));
 
         return (($visitor && !$visitor->deleted_at) 
-            && ($auth_user_role !== 3 || ($visitor->user_id === $auth_user_id)));
+            && $auth_user_role === 4);
     }
 
     /**

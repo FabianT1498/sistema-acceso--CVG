@@ -27,28 +27,27 @@
               <div class="row">
                 <div class="col-lg-11">
                   <div class="input-group input-group-sm">
-              <input type="hidden" name="buscar" value="true">
-              <input id="search" name="search" class="form-control form-control-navbar" type="search" placeholder="{{ __('Buscar') }}" aria-label="Search" value="{{ $search }}">
-            </div>
-              <div class="w-100"></div>
-            <!-- ACOMODAR (Quisiera que estuviera debajo de esto)-->
-              <div class="form" style="padding-top: 5px">
-                <label for="start_date">{{ _('Desde:') }}&nbsp;</label>
-              <input type="date" class="form-control-medium" id="start_date" name="start_date" title="Desde" placeholder="Desde" value="{{ $start_date }}">
+                    <input type="hidden" name="buscar" value="true">
+                    <input id="search" name="search" class="form-control form-control-navbar" type="search" placeholder="{{ __('Buscar') }}" aria-label="Search" value="{{ $search }}">
+                  </div>
+                  <div class="w-100"></div>
+                  <!-- ACOMODAR (Quisiera que estuviera debajo de esto)-->
+                  <div class="form" style="padding-top: 5px">
+                    <label for="start_date">{{ _('Desde:') }}&nbsp;</label>
+                    <input type="date" class="form-control-medium" id="start_date" name="start_date" title="Desde" placeholder="Desde" value="{{ $start_date }}">
 
-                 <label for="finish_date">&nbsp;{{ _('Hasta:') }}&nbsp;</label>
-              <input type="date" class="form-control-medium" id="finish_date" name="finish_date" title="Hasta" placeholder="Hasta" value="{{ $finish_date }}">
-              </div>
-
-              <!-- FIN ACOMODAR-->
+                    <label for="finish_date">&nbsp;{{ _('Hasta:') }}&nbsp;</label>
+                    <input type="date" class="form-control-medium" id="finish_date" name="finish_date" title="Hasta" placeholder="Hasta" value="{{ $finish_date }}">
+                  </div>
+                  <!-- FIN ACOMODAR-->
                 </div>
 
                 <div class="col-1">
                   <div class="input-group-append">
-                <button class="btn btn-navbar" type="submit">
-                  <i class="fas fa-search"></i>
-                </button>
-              </div>
+                  <button class="btn btn-navbar" type="submit">
+                    <i class="fas fa-search"></i>
+                  </button>
+                </div>
               @if (Auth::user()->role->name == "ADMIN" || Auth::user()->role->name == "SUPERADMIN")
               <div class="form-check">
                 <input class="form-check-input" type="checkbox" value="{{ ($trashed) ? $trashed : 0 }}" id="check_trashed" @if($trashed) checked="true" @endif  id="check_trashed" name="trashed">

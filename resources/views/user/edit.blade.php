@@ -55,44 +55,59 @@
                 @method('PUT')
                 <div class="card-body">
 
-                	<div class="form-group">
-                    <label for="workerSearch">{{ _('Nombre del trabajador') }}</label>
-                    <p class="text-left">{{ $user->firstname . ' ' . $user->lastname }}</p>
-                    <input type="hidden" id='workerID' name="worker_id" value="{{$user->worker_id}}" readonly>
+                  <h3 class="h3 mb-md-5 text-center title-subline">Datos del usuario</h3>
+
+                  <div class="form-row border-bottom border-secondary mb-md-3">
+                    <div class="form-group col-md-4">
+                      <label for="workerSearch">{{ _('Nombre del trabajador') }}</label>
+                      <p class="text-left">{{ $user->firstname . ' ' . $user->lastname }}</p>
+                      <input type="hidden" id='workerID' name="worker_id" value="{{$user->worker_id}}" readonly>
+                    </div>
+
+                    <div class="form-group col-md-4">
+                      <label for="workerDNI">{{ _('Cédula del trabajador') }}</label>
+                      <p class="text-left">{{$user->dni}}</p>
+                    </div>
+
+                    <div class="form-group col-md-4">
+                      <label for="email">{{ _('Correo de la persona') }}&nbsp;</label>
+                      <p class="text-left">{{ $user->email }}</p>
+                    </div>
+
+                    <div class="form-group col-md-4">
+                      <label for="username">{{ _('Usuario de la persona') }}</label>
+                      <p class="text-left"> {{ $user->username }} </p>
+                    </div>
                   </div>
 
-                  <div class="form-group">
-                    <label for="workerDNI">{{ _('Cédula del trabajador') }}</label>
-                    <p class="text-left">{{$user->dni}}</p>
-                  </div>
+                  <div class="form-row">
+                    <div class="form-group col-md-3">
+                      <label for="password">{{ _('Nueva contraseña:') }}</label>
+                      <input 
+                        id="password" 
+                        name="password" 
+                        type="password" 
+                        class="form-control" 
+                        placeholder="{{ __('Ingrese Contraseña') }}" 
+                        autocomplete="new-password"
+                      >
+                    </div>
 
-                  <div class="form-group">
-                    <label for="email">{{ _('Correo de la persona') }}&nbsp;</label>
-                    <p class="text-left">{{ $user->email }}</p>
-                  </div>
+                    <div class="form-group col-md-3">
+                      <label for="role">{{ _('Rol') }}&nbsp;<sup class="text-danger">*</sup></label>
+                      <select id="role" name="role_id" class="form-control">
+                        <option hidden disabled value> -- seleccione un rol -- </option>
+                        @foreach ($roles as $role)
+                          @if ($role->id === $user->role_id)
+                            <option value="{{ $role->id }}" selected> {{ $role->name }}</option>
+                          @else
+                            <option value="{{ $role->id }}"> {{ $role->name }}</option>
+                          @endif
 
-                  <div class="form-group">
-                    <label for="username">{{ _('Usuario de la persona') }}&nbsp;<sup class="text-danger">*</sup></label>
-                    <input id="username" name="username" type="text" class="form-control" placeholder="{{ __('Ingrese Usuario') }}" value="{{ $user->username }}" required>
-                  </div>
+                        @endforeach
+                      </select>
+                    </div>
 
-                  <div class="form-group">
-                    <label for="password">{{ _('Contraseña de la persona') }}&nbsp;<sup class="text-danger">*</sup></label>
-                    <input id="password" name="password" type="password" class="form-control" placeholder="{{ __('Ingrese Contraseña') }}" >
-                  </div>
-                  <div class="form-group">
-                    <label for="role">{{ _('Rol') }}&nbsp;<sup class="text-danger">*</sup></label>
-                    <select id="role" name="role_id" class="form-control">
-                      <option hidden disabled selected value> -- seleccione un rol -- </option>
-                      @foreach ($roles as $role)
-                        @if ($role->id == $user->role_id)
-                          <option value="{{ $role->id }}" selected> {{ $role->name }}</option>
-                        @else
-                          <option value="{{ $role->id }}"> {{ $role->name }}</option>
-                        @endif
-
-                      @endforeach
-                    </select>
                   </div>
                 </div>
                 <!-- /.card-body -->

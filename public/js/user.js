@@ -5,11 +5,39 @@ $(function() {
       '1': { pattern: /[1-9]/ },
       '9': { pattern: /\d/, optional: true },
       '#': { pattern: /\d/, recursive: true },
-      C: { pattern: /[VvEe]/, fallback: 'V' },
+      C: { pattern: /[VE|ve]/, fallback: 'V' },
     },
   };
 
-  $('#dni').mask('C-19999999', options);
+  $.ajaxSetup({
+    headers: {
+        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+    },
+  });
+
+  $( '#userBtnSubmit' ).on('click', function(e){
+
+    const errors = [];
+
+    $('#errors').html('');
+    
+    if ( $('#workerID').val() === "-1" ){
+        errors.push('<li><i class="fa-li fa fa-check-square"></i>La cedula suministrada no le corresponde a ningun trabajador</li>');
+    }
+
+    if ( $('#password').val().length < 5){
+      errors.push('<li><i class="fa-li fa fa-check-square"></i>La contraseña debe tener al menos 5 caracteres</li>');
+    }
+  
+    if (errors.length > 0){
+        e.preventDefault();
+        errors.forEach(error => {$('#errors').append(error)});
+        $('#errorModal').modal("show");
+    }
+  });
+
+
+  $('#workerDNI').mask('C-19999999', options);
 });
 
 $(document).ready(function(){
@@ -20,55 +48,79 @@ $(document).ready(function(){
     dataType: 'json'
   }
 
-  const setInputsValue =  function(keyMap){
-
-      for (const key in keyMap) {
-          $(key).val(keyMap[key]);
-      } 
+  const delay = function (fn, ms) {
+    let timer = 0
+    return function (...args) {
+        clearTimeout(timer)
+        timer = setTimeout(fn.bind(this, ...args), ms || 0)
+    }
   }
 
-  $( "#workerSearch" ).autocomplete({
-      source: function( request, response ) {
+  $("#username").keyup(delay(function (e) {
 
-          const url = '/lista_trabajadores';
-          
-          ajaxParams.url = url;
-          ajaxParams.data = {search: request.term};
-          ajaxParams.success = function(data) {
-              response( data );
-          }
+    const resultMsg = $('#usernameResult');
 
-          // Set dni and id input empty during typing
-          const selector = '#worker';  
-          const keyMap = {};
-          keyMap[`${selector}ID`] = '';
-          keyMap[`${selector}DNI`] = '';
-     
-          setInputsValue(keyMap);
+    ajaxParams.url = '/username';
+    ajaxParams.data = { username: this.value };
 
-          $.ajaxSetup({
-              headers: {
-                  'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-              },
-          });
+    const loader = $('#usernameLoader > div').first();
 
-          // Fetch data
-          $.ajax(ajaxParams);
-      },
-      select: function (event, ui) {
+    ajaxParams.beforeSend = function () {
+        loader.removeClass(['d-none', 'success', 'not-found']);
+    }
 
-          const selector = '#worker';
-          
-          // Set selection
-          const keyMap = {};
-          keyMap[`${selector}Search`] = ui.item.value
-          keyMap[`${selector}ID`] = ui.item.id
-          keyMap[`${selector}DNI`] = ui.item.dni
-          setInputsValue(keyMap);
-          
-          return false;
-      }
-  });
+    ajaxParams.success = function (data) {
+        if (data.length === 0) {
+            const html = `
+                <p class="mt-md-2">Nombre de usuario disponible</p>
+            `;
+            loader.addClass('success');
+            resultMsg.html(html);
+        } else {
+            loader.addClass('not-found');
+            resultMsg.html(`<p class="text-danger mt-md-2">Nombre de usuario no disponible</p>`);
+        }
+    }
+
+    // Fetch data
+    $.ajax(ajaxParams);
+  }, 500));
+
+  $("#workerDNI").keyup(delay(function (e) {
+
+    if ((this.value.length < 7 || (e.which < 48 || e.which > 57)) && e.which !== 8) {
+        return;
+    }
+
+    ajaxParams.url = '/trabajador';
+    ajaxParams.data = { dni: this.value.toUpperCase() };
+
+    const loader = $('#workerLoader > div').first();
+    const resultMsg = $('#workerResult');
+
+    ajaxParams.beforeSend = function () {
+        loader.removeClass(['d-none', 'success', 'not-found']);
+    }
+
+    ajaxParams.success = function (data) {
+        if (data.length === 0) {
+            const html = `
+                <p class="text-danger mt-md-2">Este trabajador no existe</p>
+            `;
+            loader.addClass('not-found');
+            resultMsg.html(html);
+        } else {
+            loader.addClass('success');
+            $('#workerID').val(data[0].id);
+            resultMsg.html(`<p class="text-uppercase mt-md-2">${data[0].value}</p>`);
+        }
+    }
+
+    $('#workerID').val('-1');
+  
+    // Fetch data
+    $.ajax(ajaxParams);
+  }, 500));
 })
 
 $(document).on('click', '#check_trashed', function() {

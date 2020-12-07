@@ -59,80 +59,46 @@
             @endif
             <div class="card card-primary">
               <!-- form start -->
-              <form method='POST' action="{{ route('autos.update', $auto->auto_id) }}"  role="form"  enctype="multipart/form-data">
+              <form method='POST' action="{{ route('autos.update', $auto->id) }}"  role="form"  enctype="multipart/form-data">
                 @csrf
                 @method('PUT')
                 <div class="card-body">
 
-                  <div class="form-group">
-                    <label for="visitorSearch">{{ _('Nombre del visitante') }}&nbsp;<sup class="text-danger">*</sup></label>
-                    <input id="visitorSearch" name="visitor_name" type="text" class="form-control" placeholder="{{ __('Ingrese Nombre') }}" value="{{$auto->visitor_firstname.' '.$auto->visitor_lastname }}" required>
-                    <input type="hidden" id='visitorID' name="visitor_id" value="{{$auto->visitor_id}}" readonly>
+                  <h3 class="h3 mb-md-5 text-center title-subline">Datos del auto</h3>
+                  <div class="form-row mb-md-4">
+                      <div class="form-group col-md-3">
+                          <label for="autoEnrrolment">Matricula del auto:&nbsp;</label>
+                          <p>{{$auto->enrrolment}}</p>                 
+                          <input 
+                              type="hidden" 
+                              id="autoID" 
+                              name="auto_id" 
+                              value="{{$auto->id}}"
+                              readonly
+                          >
+                      </div>
+                      <div class="form-group col-md-3">
+                          <label for="autoBrand">Marca del auto:</label>
+                          <p>{{$auto->brand}}</p>           
+                      </div>
+                      <div class="form-group col-md-3">
+                          <label for="autoModel">Modelo del auto:</label>
+                          <p>{{$auto->model}}</p>               
+                      </div>
                   </div>
-                  
-                  <div class="form-group">
-                    <label for="visitorDNI">{{ _('Cédula del visitante') }}&nbsp;<sup class="text-danger">*</sup></label>
-                    <input id="visitorDNI" name="visitor_dni" type="text" class="form-control" style="text-transform:uppercase" placeholder="{{ __('Ingrese Cedula') }}" value="{{$auto->visitor_dni}}" readonly required>
-                  </div>
-
-                  <div class="form-group">
-                    <label for="autoBrand">{{ _('Marca del automovil') }}&nbsp;<sup class="text-danger">*</sup></label>
-                    <select id="autoBrandSelect" name="auto_brand_select" class="form-control" required>
-                      <option hidden disabled value> -- selecciona una marca -- </option>
-                      @foreach ($auto_brands as $auto_brand)
-					  		@if ($auto_brand->id === $auto->auto_brand_id)
-							  <option selected value="{{$auto_brand->id}}">{{$auto_brand->name}}</option>
-							@else
-								<option value="{{$auto_brand->id}}">{{$auto_brand->name}}</option> 
-							@endif
-                      @endforeach
-                    </select>
-                  </div>
-
-                  <div class="form-check mb-md-3">
-                    <input class="form-check-input" type="checkbox" id="checkAutoBrand" name="check_auto_brand" value="0">
-                    <label class="form-check-label" for="checkAutoBrand">
-                      La marca no se encuentra en la lista
-                    </label>
-                  </div>
-
-                  <div class="form-group d-none" id="autoBrandGroup">
-                  </div>
-                  
-                  <div class="form-group">
-                    <label for="autoModel">{{ _('Modelo del automovil') }}&nbsp;<sup class="text-danger">*</sup></label>
-                    <select id="autoModelSelect" name="auto_model_select" class="form-control" required>
-                      	<option hidden disabled value> -- selecciona un modelo -- </option>
-						@foreach ($auto_models as $auto_model)
-							@if ($auto_model->id === $auto->auto_mdoel_id)
-								<option selected value="{{$auto_model->id}}">{{$auto_model->name}}</option>
-							@else
-								<option value="{{$auto_model->id}}">{{$auto_model->name}}</option> 
-							@endif
-						@endforeach
-                    </select>
-                  </div>
-
-                  <div class="form-check mb-md-3">
-                    <input class="form-check-input" type="checkbox" id="checkAutoModel" name="check_auto_model" value="0">
-                    <label class="form-check-label" for="checkAutoModel">
-                        El modelo no se encuentra en la lista
-                      </label>   
-                  </div>
-
-                  <div class="form-group d-none" id="autoModelGroup">
-                  </div>
-
-                  <div class="form-group">
-                    <label for="autoEnrrolment">{{ _('Matricula del auto') }}&nbsp;<sup class="text-danger">*</sup></label>
-                    <input id="autoEnrrolment" name="auto_enrrolment" type="text" class="form-control" style="text-transform:uppercase" placeholder="{{ __('Ingrese Matricula') }}" value="{{$auto->auto_enrrolment}}" required>
-                  </div>
-
-                  <div class="form-group">
-                    <label for="autoColor">{{ _('Color del auto') }}&nbsp;<sup class="text-danger">*</sup></label>
-                    <select id="autoColor" name="auto_color" class="form-control" value="{{$auto->auto_color}}" required>
-                      <option hidden disabled value> -- selecciona un color -- </option>
-                    </select>
+                      
+                  <div class="form-row">
+                      <div class="form-group col-md-3">
+                          <label for="autoColor">Color:</label>
+                          <input 
+                              type="text" 
+                              class="form-control" 
+                              id="autoColor" 
+                              name="auto_color" 
+                              value="{{$auto->color}}"
+                              placeholder="COLOR DEL AUTO"
+                          >                   
+                      </div> 
                   </div>
                 </div>
 

@@ -15,11 +15,8 @@ class StoreReportRequest extends FormRequest
     public function authorize()
     {
         $auth_user_role = $this->user()->role_id;
-
-        $worker_id = (int) $this->worker_id;
-     
-        return ($auth_user_role !== 3 
-            || (isset($worker_id) && $worker_id === $this->user()->worker_id));
+   
+        return ($auth_user_role === 4);
     }
 
     /**
@@ -53,6 +50,12 @@ class StoreReportRequest extends FormRequest
                 'required',
                 'date_format:H:i',
                 'after:entry_time'
+            ],
+            'building' => [
+                'required'
+            ],
+            'department' => [
+                'required'
             ]
         ];
 
@@ -137,7 +140,9 @@ class StoreReportRequest extends FormRequest
             'worker_dni.exists' => 'El trabajador ingresado no existe',
             'worker_dni.max' => 'La cedula del trabajador debe tener como maximo 10 caracteres',
             'visitor_dni.max' => 'La cedula del visitante debe tener como maximo 10 caracteres',
-            'departure_time.after' => 'La hora de salida debe ser posterior a la hora de entrada'
+            'departure_time.after' => 'La hora de salida debe ser posterior a la hora de entrada',
+            'building.required' => 'Debe indicar el edificio donde se realizara la visita',
+            'department.required' => 'Debe indicar el departamento donde se realizara la visita',
         ];
 
         if ($visitor_id === -1){
@@ -177,6 +182,8 @@ class StoreReportRequest extends FormRequest
             'attending_date' => date('Y-m-d', strtotime($this->attending_date)),
             'entry_time' => date('H:i', strtotime($this->entry_time)),
             'departure_time' => date('H:i', strtotime($this->departure_time)),
+            'building' => strtoupper($this->building),
+            'department' => strtoupper($this->department),
         ];
 
         if ($auto_option){

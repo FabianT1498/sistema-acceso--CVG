@@ -15,18 +15,11 @@ class UpdateVisitorRequest extends FormRequest
      */
     public function authorize()
     {
-        $auth_user_role = $this->user()->role_id;
-
-        $auth_user_id = null;
-
-        if( $auth_user_role === 3 ){
-            $auth_user_id = $this->user()->id;
-        }
-        
+        $auth_user_role = $this->user()->role_id;     
         $visitor = Visitor::find($this->route('visitante'));
 
         return (($visitor && !$visitor->deleted_at) 
-            && ($auth_user_role !== 3 || ($visitor->user_id === $auth_user_id)));
+            && ($auth_user_role === 4));
     }
 
     /**
@@ -39,21 +32,6 @@ class UpdateVisitorRequest extends FormRequest
         $visitor_id = $this->route('visitante');
 
         return [
-            'visitor_firstname' => [
-                'bail',
-                'required',
-                'max:50',
-            ],    
-            'visitor_lastname' => [
-                'required',
-                'max:50', 
-            ],
-            'visitor_dni' => [                
-                'required',
-                Rule::unique('visitors', 'dni')
-                    ->ignore($visitor_id),
-                'max:10'
-            ],
             'visitor_phone_number' => [
                 'required',
                 Rule::unique('visitors', 'phone_number')
@@ -79,6 +57,7 @@ class UpdateVisitorRequest extends FormRequest
         $messages = [
             'visitor_dni.unique' => 'La cedula del visitante ya fue registrada',
             'visitor_phone_number.unique' => 'El telefono del visitante ya fue registrado',
+            'visitor_phone_number.required' => 'Debe especificar el numero de telefono del visitante',
             'image.required' => 'Es necesario que suba la imagen del visitante',
             'image.max' =>'El peso maximo de la imagen es de 512 KB'
         ];
@@ -86,11 +65,11 @@ class UpdateVisitorRequest extends FormRequest
         return $messages;
     }
 
-    /**
+    /*
      * Prepare the data for validation.
      *
      * @return void
-     */
+     *
     protected function prepareForValidation()
     {
         
@@ -100,5 +79,6 @@ class UpdateVisitorRequest extends FormRequest
 
         $this->merge($inputs);
     }
+    */
 }
 

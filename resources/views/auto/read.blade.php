@@ -49,54 +49,34 @@
               <table id="tbl_read" class="table table-bordered table-hover">
                 <thead>
                   <tr>
+                    <th>{{ __('Marca') }}</th>
                     <th>{{ __('Modelo') }}</th>
                     <th>{{ __('Matricula') }}</th>
-                    <th>{{ __('Visitante') }}</th>
+                    <th>{{ __('Color') }}</th>
                     <th>{{ __('Fecha de registro') }}</th>
-                    <th>{{ __('Opciones') }}</th>
                   </tr>
                 </thead>
                 <tbody>
                   @foreach ($autos as $auto)
                     <tr id="tr_{{$auto->auto_id}}">
-                      <td>
-                        @if ($trashed == 0 && (Auth::user()->role_id !== 3 || $auto->auto_user_id === Auth::user()->id))
-                          <a href="{{ route('autos.edit', $auto->auto_id) }}"
-                            onclick="event.preventDefault();
-                            document.getElementById('frm_report_{{ $auto->auto_id }}').submit();">
-                                {{ $auto->auto_model_name }}
-                          </a>
-                          <form id="frm_report_{{ $auto->auto_id }}" action="{{ route('autos.edit', $auto->auto_id) }}" class="d-none">
-                              @method('PUT')
-                              @csrf
-                          </form>
-                        @else
-							{{ $auto->auto_model_name }}
-                        @endif
+                      <td>          
+                          @if (Auth::user()->role_id === 4)
+                            <a href="{{ route('autos.edit', $auto->id) }}"
+                              onclick="document.getElementById('frm_auto_{{ $auto->id }}').submit();">
+                              {{ $auto->auto_brand }}
+                            </a>
+                            <form id="frm_auto_{{ $auto->auto_id }}" action="{{ route('autos.edit', $auto->id) }}" class="d-none">
+                                @method('PUT')
+                                @csrf
+                            </form>
+                          @else
+                            {{ $auto->auto_brand }}
+                          @endif
                       </td>
-                      <td>{{ $auto->auto_enrrolment }}</td>   
-                      <td>{{ $auto->visitor_firstname. ' ' .$auto->visitor_lastname }}</td> 
-                      <td>{{ $auto->auto_created_at }}</td>               
-                      <td>
-                        @if ($trashed == 0 && (Auth::user()->role->name == "ADMIN" || Auth::user()->role->name == "SUPERADMIN"))
-                          <a title="{{ __('Eliminar') }}" href="#" onclick="
-                            event.preventDefault();
-                            confirm('{{ __("Esta acción no se puede deshacer. ¿Desea continuar?") }}') ?
-                              document.getElementById('frm_eliminar_{{ $auto->auto_id }}').submit() : false;"
-                          >
-                            <small>
-                              <small class="text-danger"><i class="fa fa-trash fa-2x"></i></small>
-                            </small>
-                          </a>
-                          <form method="POST" id="frm_eliminar_{{ $auto->auto_id }}"action="{{ route('autos-destroy', $auto->auto_id) }}" class="d-none">
-                              @method('DELETE')
-                              @csrf
-                              <input type="hidden" name="search" value="{{ $search }}">
-                          </form>
-
-                            
-                        @endif
-                      </td>
+                      <td>{{ $auto->auto_model }}</td>             
+                      <td>{{ $auto->enrrolment }}</td>   
+                      <td>{{ $auto->color }}</td> 
+                      <td>{{ date('d-m-Y', strtotime($auto->created_at)) }}</td>               
                     </tr>
                   @endforeach
                 </tbody>

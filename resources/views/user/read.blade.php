@@ -81,18 +81,33 @@
                       <td>{{ $user->email }}</td>
                       <td>{{ $user->role_name }}</td>
                       <td>
-                        @if ($trashed == 0)
-                          <a title="{{ __('Eliminar') }}" href="#" onclick="
+                        @if ($trashed == 0 && !$user->deleted_at)
+                          <a title="{{ __('Dar de baja') }}" href="#" onclick="
                               event.preventDefault();
-                              confirm('{{ __("Esta acción no se puede deshacer. ¿Desea continuar?") }}') ?
-                                document.getElementById('frm_eliminar_{{ $user->user_id }}').submit() : false;"
+                              confirm('{{ __("Usted va a dar de baja a este usuario, esta acción es reversible. ¿Desea continuar?") }}') ?
+                                document.getElementById('frm_desactivar_{{ $user->user_id }}').submit() : false;"
                           >
                             <small>
-                              <small class="text-danger"><i class="fa fa-trash fa-2x"></i></small>
+                              <small class="text-danger"><i class="fa fa-arrow-circle-down fa-2x" aria-hidden="true"></i></small>
                             </small>
                           </a>
-                          <form method="POST" id="frm_eliminar_{{ $user->user_id }}"action="{{ route('usuarios-destroy', $user->user_id) }}" class="d-none">
+                          <form method="POST" id="frm_desactivar_{{ $user->user_id }}"action="{{ route('usuarios-destroy', $user->user_id) }}" class="d-none">
                               @method('DELETE')
+                              @csrf
+                              <input type="hidden" name="search" value="{{ $search }}">
+                          </form>
+                        @else
+                          <a title="{{ __('Dar de alta') }}" href="#" onclick="
+                                event.preventDefault();
+                                confirm('{{ __("Usted va a dar de alta a este usuario, esta acción es reversible. ¿Desea continuar?") }}') ?
+                                  document.getElementById('frm_restaurar_{{ $user->user_id }}').submit() : false;"
+                            >
+                              <small>
+                                <small class="text-info"><i class="fa fa-arrow-circle-up fa-2x"></i></small>
+                              </small>
+                          </a>
+                          <form method="POST" id="frm_restaurar_{{ $user->user_id }}"action="{{ route('usuarios-restore', $user->user_id) }}" class="d-none">
+                              @method('PUT')
                               @csrf
                               <input type="hidden" name="search" value="{{ $search }}">
                           </form>

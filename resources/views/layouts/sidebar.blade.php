@@ -31,37 +31,46 @@
   <!-- Sidebar Menu -->
   <nav class="mt-2">
     <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
+    
+      <li class="nav-item {{ setActive('mis-visitas') }}">
+          <a href="{{ route('reportes.myVisits') }}" class="nav-link {{ setActive('mis-visitas') }}">
+            <i class="nav-icon icon fa fa-file"></i>
+            <p>{{ __('MIS VISITAS') }}</p>
+          </a>
+      </li>
+
+      @if (Auth::user()->role_id !== 3)
+        <li class="nav-item {{ setActive('visitantes') }}">
+          <a href="{{ route('visitantes.index') }}" class="nav-link {{ setActive('visitantes') }}">
+            <i class="nav-icon icon fa fa-address-book"></i>
+            <p>{{ __('VISITANTES') }}</p>
+          </a>
+        </li>
       
-		<li class="nav-item {{ setActive('visitantes') }}">
-			<a href="{{ route('visitantes.index') }}" class="nav-link {{ setActive('visitantes') }}">
-				<i class="nav-icon icon fa fa-address-book"></i>
-				<p>{{ __('VISITANTES') }}</p>
-			</a>
-		</li>
+        <li class="nav-item {{ setActive('reportes') }}">
+          <a href="{{ route('reportes.index') }}" class="nav-link {{ setActive('reportes') }}">
+            <i class="nav-icon icon fa fa-file"></i>
+            <p>{{ __('VISITAS') }}</p>
+          </a>
+        </li>
 
-		<li class="nav-item {{ setActive('reportes') }}">
-			<a href="{{ route('reportes.index') }}" class="nav-link {{ setActive('reportes') }}">
-				<i class="nav-icon icon fa fa-file"></i>
-				<p>{{ __('VISITAS') }}</p>
-			</a>
-		</li>
-
-		<li class="nav-item {{ setActive('autos') }}">
-			<a href="{{ route('autos.index') }}" class="nav-link {{ setActive('autos') }}">
-				<i class="nav-icon icon fa fa-car"></i>
-				<p>{{ __('AUTOS') }}</p>
-			</a>
-		</li>
-          
-		@if (Auth::user()->role->name == "ADMIN" || Auth::user()->role->name == "SUPERADMIN")
-		
-			<li class="nav-item {{ setActive('usuarios') }}">
-				<a href="{{ route('usuarios.index') }}" class="nav-link {{ setActive('usuarios') }}">
-					<i class="nav-icon icon fa fa-user"></i>
-					<p>{{ __('USUARIOS') }}</p>
-				</a>
-			</li>
-		@endif
+        <li class="nav-item {{ setActive('autos') }}">
+          <a href="{{ route('autos.index') }}" class="nav-link {{ setActive('autos') }}">
+            <i class="nav-icon icon fa fa-car"></i>
+            <p>{{ __('AUTOS') }}</p>
+          </a>
+        </li>
+      @endif
+      
+      @if (Auth::user()->role->name == "ADMIN" || Auth::user()->role->name == "SUPERADMIN")
+      
+        <li class="nav-item {{ setActive('usuarios') }}">
+          <a href="{{ route('usuarios.index') }}" class="nav-link {{ setActive('usuarios') }}">
+            <i class="nav-icon icon fa fa-user"></i>
+            <p>{{ __('USUARIOS') }}</p>
+          </a>
+        </li>
+      @endif
     </ul>
   </nav>
   <!-- /.sidebar-menu -->

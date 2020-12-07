@@ -17,6 +17,7 @@ use DB;
 use App\Http\Requests\StoreUserRequest;
 use App\Http\Requests\UpdateUserRequest;
 use App\Http\Requests\DestroyUserRequest;
+use App\Http\Requests\RestoreUserRequest;
 
 class UserController extends WebController
 {
@@ -31,6 +32,7 @@ class UserController extends WebController
         $vista = $this::READ;
         $search = request('search');
         $trashed = (int) request('trashed');
+        $isDNI = null;
 
         $user_id = Auth::id();
         $user_role = Auth::user()->role_id;
@@ -44,6 +46,7 @@ class UserController extends WebController
             'workers.email as email',
             'users.id as user_id',
             'users.username as username',
+            'users.deleted_at as deleted_at',
             'roles.name as role_name' 
         ];
 
@@ -53,8 +56,19 @@ class UserController extends WebController
             $users = User::select($columns);
         }
 
+        if (strlen($search) > 0){
+            $search = strtolower($search);
+            $isDNI =  (strpos($search, 'v-') !== false || strpos($search, 'e-') !== false) ? true : false;
+        }
+
         $users = $users
-            ->join('workers', 'workers.id', '=', 'users.worker_id')
+            ->join('workers', function($query) use ($search, $isDNI){
+                $query->on('workers.id', '=', 'users.worker_id');
+
+                if (isset($isDNI) && $isDNI){
+                    $query->where(DB::raw('lower("dni")'), $search);
+                }
+            })
             ->join('roles', 'roles.id', '=', 'users.role_id');
 
         if ($user_role === 1){
@@ -63,20 +77,10 @@ class UserController extends WebController
             $users = $users->where('users.role_id', '>', 2);
         }
 
-        if (strlen($search) > 0){
-            
-            $splitName = explode(' ', $search, 2);
-            $first_name = $splitName[0];
-            $last_name = !empty($splitName[1]) ? $splitName[1] : '';
-
-            $users = $users->where(DB::raw('lower("firstname")'), "LIKE", "%".strtolower($first_name)."%")
-                ->orWhere(DB::raw('lower("dni")'), "LIKE", "%".strtolower($search)."%");
-
-            if ($last_name !== ''){
-               $users = $users->where(DB::raw('lower("lastname")'), "LIKE", "%".strtolower($last_name)."%");
-            }
+        if (isset($isDNI) && !$isDNI){
+            $users->where(DB::raw('lower("username")'), $search);
         }
-
+        
         $users = $users->where('users.id', '!=', $user_id);
         
         $users = $users->paginate(10); 
@@ -186,14 +190,16 @@ class UserController extends WebController
      */
     public function update(UpdateUserRequest $request, $id)
     {
-      
+  
         $vista = $this::READ;
         $search = request('search');
         $trashed = request('trashed');
+
+        $validated = $request->validated();
         
-        $user = User::withTrashed()->where('id', '=', $id)->first();
+        $user = User::where('id', $id)->first();
    
-        if(!$user->update($request->validated()))
+        if(!$user->update($validated))
         {
             toastr()->error(__('Error al actualizar el registro'));
         } else {
@@ -217,7 +223,48 @@ class UserController extends WebController
         $vista = $this::READ;
         $search = request('search');
         $trashed = request('trashed');
-        toastr()->success(__('Registro eliminado con éxito'));
+        toastr()->success(__('Usuario desactivado con éxito'));
         return redirect()->route('usuarios.index', compact('vista', 'trashed', 'search'));
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     *
+     * @param  \App\User  $user
+     * @return \Illuminate\Http\Response
+     */
+    public function restore($id, RestoreUserRequest $request)
+    {
+        $user = User::onlyTrashed()->where('id', $id)->first();
+        $user->restore();
+
+        $vista = $this::READ;
+        $search = request('search');
+        $trashed = request('trashed');
+        toastr()->success(__('Usuario restaurado con éxito'));
+        return redirect()->route('usuarios.index', compact('vista', 'trashed', 'search'));
+    }
+
+    public function getUsername(Request $request){
+
+        $username = $request->get('username');
+
+        $response = array();
+
+        if (isset($username)){
+       
+            $columns = ['username'];
+            
+            $user = User::select($columns)
+                ->where('username', $username)
+                ->first();
+            
+            if ($user){
+                $response[] = array("username" => $user->username);
+            }
+            
+        }
+
+        return response()->json($response);
     }
 }

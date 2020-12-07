@@ -18,7 +18,7 @@ class StoreAutoRequest extends FormRequest
     {
         $auth_user_role = $this->user()->role_id;
      
-        return (($visitor && !$visitor->deleted_at) && $auth_user_role !== 3);
+        return ($auth_user_role === 4);
     }
 
     /**

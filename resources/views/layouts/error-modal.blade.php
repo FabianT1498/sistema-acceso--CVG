@@ -11,7 +11,7 @@
             </button>
         </div>
         <div class="modal-body">
-            <p class="text-justify">Corrige los siguientes errores porfavor</p>
+            <p class="text-justify">Corrige los siguientes errores por favor</p>
             <ul id="errors" class="fa-ul">   
             </ul>
         </div>

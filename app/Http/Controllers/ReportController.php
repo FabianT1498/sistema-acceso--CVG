@@ -10,7 +10,8 @@ use App\Auto;
 use App\AutoBrand;
 use App\AutoModel;
 use App\Photo;
-
+use App\Building;
+use App\Department;
 
 use Illuminate\Validation\Rule;
 use App\Http\Controllers\WebController;
@@ -26,7 +27,9 @@ use App\Http\Requests\StoreReportRequest;
 use App\Http\Requests\UpdateReportRequest;
 use App\Http\Requests\DestroyReportRequest;
 use App\Http\Requests\EditReportRequest;
+use App\Http\Requests\ShowReportRequest;
 use App\Http\Requests\GeneratePDFRequest;
+use App\Http\Requests\ChangeReportStatusRequest;
 
 use PDF;
 
@@ -43,7 +46,80 @@ class ReportController extends WebController
     {
         $vista = $this::READ;
         $search = request('search');
-        $trashed = (int) request('trashed');
+        $status_select = request('status_select') ? request('status_select') : 'TODAS' ;
+        $start_date = request('start_date') ? request('start_date') : '';
+        $finish_date = request('finish_date') ? request('finish_date') : '';
+
+        $columns = [
+            'reports.*',
+            'visitors.firstname as visitor_firstname',
+            'visitors.lastname as visitor_lastname',
+            'visitors.dni as visitor_dni',
+            'users.username as user_username',
+            'workers.firstname as worker_firstname',
+            'workers.lastname as worker_lastname',
+            'workers.dni as worker_dni'
+        ];
+
+        $reports = Report::select($columns);
+    
+        $reports = $reports->join('visitors',
+                function($query) use ($search){
+                    $query->on('visitors.id', '=', 'reports.visitor_id');
+                    
+                    if (strlen($search) > 0){
+                        $search = strtolower($search);
+            
+                        $isDNI =  (strpos($search, 'v-') !== false || strpos($search, 'e-') !== false) ? true : false;
+            
+                        if ($isDNI){
+                            $query->where(DB::raw('lower("dni")'), $search);
+                        } else {
+                            $splitName = explode(' ', $search, 2);
+                            $first_name = $splitName[0];
+                            $last_name = !empty($splitName[1]) ? $splitName[1] : '';
+            
+                            $query->where(DB::raw('lower("firstname")'), "LIKE", "%".$first_name."%");
+            
+                            if ($last_name !== ''){
+                               $query->where(DB::raw('lower("lastname")'), "LIKE", "%".strtolower($last_name)."%");
+                            }
+                        }   
+                    }
+                }
+            )
+            ->join('workers', 'workers.id', '=', 'reports.worker_id')
+            ->join('users', 'users.id', '=', 'reports.user_id');
+        
+        if ($status_select !== "TODAS"){
+            $reports = $reports->where('reports.status', $status_select);
+        }
+
+        if ($start_date !== '' && $finish_date !== ''){
+            $new_start_date = date('Y-m-d', strtotime($start_date));
+            $new_finish_date = date('Y-m-d', strtotime($finish_date));
+
+            $reports = $reports->whereBetween('reports.date_attendance', [$new_start_date, $new_finish_date]);
+        }
+
+        $reports = $reports->paginate(10); 
+
+        return view('report.read', compact('vista', 'status_select', 'search', 'reports', 'start_date', 'finish_date'));
+    }
+
+    //
+     /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function myVisits()
+    {
+        $vista = $this::READ;
+        $search = request('search');
+        $start_date = request('start_date') ? request('start_date') : '';
+        $finish_date = request('finish_date') ? request('finish_date') : '';
+        $status_select = request('status_select') ? request('status_select') : 'TODAS' ;
 
         $columns = [
             'reports.*',
@@ -53,42 +129,51 @@ class ReportController extends WebController
             'users.username as user_username'
         ];
 
-        if ($auth_user_role !== 3){ 
-            $columns[] = 'workers.firstname as worker_firstname';
-            $columns[] = 'workers.lastname as worker_lastname';
-            $columns[] = 'workers.dni as worker_dni';
-        }
-
-        $auth_user_role = Auth::user()->role_id;
-
         $reports = Report::select($columns);
     
         $reports = $reports->join('visitors',
                 function($query) use ($search){
                     $query->on('visitors.id', '=', 'reports.visitor_id');
                     
-                    if (isset($search) && strlen($search) > 2){
-                        $search = strtoupper($search);
-                        $query->where("visitors.dni", $search);
+                    if (strlen($search) > 0){
+                        $search = strtolower($search);
+            
+                        $isDNI =  (strpos($search, 'v-') !== false || strpos($search, 'e-') !== false) ? true : false;
+            
+                        if ($isDNI){
+                            $query->where(DB::raw('lower("dni")'), $search);
+                        } else {
+                            $splitName = explode(' ', $search, 2);
+                            $first_name = $splitName[0];
+                            $last_name = !empty($splitName[1]) ? $splitName[1] : '';
+            
+                            $query->where(DB::raw('lower("firstname")'), "LIKE", "%".$first_name."%");
+            
+                            if ($last_name !== ''){
+                               $query->where(DB::raw('lower("lastname")'), "LIKE", "%".strtolower($last_name)."%");
+                            }
+                        }   
                     }
                 }
             )
             ->join('workers', 'workers.id', '=', 'reports.worker_id')
             ->join('users', 'users.id', '=', 'reports.user_id');
         
-        $status = request('status');
-
-        if (isset($status) && $status !== "TODOS"){
-            $reports = $reports->where('reports.status', $status);
+        if ($status_select !== "TODAS"){
+            $reports = $reports->where('reports.status', $status_select);
         }
 
-        if ($auth_user_role === 3){ // TRABAJADOR
-            $reports = $reports->where('reports.worker_id', Auth::user()->worker_id);
+        if ($start_date !== '' && $finish_date !== ''){
+            $new_start_date = date('Y-m-d', strtotime($start_date));
+            $new_finish_date = date('Y-m-d', strtotime($finish_date));
+
+            $reports = $reports->whereBetween('reports.date_attendance', [$new_start_date, $new_finish_date]);
         }
-        
+
+        $reports = $reports->where('reports.worker_id', Auth::user()->worker_id);
         $reports = $reports->paginate(10); 
 
-        return view('report.read', compact('vista', 'trashed', 'search', 'reports'));
+        return view('report.auth-user-visits', compact('vista', 'status_select', 'search', 'reports', 'start_date', 'finish_date'));
     }
 
     /**
@@ -101,8 +186,11 @@ class ReportController extends WebController
         
         $vista = $this::CREATE;
         $search = request('search');
-        $trashed = request('trashed');
-        return view('report.create', compact('trashed', 'vista', 'search'));
+        $status_select = request('status_select') ? request('status_select') : 'TODAS';
+        $start_date = request('start_date') ? request('start_date') : '';
+        $finish_date = request('finish_date') ? request('finish_date') : '';
+
+        return view('report.create', compact('status_select', 'vista', 'search', 'start_date', 'finish_date'));
     }
 
     /**
@@ -130,8 +218,30 @@ class ReportController extends WebController
         $report->date_attendance =  $validated['attending_date'];
         $report->entry_time =  $validated['entry_time'];
         $report->departure_time =  $validated['departure_time'];
+        $report->status =  "POR CONFIRMAR";
         $report->user_id = Auth::id();
 
+        $building = Building::where('name', $validated['building'])
+                ->first();
+                
+        $department = Department::where('name', $validated['department'])
+            ->first();
+     
+        if (!$department){
+            if (!$building){
+                $building = new Building();
+                $building->name = $validated['building'];
+                $building->save();
+            }
+
+            $department = new Department();
+            $department->name = $validated['department'];
+            $department->building_id = $building->id;
+            $department->save();
+        }
+
+        $report->department_id =  $department->id;
+    
         if ($visitor_id === -1){
 
             $visitor = new Visitor($validated);
@@ -202,9 +312,47 @@ class ReportController extends WebController
      * @param  \App\User  $user
      * @return \Illuminate\Http\Response
      */
-    public function show(User $user)
+    public function show($id, ShowReportRequest $request)
     {
+        $start_date = request('start_date') ? request('start_date') : '';
+        $finish_date = request('finish_date') ? request('finish_date') : '';
+
         //
+        $status_select = request('status_select') ? request('status_select') : 'TODAS' ;
+
+        $columns = [
+            'reports.*',
+            'departments.name as department_name',
+            'buildings.name as building_name',
+            'visitors.id as visitor_id',
+            'visitors.firstname as visitor_firstname',
+            'visitors.lastname as visitor_lastname',
+            'visitors.dni as visitor_dni',
+            'workers.firstname as worker_firstname',
+            'workers.lastname as worker_lastname',
+            'workers.dni as worker_dni',
+            'autos.id as auto_id',
+            'autos.enrrolment as auto_enrrolment',
+            'autos.color as auto_color',
+            'auto_models.name as auto_model',
+            'auto_brands.name as auto_brand'
+        ];
+
+        $report = Report::select($columns)
+            ->join('visitors', 'visitors.id', '=', 'reports.visitor_id')
+            ->join('workers', 'workers.id', '=', 'reports.worker_id')
+            ->join('departments', 'departments.id', '=', 'reports.department_id')
+            ->join('buildings', 'buildings.id', '=', 'departments.building_id')
+            ->leftJoin('autos', 'autos.id', '=', 'reports.auto_id')
+            ->leftJoin('auto_models', 'autos.auto_model_id', '=', 'auto_models.id')
+            ->leftJoin('auto_brands', 'auto_models.auto_brand_id', '=', 'auto_brands.id')
+            ->where("reports.id", "=", $id)
+            ->first();
+        
+            $vista = $this::EDIT;
+            $search = request('search');
+            
+            return view('report.show', compact('vista', 'search', 'status_select', 'report', 'start_date', 'finish_date'));
     }
 
     /**
@@ -217,8 +365,7 @@ class ReportController extends WebController
     {
         
         $columns = [
-            'reports.id as report_id',
-            'reports.date_attendance as date_attendance',
+            'reports.*',
             'visitors.id as visitor_id',
             'visitors.firstname as visitor_firstname',
             'visitors.lastname as visitor_lastname',
@@ -229,7 +376,9 @@ class ReportController extends WebController
             'workers.dni as worker_dni',
             'autos.id as auto_id',
             'autos.enrrolment as auto_enrrolment',
-            'auto_models.name as auto_model_name'
+            'autos.color as auto_color',
+            'auto_models.name as auto_model_name',
+            'auto_brands.name as auto_model_name'
         ];
        
         $report = Report::select($columns)
@@ -314,6 +463,33 @@ class ReportController extends WebController
         return redirect()->route('reportes.index', compact('vista', 'search', 'trashed'));
     }
 
+    
+    public function denyVisit($id, ChangeReportStatusRequest $request){
+        $report = Report::where('id', $id);
+        
+
+        if (!$report->update(['status' => "CANCELADA"])){
+            toastr()->error(__('Error al actualizar el registro'));
+        } else {
+            toastr()->success(__('Cita cancelada con exito'));
+        }
+
+        return redirect()->route('reportes.myVisits');
+    }
+
+    public function confirmVisit($id, ChangeReportStatusRequest $request){
+        $report = Report::where('id', $id);
+    
+        if (!$report->update(['status' => "CONFIRMADA"])){
+            toastr()->error(__('Error al actualizar el registro'));
+        } else {
+            toastr()->success(__('Cita confirmada con exito'));
+        }
+
+        return redirect()->route('reportes.myVisits');
+
+    }
+
     public function generatePDF($id, GeneratePDFRequest $request){
 
         $registros = null;
@@ -321,22 +497,24 @@ class ReportController extends WebController
         $search = request('search');
     
         $columns = [
-            'reports.date_attendance as date_attendance',
+            'reports.*',
             'visitors.firstname as visitor_firstname',
             'visitors.lastname as visitor_lastname',
             'visitors.dni as visitor_dni',
             'workers.firstname as worker_firstname',
             'workers.lastname as worker_lastname',
             'workers.dni as worker_dni',
-            'users.username as user_username',
             'autos.enrrolment as auto_enrrolment',
-            'auto_models.name as auto_model_name'
+            'auto_models.name as auto_model_name',
+            'departments.name as department',
+            'buildings.name as building'
         ];
        
         $record = Report::select($columns)
             ->join('visitors', 'visitors.id', '=', 'reports.visitor_id')
             ->join('workers', 'workers.id', '=', 'reports.worker_id')
-            ->join('users', 'users.id', '=', 'reports.user_id')
+            ->join('departments', 'departments.id', '=', 'reports.department_id')
+            ->join('buildings', 'buildings.id', '=', 'departments.building_id')
             ->leftJoin('autos', 'autos.id', '=', 'reports.auto_id')
             ->leftJoin('auto_models', 'autos.auto_model_id', '=', 'auto_models.id')
             ->where("reports.id", "=", $id)
@@ -348,12 +526,81 @@ class ReportController extends WebController
         $pass->report_id = $id;
         $pass->save();
 
-        $file_name = $record->visitor_firstname. '_' . $record->visitor_lastname.'_'. $record->date_attendance . '.pdf';
+        $file_name = $record->visitor_firstname. '_' . $record->visitor_lastname.'_'. date('d-m-Y', strtotime($record->date_attendance)). '.pdf';
   
         $pdf = PDF::loadView('report.pass', compact('record'));
 
         return $pdf->download($file_name);
 
     }
+
+    public function getDepartments(Request $request){
+
+        $search =  $request->has('search') ? $request->get('search') : '';
+        $building = $request->has('building') ? $request->get('building') : '';
+
+        $columns = [
+            'departments.id as department_id',
+            'departments.name as department',
+            'buildings.id as building_id',
+            'buildings.name as building',
+        ];
+
+        $departments = Department::orderby('departments.name','asc')->select($columns);
+        
+        $departments = $departments->join('buildings', function($query) use ($building){
+            $query->on('buildings.id', '=', 'departments.building_id');
+            
+            if (strlen($building) > 0){
+                $query->where("buildings.name", $building);
+            }
+        });
+        
+        
+        if (strlen($search) > 0){      
+            $departments = $departments->where("departments.name", "LIKE", "%".$search."%");
+        }
+
+        $departments = $departments->limit(5)->get();
+    
+        $response = array();
+
+        foreach($departments as $department){
+            $response[] = array(
+                "department_id"=>$department->department_id,
+                "department"=>ucfirst($department->department),
+                "building"=>$department->building,
+                "building"=>ucfirst($department->building),
+                "value"=>ucfirst($department->department)
+            );
+        }
+        
+        return response()->json($response);
+    }
+    
+    public function getBuildings(Request $request){
+
+        $search =  $request->get('search');
+
+        $columns = ['id','name'];
+
+        $buildings = Building::orderby('name','asc')->select($columns);
+
+        if (strlen($search) > 0){
+            $buildings = $buildings->where("name", "LIKE", "%".$search."%");
+        }
+
+        $buildings = $buildings->limit(5)->get();
+    
+        $response = array();
+
+        foreach($buildings as $building){
+            $response[] = array("id"=>$building->id, "value"=>ucfirst($building->name));
+        }
+        
+        return response()->json($response);
+    }
+
+
 
 }

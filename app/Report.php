@@ -20,17 +20,6 @@ class Report extends Model
         'date_attendance',
 	];
 
-	protected $statuses = array(
-        '0' => 'POR CONFIRMAR',
-		'1' => 'CONFIRMADA',
-		'2' => 'ANULADA'
-    );
-
-    public function getStatusAttribute()
-    {
-        return $this->statuses[$this->status];
-    }
-
     //
 	public function user(){
 		return $this->belongsTo(User::class);

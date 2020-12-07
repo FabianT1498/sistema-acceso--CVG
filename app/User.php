@@ -21,7 +21,7 @@ class User extends Authenticatable
      * @var array
      */
     protected $fillable = [
-        'name', 'email', 'password',
+        'role_id', 'password',
     ];
     protected $dates = ['deleted_at']; //Registramos la nueva columna
 

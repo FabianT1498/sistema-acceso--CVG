@@ -18,8 +18,6 @@ $(document).ready(function() {
 
   $.count = 0;
 
-  
-
   function dynamic_field(number) {
     html = `
       <tr>
@@ -79,11 +77,6 @@ $(document).ready(function() {
     reader.readAsDataURL(e.target.files[0]);
   });
 
-});
-
-$(document).on('click', '#check_trashed', function() {
-  $('#check_trashed').val($('#check_trashed').val() == 1 ? 0 : 1);
-  $('#searchForm').submit();
 });
 
 

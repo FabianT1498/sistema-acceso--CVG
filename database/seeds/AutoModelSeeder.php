@@ -23,14 +23,5 @@ class AutoModelSeeder extends Seeder
     		'auto_brand_id' => 1
     		]);
 
-    	AutoModel::create([
-    		'name' => 'SEDANS UV',
-    		'auto_brand_id' => 2
-    		]);
-
-    	AutoModel::create([
-    		'name' => 'RAPID V2',
-    		'auto_brand_id' => 2
-    		]);
     }
 }

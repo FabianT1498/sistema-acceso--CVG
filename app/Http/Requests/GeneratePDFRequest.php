@@ -15,15 +15,12 @@ class GeneratePDFRequest extends FormRequest
     public function authorize()
     {
         $auth_user_role = $this->user()->role_id;
-        $auth_user_id = $this->user()->id;
-        $auth_worker_id = $this->user()->worker_id;
-
+      
         $report = Report::find($this->route('id'));
      
         return (($report && !$report->deleted_at) 
-                && ($auth_user_role !== 3 
-                        || ($report->user_id === $auth_user_id) 
-                                || ($report->worker_id === $auth_worker_id)));
+                && $auth_user_role === 4 
+                        && $report->status === "CONFIRMADA");
     }
 
     /**

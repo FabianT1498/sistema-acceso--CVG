@@ -3,9 +3,10 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
-use App\Auto;
+use Illuminate\Validation\Rule;
+use App\Report;
 
-class EditAutoRequest extends FormRequest
+class ShowReportRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -15,11 +16,15 @@ class EditAutoRequest extends FormRequest
     public function authorize()
     {
         $auth_user_role = $this->user()->role_id;
-  
-        $auto = Auto::find($this->route('auto'));
+        $auth_user_id = $this->user()->id;
+        $auth_worker_id = $this->user()->worker_id;
+        
+        $report = Report::find($this->route('reporte'));
 
-        return (($auto && !$auto->deleted_at) && $auth_user_role === 4);
-    }
+        return (($report && !$report->deleted_at) 
+                && ($auth_user_role !== 3 
+                        || $report->worker_id === $auth_worker_id));
+        }
 
     /**
      * Get the validation rules that apply to the request.

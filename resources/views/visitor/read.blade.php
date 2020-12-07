@@ -53,14 +53,13 @@
                     <th>{{ __('Apellidos') }}</th>
                     <th>{{ __('Cédula') }}</th>
                     <th>{{ __('Numero de telefono') }}</th>
-                    <th>{{ __('Opciones') }}</th>
                   </tr>
                 </thead>
                 <tbody>
                   @foreach ($visitors as $visitor)
                     <tr id="tr_{{$visitor->id}}">
                       <td>
-                        @if ($trashed == 0 && (Auth::user()->role_id !== 3 || $visitor->user_id === Auth::user()->id))
+                        @if (Auth::user()->role_id === 4)
                           <a href="{{ route('visitantes.edit', $visitor->id) }}"
                             onclick="event.preventDefault();
                             document.getElementById('frm_registro_{{ $visitor->id }}').submit();">
@@ -78,25 +77,6 @@
                       <td>{{ $visitor->dni }}</td>
                       <td>{{ $visitor->phone_number }}</td>
             
-                      <td>
-                        @if ($trashed == 0 && (Auth::user()->role->name == "ADMIN" || Auth::user()->role->name == "SUPERADMIN"))
-                          <a title="{{ __('Eliminar') }}" href="#" onclick="
-                            event.preventDefault();
-                            confirm('{{ __("Esta acción no se puede deshacer. ¿Desea continuar?") }}') ?
-                              document.getElementById('frm_eliminar_{{ $visitor->id }}').submit() : false;"
-                          >
-                            <small>
-                              <small class="text-danger"><i class="fa fa-trash fa-2x"></i></small>
-                            </small>
-                          </a>
-                          <form method="POST" id="frm_eliminar_{{ $visitor->id }}"action="{{ route('visitantes-destroy', $visitor->id) }}" class="d-none">
-                              @method('DELETE')
-                              @csrf
-                              <input type="hidden" name="search" value="{{ $search }}">
-                          </form>  
-                        @endif
-                      </td>
-                   
                     </tr>
                   @endforeach
                 </tbody>
