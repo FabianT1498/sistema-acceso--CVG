@@ -5,12 +5,12 @@
         <nav class="main-header navbar navbar-expand navbar-white navbar-light border-bottom-0 col-12 flex-wrap">
           <div class="row w-100 mb-md-2">
             <span class="text-dark d-inline h4 mr-3">
-              <a href="{{ route('reportes.index') }}" title="">
-                <small class="mr-md-2"><i class="nav-icon icon fa fa-file"></i></small>{{ __('Mis visitas') }}
+              <a href="{{ route('visitas.index') }}" title="">
+                <small class="mr-md-2"><i class="nav-icon icon fa fa-file"></i></small>{{ __('Visitas') }}
               </a>
             </span>
             @if (Auth::user()->role_id === 4)
-              <form class="d-flex mr-md-3" action="{{ route('reportes.create') }}">
+            <form class="d-flex mr-md-3" action="{{ route('visitas.create') }}">
                 <input type="hidden" name="search" value="{{ $search }}">
                 <div class="input-group" title="{{ __('Nuevo Registro') }}">
                   <div class="">
@@ -21,7 +21,7 @@
                 </div>
               </form>
             @endif
-            <form id="searchForm" class="d-flex flex-column ml-3" action="{{ route('reportes.myVisits') }}">
+            <form id="searchForm" class="d-flex flex-column ml-3" action="{{ route('visitas.index') }}">
               <div class="row mb-md-2">
                 <div class="form-inline ">
                   
@@ -55,6 +55,7 @@
                     name="start_date" 
                     placeholder=""
                     value=""
+                    autocomplete="off"
                   >
 
                   <label class="mr-3" for="startDate">{{ _('Hasta:') }}</label>
@@ -65,10 +66,11 @@
                     name="finish_date" 
                     placeholder=""
                     value=""
+                    autocomplete="off"
                   > 
                 </div>
               </div>
-              @if ($start_date !== '' && $finish_date)
+              @if ($start_date !== '' && $finish_date !== '')
                 <div class="row">
                   <p class="text-info">{{'Usted ha buscado desde el ' . $start_date . ' hasta el ' . $finish_date}}</p>
                 </div>  

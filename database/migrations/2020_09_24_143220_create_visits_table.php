@@ -5,7 +5,7 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Support\Facades\DB;
 
-class CreateReportsTable extends Migration
+class CreateVisitsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -15,7 +15,7 @@ class CreateReportsTable extends Migration
     public function up()
     {
         //
-        Schema::create('reports', function (Blueprint $table) {
+        Schema::create('visits', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->unsignedBigInteger('user_id')->unsigned();
             $table->unsignedBigInteger('visitor_id')->unsigned();
@@ -48,5 +48,6 @@ class CreateReportsTable extends Migration
     public function down()
     {
         //
+        Schema::drop('visits');
     }
 }

@@ -65,12 +65,13 @@ Route::group(['middleware' => ['auth', 'worker']], function () {
 
 Route::group(['middleware' => ['auth', 'receptionist']], function () {
 	
-		/********           REPORT         **********/
-		Route::resource('reportes', 'ReportController')->except(['destroy', 'edit', 'update']);
-		Route::get('mis-visitas', 'ReportController@myVisits')->name('reportes.myVisits');
+		/********           VISIT         **********/
+		Route::resource('visitas', 'VisitController')->except(['destroy', 'edit', 'update']);
+		Route::post('/departamentos', 'VisitController@getDepartments');
+		Route::post('/edificios', 'VisitController@getBuildings');
+
+		/*************        PASES ************** */
 		Route::get('/generar_pase/{id}/pdf', 'ReportController@generatePDF')->name('reportes.generar_pase');
-		Route::post('/departamentos', 'ReportController@getDepartments');
-		Route::post('/edificios', 'ReportController@getBuildings');
 
 		/********           WORKER         **********/	
 		Route::post('trabajador', 'WorkerController@getWorker');
@@ -97,19 +98,19 @@ Route::group(['middleware' => ['auth', 'receptionist']], function () {
 /*********************************************/
 Route::group(['middleware' => ['auth']], function () {
 
-	/********           REPORT         **********/	
-	Route::get('mis-visitas', 'ReportController@myVisits')->name('reportes.myVisits');
-	Route::get('reportes/{reporte}', 'ReportController@show')->name('reportes.show');
-	Route::put('reporte/{id}/anular', 'ReportController@denyVisit')->name('reportes.denyVisit');
-	Route::put('reporte/{id}/confirmar', 'ReportController@confirmVisit')->name('reportes.confirmVisit');
+	/********           VISIT         **********/	
+	Route::get('mis-visitas', 'VisitController@myVisits')->name('visitas.mis_visitas');
+	Route::get('visitas/{visita}', 'VisitController@show')->name('visitas.show');
+	Route::put('visita/{id}/anular', 'VisitController@denyVisit')->name('visitas.denyVisit');
+	Route::put('visita/{id}/confirmar', 'VisitController@confirmVisit')->name('visitas.confirmVisit');
 	
 	Route::get('/home', function(){
 		if(Auth::user())
 		{	
 			if (Auth::user()->role_id === 3){
-				return redirect()->route('reportes.myVisits');
+				return redirect()->route('visitas.mis_visitas');
 			} else if (Auth::user()->role_id === 4){
-				return redirect()->route('reportes.index');
+				return redirect()->route('visitas.index');
 			}
 
 			return redirect()->route('dashboard');

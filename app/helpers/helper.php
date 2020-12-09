@@ -50,7 +50,7 @@ function getSearchOptions(){
 		$options = array(
 			'Número de matricula del auto (ej. ABC1246)',
 		);
-	} else if ($arrName[0] === 'reportes' || $arrName[0] === 'mis-visitas'){
+	} else if ($arrName[0] === 'visitas' || $arrName[0] === 'mis-visitas'){
 		$options = array(
 			'Nombre y apellido del visitante (ej. Juan Perez)',
 			'Cedula del visitante (ej. v-1014823 o e-1014823)',

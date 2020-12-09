@@ -10,11 +10,11 @@
   <script src="{{ asset('js/toastr.min.js') }}"></script>
 
   @toastr_render
-  <script src="{{ asset('js/report.js') }}"></script>
+  <script src="{{ asset('js/visit.js') }}"></script>
 @endsection
 
 @section('migasdepan')
-    <a href="{{ route('reportes.index') }}">{{ __('Visita') }}</a>
+    <a href="{{ route('visitas.index') }}">{{ __('Visita') }}</a>
     &nbsp;&nbsp;<i class="icon ion-android-arrow-forward"></i>&nbsp;&nbsp;{{ __('Visita') }}
      <span class="text-success">({{ __('Crear') }})</span>
 @endsection
@@ -30,7 +30,7 @@
   </aside>
   <!-- Fin Main Sidebar Container -->
   <!-- Content Header (Page header) -->
-  @include('report.head')
+  @include('visit.head')
   <!-- /.content-header -->
 
   <!-- Content Wrapper. Contains page content -->
@@ -49,15 +49,15 @@
                             <div class="form-row mb-md-4">
                                 <div class="form-group col-md-4">
                                     <label for="visitorFirstname">Cedula</label>
-                                    <p>{{$report->visitor_dni}}</p>                 
+                                    <p>{{$visit->visitor_dni}}</p>                 
                                 </div>
                                 <div class="form-group col-md-4">
                                     <label for="visitorFirstname">Nombre(s):&nbsp;</label>
-                                    <p>{{$report->visitor_firstname}}</p>                 
+                                    <p>{{$visit->visitor_firstname}}</p>                 
                                 </div>
                                 <div class="form-group col-md-4">
                                     <label for="visitorLastname">Apellido(s):&nbsp;</label>
-                                    <p>{{$report->visitor_lastname}}</p> 
+                                    <p>{{$visit->visitor_lastname}}</p> 
                                 </div>
                             </div>
                         </div>
@@ -72,15 +72,15 @@
                                 <div class="form-row mb-md-4">
                                     <div class="form-group col-md-4">
                                         <label for="workerDNI">Cedula del trabajador</label>
-                                        <p>{{$report->worker_dni}}</p>                 
+                                        <p>{{$visit->worker_dni}}</p>                 
                                     </div>
                                     <div class="form-group col-md-4">
                                         <label for="visitorFirstname">Nombre(s):&nbsp;</label>
-                                        <p>{{$report->worker_firstname}}</p>                 
+                                        <p>{{$visit->worker_firstname}}</p>                 
                                     </div>
                                     <div class="form-group col-md-4">
                                         <label for="visitorLastname">Apellido(s):&nbsp;</label>
-                                        <p>{{$report->worker_lastname}}</p> 
+                                        <p>{{$visit->worker_lastname}}</p> 
                                     </div>
                                 </div>
                             @endif
@@ -88,57 +88,57 @@
                             <div class="form-row mb-md-4">
                                 <div class="form-group col-md-3">
                                     <label for="attendingDate">{{ _('Fecha de visita:') }}</label>
-                                    <p>{{date('d-m-Y', strtotime($report->date_attendance))}}</p> 
+                                    <p>{{date('d-m-Y', strtotime($visit->date_attendance))}}</p> 
                                 </div>
                                 <div class="form-group col-md-3">
                                     <label for="entry-time">{{ _('Hora de entrada:') }}&nbsp;</label>
-                                    <p>{{ date('H:i', strtotime($report->entry_time)) }}</p>           
+                                    <p>{{ date('H:i', strtotime($visit->entry_time)) }}</p>           
                                 </div>
                                 <div class="form-group col-md-3">
                                     <label for="departure-time">{{ _('Hora de salida:') }}&nbsp;</label>
-                                    <p>{{ date('H:i', strtotime($report->departure_time)) }}</p>                 
+                                    <p>{{ date('H:i', strtotime($visit->departure_time)) }}</p>                 
                                 </div>
                                 <div class="form-group col-md-3">
                                     <label for="departure-time">{{ _('Estatus:') }}&nbsp;</label>
-                                    <p>{{$report->status}}</p>                 
+                                    <p>{{$visit->status}}</p>                 
                                 </div>
                             </div>
 
                             <div class="form-row">
                                 <div class="form-group col-md-4">
                                     <label for="attendingDate">{{ _('Edificio:') }}</label>
-                                    <p>{{$report->building_name}}</p> 
+                                    <p>{{$visit->building_name}}</p> 
                                 </div>
                                 <div class="form-group col-md-4">
                                     <label for="attendingDate">{{ _('Departamento:') }}</label>
-                                    <p>{{$report->department_name}}</p> 
+                                    <p>{{$visit->department_name}}</p> 
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    @if(!is_null($report->auto_id))
+                    @if(!is_null($visit->auto_id))
                         <div class="card">
                             <div class="card-body">
                                 <h3 class="h3 mb-md-5 text-center title-subline">Datos del automovil</h3>
                                 <div class="form-row mb-md-4">
                                     <div class="form-group col-md-4">
                                         <label for="workerDNI">Matricula del auto</label>
-                                        <p>{{$report->auto_enrrolment}}</p>                 
+                                        <p>{{$visit->auto_enrrolment}}</p>                 
                                     </div>
                                     <div class="form-group col-md-4">
                                         <label for="visitorFirstname">Marca</label>
-                                        <p>{{$report->auto_brand}}</p>                 
+                                        <p>{{$visit->auto_brand}}</p>                 
                                     </div>
                                     <div class="form-group col-md-4">
                                         <label for="visitorFirstname">Modelo</label>
-                                        <p>{{$report->auto_model}}</p>                 
+                                        <p>{{$visit->auto_model}}</p>                 
                                     </div>
                                 </div>
                                 <div class="form-row">
                                     <div class="form-group col-md-4">
                                         <label for="workerDNI">Color del auto</label>
-                                        <p>{{$report->auto_color}}</p>                 
+                                        <p>{{$visit->auto_color}}</p>                 
                                     </div>
                                 </div>
                             </div>

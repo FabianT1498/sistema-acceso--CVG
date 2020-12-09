@@ -10,12 +10,12 @@
 
   @toastr_render
   <script src="{{ asset('js/insumo.js') }}"></script>
-  <script src="{{ asset('js/report.js') }}"></script>
+  <script src="{{ asset('js/visit.js') }}"></script>
 @endsection
 
 @section('migasdepan')
-    <a href="{{ route('reportes.index') }}">{{ __('REPORTES') }}</a>
-    &nbsp;&nbsp;<i class="icon ion-android-arrow-forward"></i>&nbsp;&nbsp;{{ __('REPORTES') }}
+    <a href="{{ route('visitas.index') }}">{{ __('VISITAS') }}</a>
+    &nbsp;&nbsp;<i class="icon ion-android-arrow-forward"></i>&nbsp;&nbsp;{{ __('VISITAS') }}
      <span class="text-success">({{ __('Editar') }})</span>
 @endsection
 
@@ -30,7 +30,7 @@
 	</aside>
 	<!-- Fin Main Sidebar Container -->
 	<!-- Content Header (Page header) -->
-	@include('report.head')
+	@include('visit.head')
 	<!-- /.content-header -->
 
 	<!-- Content Wrapper. Contains page content -->
@@ -58,7 +58,7 @@
 						@endif
 						<div class="card card-primary">
 						<!-- form start -->
-						<form method='POST' action="{{ route('reportes.update', $report->report_id) }}"  role="form" enctype="multipart/form-data">
+						<form method='POST' action="{{ route('visitas.update', $visit->visit_id) }}"  role="form" enctype="multipart/form-data">
 							@csrf
 							@method('PUT')
 
@@ -72,10 +72,10 @@
 										type="text"
 										class="form-control"
 										placeholder="{{ __('Ingrese Nombre') }}"
-										value="{{$report->visitor_firstname.' '.$report->visitor_lastname }}" 
+										value="{{$visit->visitor_firstname.' '.$visit->visitor_lastname }}" 
 										required
 									>
-									<input type="hidden" id='visitorID' name="visitor_id" value="{{$report->visitor_id}}" readonly>
+									<input type="hidden" id='visitorID' name="visitor_id" value="{{$visit->visitor_id}}" readonly>
 								</div>
 
 								<div class="form-group">
@@ -87,7 +87,7 @@
 										class="form-control" 
 										style="text-transform:uppercase" 
 										placeholder="{{ __('Ingrese Cedula') }}" 
-										value="{{$report->visitor_dni}}"
+										value="{{$visit->visitor_dni}}"
 										readonly 
 										required
 									>
@@ -102,10 +102,10 @@
 											type="text" 
 											class="form-control" 
 											placeholder="{{ __('Ingrese Nombre') }}"
-											value="{{$report->worker_firstname.' '.$report->worker_lastname }}" 
+											value="{{$visit->worker_firstname.' '.$visit->worker_lastname }}" 
 											required
 										>
-										<input type="hidden" id='workerID' name="worker_id" value="{{$report->worker_id}}" readonly>
+										<input type="hidden" id='workerID' name="worker_id" value="{{$visit->worker_id}}" readonly>
 									</div>
 
 									<div class="form-group">
@@ -117,7 +117,7 @@
 											class="form-control"
 											style="text-transform:uppercase"
 											placeholder="{{ __('Ingrese Cedula') }}"
-											value="{{$report->worker_dni}}"
+											value="{{$visit->worker_dni}}"
 											readonly 
 											required
 										>
@@ -125,14 +125,14 @@
 								@else
 									<div class="form-group">
 										<label for="workerSearch">{{ _('Nombre del trabajador') }}&nbsp;<sup class="text-danger">*</sup></label>
-										<p class="text-left">{{$report->worker_firstname.' '.$report->worker_lastname }}</p>
-										<input type="hidden" name="worker_id" value="{{$report->worker_id}}" readonly required>
+										<p class="text-left">{{$visit->worker_firstname.' '.$visit->worker_lastname }}</p>
+										<input type="hidden" name="worker_id" value="{{$visit->worker_id}}" readonly required>
 									</div>
 
 									<div class="form-group">
 										<label for="workerDNI">{{ _('Cédula del trabajador') }}&nbsp;<sup class="text-danger">*</sup></label>
-										<p class="text-left">{{$report->worker_dni}}</p>
-										<input type="hidden" name="worker_dni" value="{{$report->worker_dni}}" readonly required>
+										<p class="text-left">{{$visit->worker_dni}}</p>
+										<input type="hidden" name="worker_dni" value="{{$visit->worker_dni}}" readonly required>
 									</div>
 								@endif
 
@@ -144,7 +144,7 @@
 										id="attendingDate" 
 										name="attending_date" 
 										placeholder="Fecha y hora de asistencia"
-										value="{{$report->date_attendance}}"
+										value="{{$visit->date_attendance}}"
 									>
 								</div>
 
@@ -152,8 +152,8 @@
 									<label for="autoSelect">{{ _('Auto aparcado:') }}&nbsp;</label>
 									<select id="autoSelect" name="auto_id" class="form-control">
 										<option value="-1">Ninguno</option>
-										@if($report->auto_id)
-											<option selected value="{{$report->auto_id}}">{{$report->auto_model_name. ' - '. $report->auto_enrrolment}}</option>		
+										@if($visit->auto_id)
+											<option selected value="{{$visit->auto_id}}">{{$visit->auto_model_name. ' - '. $visit->auto_enrrolment}}</option>		
 										@endif
 										@foreach ($autos as $auto)
 											<option value="{{$auto->auto_id}}">{{$auto->auto_model_name. ' '. $auto->auto_enrrolment}}</option>

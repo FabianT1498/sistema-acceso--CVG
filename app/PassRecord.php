@@ -5,7 +5,7 @@ namespace App;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\Pivot;
 
-class PassRecord extends Pivot
+class Report extends Pivot
 {
     //
 		public $incrementing = true;

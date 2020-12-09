@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Visitor;
-use App\Report;
+use App\Visit;
 use App\Auto;
 use App\Http\Controllers\WebController;
 use Illuminate\Http\Request;
@@ -24,12 +24,12 @@ class HomeController extends WebController
 
         $estadisticas->visitantesAnio = Visitor::whereYear('created_at', $anioActual)
                             ->count();
-        $estadisticas->reportesAnio = Report::whereYear('date_attendance', $anioActual)
+        $estadisticas->visitasAnio = Visit::whereYear('date_attendance', $anioActual)
                             ->count();
         
         $estadisticas->visitantesMes = Visitor::whereMonth('created_at', $mesActual)
                             ->count();
-        $estadisticas->reportesMes = Report::whereMonth('date_attendance', $mesActual)
+        $estadisticas->visitasMes = Visit::whereMonth('date_attendance', $mesActual)
                             ->count();
         return view('home', compact('estadisticas'));
     }

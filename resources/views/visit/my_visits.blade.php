@@ -12,11 +12,11 @@
   @toastr_render
 
   <script src="{{ asset('js/insumo.js') }}"></script>
-  <script src="{{ asset('js/report.js') }}"></script>
+  <script src="{{ asset('js/visit.js') }}"></script>
 @endsection
 
 @section('migasdepan')
-    <a href="{{ route('reportes.index') }}">{{ __('MIS VISITAS') }}</a>
+    <a href="{{ route('visitas.mis_visitas') }}">{{ __('MIS VISITAS') }}</a>
     &nbsp;&nbsp;<i class="icon ion-android-arrow-forward"></i>&nbsp;&nbsp;{{ __('MIS VISITAS') }}
      <span class="text-info">({{ __('Listado') }})</span>
 @endsection
@@ -33,7 +33,7 @@
   </aside>
   <!-- Fin Main Sidebar Container -->
   <!-- Content Header (Page header) -->
-  @include('report.head-auth-user-visits')
+  @include('visit.head_my_visits')
   <!-- /.content-header -->
 
   <!-- Content Wrapper. Contains page content -->
@@ -44,8 +44,8 @@
       <div class="container-fluid">
         <!-- Small boxes (Stat box) -->
         <div class="row justify-content-center">
-          <div id="contenedor_tbl" class="col-12 {{ $reports ? '' : 'd-none' }}">
-            @if ($reports)
+          <div id="contenedor_tbl" class="col-12 {{ $visits ? '' : 'd-none' }}">
+            @if ($visits)
               <table id="tbl_read" class="table table-bordered table-hover">
                 <thead>
                   <tr>
@@ -59,34 +59,34 @@
                   </tr>
                 </thead>
                 <tbody>
-                  @foreach ($reports as $report)
-                    <tr id="tr_{{$report->id}}">
+                  @foreach ($visits as $visit)
+                    <tr id="tr_{{$visit->id}}">
                       <td>          
-                        <a href="{{ route('reportes.show', $report->id) }}">
-                          {{ $report->visitor_firstname. ' ' .$report->visitor_lastname }}
+                        <a href="{{ route('visites.show', $visit->id) }}">
+                          {{ $visit->visitor_firstname. ' ' .$visit->visitor_lastname }}
                         </a>  
                       </td>                         
-                      <td>{{ $report->user_username }}</td>
-                      <td>{{ date('d-m-Y', strtotime($report->date_attendance)) }}</td>
-                      <td>{{ date('H:i', strtotime($report->entry_time)) }}</td>   
-                      <td>{{ date('H:i', strtotime($report->departure_time)) }}</td>
-                      <td>{{ $report->status }}</td>
+                      <td>{{ $visit->user_username }}</td>
+                      <td>{{ date('d-m-Y', strtotime($visit->date_attendance)) }}</td>
+                      <td>{{ date('H:i', strtotime($visit->entry_time)) }}</td>   
+                      <td>{{ date('H:i', strtotime($visit->departure_time)) }}</td>
+                      <td>{{ $visit->status }}</td>
                                     
                       <td>
                         
-                        @if ($report->status === "POR CONFIRMAR")
+                        @if ($visit->status === "POR CONFIRMAR")
 
                           <a class="ml-md-3" title="{{ __('Anular cita') }}" href="#" onclick="
                             event.preventDefault();
                             confirm('Está a punto de cancelar la cita, esta acción no se puede deshacer. ¿Desea continuar?') 
-                              ? document.getElementById('frm_anular_{{ $report->id }}').submit() :
+                              ? document.getElementById('frm_anular_{{ $visit->id }}').submit() :
                                 false;"
                           >
                             <small>
                               <small class="text-danger"><i class="fa fa-ban fa-2x"></i></small>
                             </small>
                           </a>
-                          <form method="POST" id="frm_anular_{{ $report->id }}"action="{{ route('reportes.denyVisit', $report->id) }}" class="d-none">
+                          <form method="POST" id="frm_anular_{{ $visit->id }}"action="{{ route('visitas.denyVisit', $visit->id) }}" class="d-none">
                               @method('PUT')
                               @csrf
                               <input type="hidden" name="search" value="{{ $search }}">
@@ -95,33 +95,33 @@
                           <a class="ml-md-3" title="{{ __('Confirmar cita') }}" href="#" onclick="
                             event.preventDefault();
                             confirm('Está a punto de confirmar la cita, esta acción no se puede deshacer. ¿Desea continuar?') 
-                              ? document.getElementById('frm_confirmar_{{ $report->id }}').submit() 
+                              ? document.getElementById('frm_confirmar_{{ $visit->id }}').submit() 
                               : false;"
                           >
                             <small>
                               <small class="text-success"><i class="fa fa-check fa-2x"></i></small>
                             </small>
                           </a>
-                          <form method="POST" id="frm_confirmar_{{ $report->id }}" action="{{ route('reportes.confirmVisit', $report->id) }}" class="d-none">
+                          <form method="POST" id="frm_confirmar_{{ $visit->id }}" action="{{ route('visitas.confirmVisit', $visit->id) }}" class="d-none">
                               @method('PUT')
                               @csrf
                               <input type="hidden" name="search" value="{{ $search }}">
                           </form>
 
-                        @elseif(Auth::user()->role_id === 4 && $report->status === "CONFIRMADA")
+                        @elseif(Auth::user()->role_id === 4 && $visit->status === "CONFIRMADA")
                           <a title="{{ __('Generar PDF') }}" href="#" onclick="
                             event.preventDefault();
-                            confirm('{{ __("Usted va a generar un reporte, esto quedará registrado. ¿Desea continuar?") }}') ?
-                              document.getElementById('frm_pdf_{{ $report->id }}').submit() : false;"
+                            confirm('{{ __("Usted va a generar un visite, esto quedará registrado. ¿Desea continuar?") }}') ?
+                              document.getElementById('frm_pdf_{{ $visit->id }}').submit() : false;"
                           >
                             <small>
                               <small class="text-info"><i class="fa fa-file-pdf fa-2x"></i></small>
                             </small>
                           </a>
-                          <form method="GET" id="frm_pdf_{{ $report->id }}" action="{{ route('reportes.generar_pase', $report->id) }}" class="d-none">
+                          <form method="GET" id="frm_pdf_{{ $visit->id }}" action="{{ route('reportes.generar_pase', $visit->id) }}" class="d-none">
                               @csrf
                               <input type="hidden" name="search" value="{{ $search }}">
-                          </form>           
+                          </form>       
                         @endif
                       </td>
                       
@@ -131,7 +131,7 @@
               </table>
               {{-- Pagination --}}
               <div class="d-flex justify-content-center">
-                  {!! $reports->links() !!}
+                  {!! $visits->links() !!}
               </div>
             @else
               <div class="alert alert-info h5">

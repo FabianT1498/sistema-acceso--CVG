@@ -33,7 +33,7 @@
     <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
     
       <li class="nav-item {{ setActive('mis-visitas') }}">
-          <a href="{{ route('reportes.myVisits') }}" class="nav-link {{ setActive('mis-visitas') }}">
+          <a href="{{ route('visitas.mis_visitas') }}" class="nav-link {{ setActive('mis-visitas') }}">
             <i class="nav-icon icon fa fa-file"></i>
             <p>{{ __('MIS VISITAS') }}</p>
           </a>
@@ -47,10 +47,10 @@
           </a>
         </li>
       
-        <li class="nav-item {{ setActive('reportes') }}">
-          <a href="{{ route('reportes.index') }}" class="nav-link {{ setActive('reportes') }}">
+        <li class="nav-item {{ setActive('visitas') }}">
+          <a href="{{ route('visitas.index') }}" class="nav-link {{ setActive('visitas') }}">
             <i class="nav-icon icon fa fa-file"></i>
-            <p>{{ __('VISITAS') }}</p>
+            <p>{{ __('HISTORIAL DE VISITAS') }}</p>
           </a>
         </li>
 

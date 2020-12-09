@@ -11,14 +11,13 @@
 
   @toastr_render
   <script src="{{ asset('js/insumo.js') }}"></script>
-  <script src="{{ asset('js/utilities.js') }}"></script>
-  <script src="{{ asset('js/report.js') }}"></script>
+  <script src="{{ asset('js/visit.js') }}"></script>
   <script src="{{ asset('js/autos.js') }}"></script>
   <script src="{{ asset('js/visitor.js') }}"></script>
 @endsection
 
 @section('migasdepan')
-    <a href="{{ route('reportes.index') }}">{{ __('Visita') }}</a>
+    <a href="{{ route('visitas.index') }}">{{ __('Visita') }}</a>
     &nbsp;&nbsp;<i class="icon ion-android-arrow-forward"></i>&nbsp;&nbsp;{{ __('Visita') }}
      <span class="text-success">({{ __('Crear') }})</span>
 @endsection
@@ -34,7 +33,7 @@
   </aside>
   <!-- Fin Main Sidebar Container -->
   <!-- Content Header (Page header) -->
-  @include('report.head')
+  @include('visit.head')
   <!-- /.content-header -->
 
   <!-- Content Wrapper. Contains page content -->
@@ -62,7 +61,7 @@
             @endif
             
               <!-- form start -->
-            <form method='POST' action="{{ route('reportes.store') }}"  role="form"  enctype="multipart/form-data">
+            <form method='POST' action="{{ route('visitas.store') }}"  role="form"  enctype="multipart/form-data">
               @csrf
               @method('POST')
               <div class="card">
@@ -94,7 +93,7 @@
 
               <div class="card" id="visitorData">
                 @if (old('visitor_id') === '-1')
-                  @include('visitor.inputs', ['is_form_report'=>true])
+                  @include('visitor.inputs', ['is_form_visit'=>true])
                 @endif
               </div>
 
