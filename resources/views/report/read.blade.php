@@ -12,6 +12,7 @@
   @toastr_render
   <script src="{{ asset('js/insumo.js') }}"></script>
   <script src="{{ asset('js/report.js') }}"></script>
+  <script src="{{ asset('js/reloadPage.js') }}"></script>
 @endsection
 
 @section('migasdepan')
