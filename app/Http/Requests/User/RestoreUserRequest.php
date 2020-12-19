@@ -1,12 +1,12 @@
 <?php
 
-namespace App\Http\Requests;
+namespace App\Http\Requests\User;
 
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule;
-use App\Visitor;
 
-class EditVisitorRequest extends FormRequest
+use App\User;
+
+class RestoreUserRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -17,10 +17,10 @@ class EditVisitorRequest extends FormRequest
     {
         $auth_user_role = $this->user()->role_id;
 
-        $visitor = Visitor::find($this->route('visitante'));
+        $user = User::onlyTrashed()->where('id', $this->route('usuario'))->first();
 
-        return (($visitor && !$visitor->deleted_at) 
-            && $auth_user_role === 4);
+        return ($user && ($auth_user_role === 1 || 
+            ($user->role_id > 2 && $auth_user_role === 2)));
     }
 
     /**

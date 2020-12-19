@@ -1,12 +1,11 @@
 <?php
 
-namespace App\Http\Requests;
+namespace App\Http\Requests\Auto;
 
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule;
-use App\Visitor;
+use App\Auto;
 
-class DestroyVisitorRequest extends FormRequest
+class CreateAutoRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -16,10 +15,8 @@ class DestroyVisitorRequest extends FormRequest
     public function authorize()
     {
         $auth_user_role = $this->user()->role_id;
-
-        $visitor = Visitor::find($this->route('id'));
-
-        return (($visitor && !$visitor->deleted_at) && $auth_user_role <= 2);
+        
+        return $auth_user_role === 4;
     }
 
     /**

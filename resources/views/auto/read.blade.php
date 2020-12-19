@@ -54,29 +54,32 @@
                     <th>{{ __('Matricula') }}</th>
                     <th>{{ __('Color') }}</th>
                     <th>{{ __('Fecha de registro') }}</th>
+                    @if (Auth::user()->role_id === 4)
+                      <th>{{ __('Opciones') }}</th>
+                    @endif
                   </tr>
                 </thead>
                 <tbody>
                   @foreach ($autos as $auto)
                     <tr id="tr_{{$auto->auto_id}}">
-                      <td>          
-                          @if (Auth::user()->role_id === 4)
-                            <a href="{{ route('autos.edit', $auto->id) }}"
-                              onclick="document.getElementById('frm_auto_{{ $auto->id }}').submit();">
-                              {{ $auto->auto_brand }}
-                            </a>
-                            <form id="frm_auto_{{ $auto->auto_id }}" action="{{ route('autos.edit', $auto->id) }}" class="d-none">
-                                @method('PUT')
-                                @csrf
-                            </form>
-                          @else
-                            {{ $auto->auto_brand }}
-                          @endif
-                      </td>
+                      <td>{{ $auto->auto_brand }}</td>
                       <td>{{ $auto->auto_model }}</td>             
                       <td>{{ $auto->enrrolment }}</td>   
                       <td>{{ $auto->color }}</td> 
-                      <td>{{ date('d-m-Y', strtotime($auto->created_at)) }}</td>               
+                      <td>{{ date('d-m-Y', strtotime($auto->created_at)) }}</td>
+                      @if (Auth::user()->role_id === 4)
+                        <td>
+                          <a 
+                            class="" 
+                            title="{{ __('Editar auto') }}" 
+                            href="{{ route('autos.edit', $auto->id) }}" 
+                          >
+                            <small>
+                              <small class="text-info"><i class="far fa-edit fa-2x"></i></small>
+                            </small>
+                          </a>
+                        </td>
+                      @endif             
                     </tr>
                   @endforeach
                 </tbody>

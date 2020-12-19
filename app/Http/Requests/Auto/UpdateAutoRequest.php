@@ -1,13 +1,12 @@
 <?php
 
-namespace App\Http\Requests;
+namespace App\Http\Requests\Auto;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
+use App\Auto;
 
-use App\Visitor;
-
-class StoreAutoRequest extends FormRequest
+class UpdateAutoRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -17,8 +16,11 @@ class StoreAutoRequest extends FormRequest
     public function authorize()
     {
         $auth_user_role = $this->user()->role_id;
-     
-        return ($auth_user_role === 4);
+        
+        $auto = Auto::find($this->route('auto'));
+
+        return ($auto 
+                && $auth_user_role === 4);
     }
 
     /**
@@ -28,17 +30,18 @@ class StoreAutoRequest extends FormRequest
      */
     public function rules()
     {
-        $visitor_id = $this->visitor_id;
-
-        $rules = [
+        $auto_id = $this->route('auto');
+    
+        $rules = [       
             'auto_enrrolment' => [
                 'required',
-                'unique:autos,enrrolment',
+                Rule::unique('autos', 'enrrolment')
+                    ->ignore($auto_id),
                 'max:7'
             ],
-            'auto_color' => ['required'],
-            'auto_brand' => ['required'],
             'auto_model' => ['required'],
+            'auto_brand' => ['required'],
+            'auto_color' => ['required'],
         ];
 
         return $rules;
@@ -53,7 +56,10 @@ class StoreAutoRequest extends FormRequest
     {
 
         $messages = [
-            'auto_enrrolment.unique' => 'La matricula de este auto ya fue registrada'
+            'auto_enrrolment.unique' => 'La placa de este auto ya ha sido registrada',
+            'auto_color.required' => 'Indique el color del auto por favor',
+            'auto_model.required' => 'Indique el modelo del auto por favor',
+            'auto_brand.required' => 'Indique la marca del auto por favor',
         ];
 
         return $messages;
@@ -63,7 +69,7 @@ class StoreAutoRequest extends FormRequest
      * Prepare the data for validation.
      *
      * @return void
-     */
+     **/
     protected function prepareForValidation()
     {
  

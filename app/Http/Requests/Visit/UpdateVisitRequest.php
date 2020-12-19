@@ -1,11 +1,16 @@
 <?php
 
-namespace App\Http\Requests;
+namespace App\Http\Requests\Visit;
 
 use Illuminate\Foundation\Http\FormRequest;
+use DateTime;
+use App\Visit;
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
-class StoreReportRequest extends FormRequest
+
+class UpdateVisitRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -14,9 +19,26 @@ class StoreReportRequest extends FormRequest
      */
     public function authorize()
     {
-        $auth_user_role = $this->user()->role_id;
-   
-        return ($auth_user_role === 4);
+        $auth_user_role = Auth::user()->role_id;
+        $auth_worker_id = Auth::user()->worker_id;
+
+        $columns = [
+            'visits.status',
+            'visits.worker_id',
+            'report_visit.id as report_id'
+        ];
+
+        $visit = Visit::select($columns)->where('visits.id', $this->route('visita'))
+            ->leftJoin(DB::raw("(SELECT DISTINCT ON (visit_id) * FROM reports) as report_visit"),
+                function($join) {
+                    $join->on("report_visit.visit_id", "=", "visits.id");
+                }
+            )->first();
+     
+        return ($visit && $visit->status !== "CANCELADA"
+                && is_null($visit->report_id)
+                        && ($visit->worker_id === $auth_worker_id
+                                || $auth_user_role === 4));
     }
 
     /**
@@ -26,6 +48,8 @@ class StoreReportRequest extends FormRequest
      */
     public function rules()
     {
+        $today_date = new DateTime();
+    
         $visitor_id  = isset($this->visitor_id) ? (int) $this->visitor_id : -1;
         $worker_id  = isset($this->worker_id) ? (int) $this->worker_id : -1;
         $auto_option = isset($this->auto_option) ? (int) $this->auto_option : 0;
@@ -41,6 +65,7 @@ class StoreReportRequest extends FormRequest
             'attending_date' => [
                 'required',
                 'date_format:Y-m-d',
+                'after_or_equal:'. $today_date->format('Y-m-d')
             ],
             'entry_time' => [
                 'required',
@@ -69,12 +94,10 @@ class StoreReportRequest extends FormRequest
                 'max:10'
             );
             $rules['visitor_phone_number'] = array(
-                'required',
                 'unique:visitors,phone_number',
                 'max:15'
             );
             $rules['image'] = array(
-                'required',
                 'image' ,
                 'mimes:jpeg,png,jpg,gif',
                 'max:512'
@@ -95,11 +118,25 @@ class StoreReportRequest extends FormRequest
             $auto_id = isset($this->auto_id) ? (int) $this->auto_id : -1;
 
             if ($auto_id === -1){
+                
                 $rules['auto_enrrolment'] = array(
                     'required',
                     'unique:autos,enrrolment',
                     'max:7'
                 );
+
+                $rules['auto_model'] = array(
+                    'required',
+                );
+    
+                $rules['auto_brand'] = array(
+                    'required',
+                );
+    
+                $rules['auto_color'] = array(
+                    'required',
+                );
+
             } else {
                 $rules['auto_enrrolment'] = array(
                     'required',
@@ -110,17 +147,6 @@ class StoreReportRequest extends FormRequest
                 );
             }
         
-            $rules['auto_model'] = array(
-                'required',
-            );
-
-            $rules['auto_brand'] = array(
-                'required',
-            );
-
-            $rules['auto_color'] = array(
-                'required',
-            );
         }
 
         return $rules;
@@ -143,12 +169,13 @@ class StoreReportRequest extends FormRequest
             'departure_time.after' => 'La hora de salida debe ser posterior a la hora de entrada',
             'building.required' => 'Debe indicar el edificio donde se realizara la visita',
             'department.required' => 'Debe indicar el departamento donde se realizara la visita',
+            'attending_date.after_or_equal' => 'La fecha de la visita debe ser igual o posterior a la fecha de hoy'
         ];
 
         if ($visitor_id === -1){
             $messages['visitor_dni.unique'] = 'La cedula del visitante ya fue registrada';
             $messages['visitor_phone_number.unique'] = 'El telefono del visitante ya fue registrado';
-            $messages['image.required'] = 'Es necesario que suba la imagen del visitante';
+            /* $messages['image.required'] = 'Es necesario que suba la imagen del visitante'; */
             $messages['image.max'] = 'El peso maximo de la imagen es de 512 KB';
         } else {
             $messages['visitor_dni.exists'] = 'El visitante ingresado no existe, porfavor registrelo';

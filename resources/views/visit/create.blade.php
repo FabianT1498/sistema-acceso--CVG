@@ -16,11 +16,7 @@
   <script src="{{ asset('js/visitor.js') }}"></script>
 @endsection
 
-@section('migasdepan')
-    <a href="{{ route('visitas.index') }}">{{ __('Visita') }}</a>
-    &nbsp;&nbsp;<i class="icon ion-android-arrow-forward"></i>&nbsp;&nbsp;{{ __('Visita') }}
-     <span class="text-success">({{ __('Crear') }})</span>
-@endsection
+@include('visit.nav_route')
 
 @section('content')
   <input type="hidden" id="edit" value="{{ App\Http\Controllers\WebController::EDIT }}">
@@ -33,7 +29,7 @@
   </aside>
   <!-- Fin Main Sidebar Container -->
   <!-- Content Header (Page header) -->
-  @include('visit.head')
+  @yield('head_visit')
   <!-- /.content-header -->
 
   <!-- Content Wrapper. Contains page content -->
@@ -93,7 +89,7 @@
 
               <div class="card" id="visitorData">
                 @if (old('visitor_id') === '-1')
-                  @include('visitor.inputs', ['is_form_visit'=>true])
+                  @include('visitor.inputs', ['is_form_visit'=>true, 'is_show_view' => false])
                 @endif
               </div>
 
@@ -101,7 +97,7 @@
                 <div class="card-body">
                   <h3 class="h3 mb-md-5 text-center title-subline">Datos de la visita</h3>
                   
-                  @if (Auth::user()->role_id !== 3)
+                  @if (Auth::user()->role_id === 4 && $is_my_visit === 0)
                     <div class="form-group row mb-md-4">
                       <label class="col-md-3 col-form-label" for="workerDNI">{{ _('Cédula del trabajador:') }}&nbsp;<sup class="text-danger">*</sup></label>
                       <div class="col-md-3">

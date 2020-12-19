@@ -1,11 +1,12 @@
 <?php
 
-namespace App\Http\Requests;
+namespace App\Http\Requests\Visit;
 
 use Illuminate\Foundation\Http\FormRequest;
-use App\Auto;
+use Illuminate\Validation\Rule;
+use App\Visit;
 
-class EditAutoRequest extends FormRequest
+class ChangeVisitStatusRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -14,11 +15,13 @@ class EditAutoRequest extends FormRequest
      */
     public function authorize()
     {
-        $auth_user_role = $this->user()->role_id;
-  
-        $auto = Auto::find($this->route('auto'));
+        $auth_worker_id = $this->user()->worker_id;
+        
+        $visit = Visit::find($this->route('id'));
 
-        return (($auto && !$auto->deleted_at) && $auth_user_role === 4);
+        return ($visit 
+                && ($visit->status === 'POR CONFIRMAR')
+                && ($visit->worker_id === $auth_worker_id));
     }
 
     /**

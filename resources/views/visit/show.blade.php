@@ -13,11 +13,7 @@
   <script src="{{ asset('js/visit.js') }}"></script>
 @endsection
 
-@section('migasdepan')
-    <a href="{{ route('visitas.index') }}">{{ __('Visita') }}</a>
-    &nbsp;&nbsp;<i class="icon ion-android-arrow-forward"></i>&nbsp;&nbsp;{{ __('Visita') }}
-     <span class="text-success">({{ __('Crear') }})</span>
-@endsection
+@include('visit.nav_route')
 
 @section('content')
   <input type="hidden" id="edit" value="{{ App\Http\Controllers\WebController::EDIT }}">
@@ -30,7 +26,7 @@
   </aside>
   <!-- Fin Main Sidebar Container -->
   <!-- Content Header (Page header) -->
-  @include('visit.head')
+  @yield('head_visit')
   <!-- /.content-header -->
 
   <!-- Content Wrapper. Contains page content -->
@@ -46,19 +42,15 @@
                     <div class="card" id="visitorData">
                         <div class="card-body">
                             <h3 class="h3 mb-md-5 text-center title-subline">Datos del visitante</h3>
-                            <div class="form-row mb-md-4">
-                                <div class="form-group col-md-4">
+                            <div class="form-row">
+                                <div class="form-group col-md-3">
+                                    <label for="visitorFirstname">Nombre del visitante:&nbsp;</label>
+                                    <p>{{$visit->visitor_firstname .' '. $visit->visitor_lastname}}</p>                 
+                                </div>
+                                <div class="form-group col-md-3">
                                     <label for="visitorFirstname">Cedula</label>
                                     <p>{{$visit->visitor_dni}}</p>                 
-                                </div>
-                                <div class="form-group col-md-4">
-                                    <label for="visitorFirstname">Nombre(s):&nbsp;</label>
-                                    <p>{{$visit->visitor_firstname}}</p>                 
-                                </div>
-                                <div class="form-group col-md-4">
-                                    <label for="visitorLastname">Apellido(s):&nbsp;</label>
-                                    <p>{{$visit->visitor_lastname}}</p> 
-                                </div>
+                                </div>          
                             </div>
                         </div>
                     </div>
@@ -69,23 +61,19 @@
 
                             
                             @if (Auth::user()->role_id !== 3)
-                                <div class="form-row mb-md-4">
-                                    <div class="form-group col-md-4">
+                                <div class="form-row mb-md-1">
+                                    <div class="form-group col-md-3">
+                                        <label for="visitorFirstname">Nombre del trabajador:&nbsp;</label>
+                                        <p>{{$visit->worker_firstname . ' ' . $visit->worker_lastname }}</p>                 
+                                    </div>
+                                    <div class="form-group col-md-3">
                                         <label for="workerDNI">Cedula del trabajador</label>
                                         <p>{{$visit->worker_dni}}</p>                 
-                                    </div>
-                                    <div class="form-group col-md-4">
-                                        <label for="visitorFirstname">Nombre(s):&nbsp;</label>
-                                        <p>{{$visit->worker_firstname}}</p>                 
-                                    </div>
-                                    <div class="form-group col-md-4">
-                                        <label for="visitorLastname">Apellido(s):&nbsp;</label>
-                                        <p>{{$visit->worker_lastname}}</p> 
-                                    </div>
+                                    </div>                   
                                 </div>
                             @endif
 
-                            <div class="form-row mb-md-4">
+                            <div class="form-row mb-md-1">
                                 <div class="form-group col-md-3">
                                     <label for="attendingDate">{{ _('Fecha de visita:') }}</label>
                                     <p>{{date('d-m-Y', strtotime($visit->date_attendance))}}</p> 
@@ -105,11 +93,11 @@
                             </div>
 
                             <div class="form-row">
-                                <div class="form-group col-md-4">
+                                <div class="form-group col-md-3">
                                     <label for="attendingDate">{{ _('Edificio:') }}</label>
                                     <p>{{$visit->building_name}}</p> 
                                 </div>
-                                <div class="form-group col-md-4">
+                                <div class="form-group col-md-3">
                                     <label for="attendingDate">{{ _('Departamento:') }}</label>
                                     <p>{{$visit->department_name}}</p> 
                                 </div>
@@ -121,22 +109,22 @@
                         <div class="card">
                             <div class="card-body">
                                 <h3 class="h3 mb-md-5 text-center title-subline">Datos del automovil</h3>
-                                <div class="form-row mb-md-4">
-                                    <div class="form-group col-md-4">
+                                <div class="form-row mb-md-2">
+                                    <div class="form-group col-md-3">
                                         <label for="workerDNI">Matricula del auto</label>
                                         <p>{{$visit->auto_enrrolment}}</p>                 
                                     </div>
-                                    <div class="form-group col-md-4">
+                                    <div class="form-group col-md-3">
                                         <label for="visitorFirstname">Marca</label>
                                         <p>{{$visit->auto_brand}}</p>                 
                                     </div>
-                                    <div class="form-group col-md-4">
+                                    <div class="form-group col-md-3">
                                         <label for="visitorFirstname">Modelo</label>
                                         <p>{{$visit->auto_model}}</p>                 
                                     </div>
                                 </div>
                                 <div class="form-row">
-                                    <div class="form-group col-md-4">
+                                    <div class="form-group col-md-3">
                                         <label for="workerDNI">Color del auto</label>
                                         <p>{{$visit->auto_color}}</p>                 
                                     </div>

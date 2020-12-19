@@ -43,9 +43,8 @@ class ReportController extends WebController
             ->first();
         
         // Create pass record
-        $pass = new Report();
+        $pass = new Report($record);
         $pass->user_id = Auth::id(); 
-        $pass->report_id = $id;
         $pass->save();
 
         $file_name = $record->visitor_firstname. '_' . $record->visitor_lastname.'_'. date('d-m-Y', strtotime($record->date_attendance)). '.pdf';

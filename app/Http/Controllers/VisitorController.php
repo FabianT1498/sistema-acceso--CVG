@@ -15,10 +15,10 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Auth;
 
-use App\Http\Requests\StoreVisitorRequest;
-use App\Http\Requests\UpdateVisitorRequest;
-use App\Http\Requests\DestroyVisitorRequest;
-use App\Http\Requests\EditVisitorRequest;
+use App\Http\Requests\Visitor\StoreVisitorRequest;
+use App\Http\Requests\Visitor\UpdateVisitorRequest;
+use App\Http\Requests\Visitor\DestroyVisitorRequest;
+use App\Http\Requests\Visitor\EditVisitorRequest;
 
 class VisitorController extends WebController
 {
@@ -56,6 +56,10 @@ class VisitorController extends WebController
                    $visitors = $visitors->where(DB::raw('lower("lastname")'), "LIKE", "%".strtolower($last_name)."%");
                 }
             }   
+        }
+
+        if (Auth::user()->role_id === 3){
+            $visitors = $visitors->where('user_id', Auth::user()->id);
         }
         
         $visitors = $visitors->paginate(10); 
@@ -97,14 +101,22 @@ class VisitorController extends WebController
         $visitor->user_id = Auth::user()->id;
 
         // Make a image name based on user name and current timestamp
-        $name = Str::slug( $validated['visitor_firstname']. '_' . $validated['visitor_lastname'].'_'. time() );
-        $photo = new Photo();
-        $photo->storePhoto($validated['image'], $name);
+        if (isset($validated['image'])){
+            $name = Str::slug( $validated['visitor_firstname']. '_' . $validated['visitor_lastname'].'_'. time() );
+            $photo = new Photo();
+            $photo->storePhoto($validated['image'], $name);
 
-        if (!$visitor->save() || !$visitor->photo()->save($photo)){
-            toastr()->error(__('Ocurrio un error al crear el registro'));
+        }
+
+        if (!$visitor->save()){
+            toastr()->error(__('Ocurrio un error al crear el visitante'));
         } else {
-            toastr()->success(__('Registro creado con éxito'));
+
+            if (isset($photo) && !$visitor->photo()->save($photo)){
+                toastr()->error(__('Ocurrio un error al registrar la foto del visitante'));
+            }
+
+            toastr()->success(__('Visitante creado con éxito'));
         }
          
         return redirect()->route('visitantes.index', compact('vista', 'trashed', 'search'));
@@ -116,9 +128,18 @@ class VisitorController extends WebController
      * @param  \App\User  $user
      * @return \Illuminate\Http\Response
      */
-    public function show(User $user)
+    public function show($id, EditVisitorRequest $request)
     {
         //
+        $visitor = Visitor::withTrashed()->where('id',$id)->first();
+     
+        $photo = $visitor->photo()->first();
+
+        $vista = $this::EDIT;
+        $search = $request['search'];
+        $trashed = ($request['trashed']) ? true : false;
+
+        return view('visitor.show', compact('vista', 'search', 'trashed', 'visitor', 'photo'));
     }
 
     /**
@@ -156,28 +177,45 @@ class VisitorController extends WebController
    
         $visitor = Visitor::withTrashed()->where('id', $id)->first();
 
-        /* $visitor->firstname = $validated['visitor_firstname'];
-        $visitor->lastname = $validated['visitor_lasttname'];
-        $visitor->dni = $validated['visitor_dni']; */
-        $visitor->phone_number = $validated['visitor_phone_number'];
+        $visitor->firstname = $validated['visitor_firstname'];
+        $visitor->lastname = $validated['visitor_lastname'];
+        $visitor->dni = $validated['visitor_dni'];
 
-        // Check if a new profile image has been uploaded
-        if ($request->has('image')) {
-
-            $photo = Photo::where('visitor_id', $visitor->id)->first();
-    
-            // Delete existing image
-            Storage::disk('public')->delete($photo->path);
-
-            $name = Str::slug( $visitor->firstname. '_' . $visitor->lastname.'_'. time() );
-            $photo->storePhoto($validated['image'], $name);
+        if ($request->has('visitor_phone_number')){
+            $visitor->phone_number = $validated['visitor_phone_number'];
         }
 
-        if(!$visitor->update() || (isset($photo) && !$photo->update()))
+        // Check if a new profile image has been uploaded
+        if (isset($validated['image'])) {
+
+            $photo = Photo::where('visitor_id', $visitor->id)->first();
+            $name = Str::slug( $validated['visitor_firstname']. '_' . $validated['visitor_lastname'].'_'. time() );
+
+            if (is_null($photo)){
+                $photo = new Photo();
+                $photo->storePhoto($validated['image'], $name);
+        
+            } else {
+                // Delete existing image
+                Storage::disk('public')->delete($photo->path);
+                $photo->storePhoto($validated['image'], $name);
+            }
+        }
+
+        if(!$visitor->update())
         {
-            toastr()->error(__('Error al actualizar el registro'));
+            toastr()->error(__('Error al actualizar el visitante'));
         } else {
-            toastr()->success(__('Registro actualizado con éxito'));
+
+            if (isset($photo)){
+                if(is_null($photo->visitor_id) && !$visitor->photo()->save($photo)){
+                    toastr()->error(__('Ocurrio un error al registrar la foto del visitante'));
+                } else if(!is_null($photo->visitor_id) && !$photo->update()){
+                    toastr()->error(__('Ocurrio un error al actualizar la foto del visitante'));
+                }
+            }
+
+            toastr()->success(__('Visitante actualizado con éxito'));
         }
 
         return redirect()->route('visitantes.index', compact('search', 'trashed'));

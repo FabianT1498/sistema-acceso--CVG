@@ -16,7 +16,7 @@
 @endsection
 
 @section('migasdepan')
-    <a href="{{ route('visitas.mis_visitas') }}">{{ __('MIS VISITAS') }}</a>
+    <a href="{{ route('mis_visitas') }}">{{ __('MIS VISITAS') }}</a>
     &nbsp;&nbsp;<i class="icon ion-android-arrow-forward"></i>&nbsp;&nbsp;{{ __('MIS VISITAS') }}
      <span class="text-info">({{ __('Listado') }})</span>
 @endsection
@@ -62,7 +62,7 @@
                   @foreach ($visits as $visit)
                     <tr id="tr_{{$visit->id}}">
                       <td>          
-                        <a href="{{ route('visites.show', $visit->id) }}">
+                        <a href="{{ route('visitas.show', $visit->id) }}">
                           {{ $visit->visitor_firstname. ' ' .$visit->visitor_lastname }}
                         </a>  
                       </td>                         
@@ -76,7 +76,7 @@
                         
                         @if ($visit->status === "POR CONFIRMAR")
 
-                          <a class="ml-md-3" title="{{ __('Anular cita') }}" href="#" onclick="
+                          <a class="" title="{{ __('Anular cita') }}" href="#" onclick="
                             event.preventDefault();
                             confirm('Está a punto de cancelar la cita, esta acción no se puede deshacer. ¿Desea continuar?') 
                               ? document.getElementById('frm_anular_{{ $visit->id }}').submit() :
@@ -92,7 +92,7 @@
                               <input type="hidden" name="search" value="{{ $search }}">
                           </form>
 
-                          <a class="ml-md-3" title="{{ __('Confirmar cita') }}" href="#" onclick="
+                          <a class="ml-md-2" title="{{ __('Confirmar cita') }}" href="#" onclick="
                             event.preventDefault();
                             confirm('Está a punto de confirmar la cita, esta acción no se puede deshacer. ¿Desea continuar?') 
                               ? document.getElementById('frm_confirmar_{{ $visit->id }}').submit() 
@@ -107,22 +107,54 @@
                               @csrf
                               <input type="hidden" name="search" value="{{ $search }}">
                           </form>
+                        @endif
 
-                        @elseif(Auth::user()->role_id === 4 && $visit->status === "CONFIRMADA")
-                          <a title="{{ __('Generar PDF') }}" href="#" onclick="
-                            event.preventDefault();
-                            confirm('{{ __("Usted va a generar un visite, esto quedará registrado. ¿Desea continuar?") }}') ?
-                              document.getElementById('frm_pdf_{{ $visit->id }}').submit() : false;"
+                        @if (is_null($visit->report_id) && $visit->status !== "CANCELADA")
+                          <a 
+                            class="ml-md-2" 
+                            title="{{ __('Editar cita') }}" 
+                            href="{{ route('visitas.edit', $visit->id) }}" 
                           >
                             <small>
-                              <small class="text-info"><i class="fa fa-file-pdf fa-2x"></i></small>
+                              <small class="text-info"><i class="far fa-edit fa-2x"></i></small>
                             </small>
                           </a>
-                          <form method="GET" id="frm_pdf_{{ $visit->id }}" action="{{ route('reportes.generar_pase', $visit->id) }}" class="d-none">
-                              @csrf
-                              <input type="hidden" name="search" value="{{ $search }}">
-                          </form>       
                         @endif
+                        
+                        @if ($today_date <= $visit->date_attendance)
+                          @if ( (Auth::user()->role_id === 4 && $visit->status === "CONFIRMADA") 
+                              || ( (Auth::user()->role_id === 1 || Auth::user()->role_id === 2) && $visit->status === "COMPLETADA" ) )
+                              
+                            <a class="ml-md-2" title="{{ __('Generar PDF') }}" href="#" onclick="
+                              event.preventDefault();
+                              confirm('{{ __("Usted va a generar un visita, esto quedará registrado. ¿Desea continuar?") }}') ?
+                                document.getElementById('frm_pdf_{{ $visit->id }}').submit() : false;"
+                            >
+                              <small>
+                                <small class="text-info"><i class="fa fa-file-pdf fa-2x"></i></small>
+                              </small>
+                            </a>
+                            <form method="GET" id="frm_pdf_{{ $visit->id }}" action="{{ route('reportes.generar_pase', $visit->id) }}" class="d-none">
+                                @csrf
+                                <input type="hidden" name="search" value="{{ $search }}">
+                            </form>           
+                          @elseif(Auth::user()->role_id === 4 && $visit->status === "COMPLETADA")
+                            <a
+                              class="ml-md-2" 
+                              data-toggle="modal" 
+                              data-target="#reportPrintedModal"
+                              title="{{ __('Pase generado') }}"
+                              href="#"
+                            >
+                                <small>
+                                  <small class="text-secondary"><i class="fa fa-file-pdf fa-2x"></i></small>
+                                </small>
+                            </a>
+                            @include ('report.report-printed-modal')
+                          @endif
+                        @endif
+
+                        &nbsp;
                       </td>
                       
                     </tr>

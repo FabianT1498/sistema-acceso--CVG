@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Requests;
+namespace App\Http\Requests\Visitor;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -14,9 +14,7 @@ class StoreVisitorRequest extends FormRequest
      */
     public function authorize()
     {
-        $auth_user_role = $this->user()->role_id;
-   
-        return ($auth_user_role === 4);
+        return (true);
     }
 
     /**
@@ -35,12 +33,10 @@ class StoreVisitorRequest extends FormRequest
                 'max:10'
             ],
             'visitor_phone_number' => [
-                'required',
                 'unique:visitors,phone_number',
                 'max:15'
             ],
             'image' => [
-                'required',
                 'image' ,
                 'mimes:jpeg,png,jpg,gif',
                 'max:512'

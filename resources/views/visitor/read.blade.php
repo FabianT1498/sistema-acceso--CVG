@@ -53,30 +53,30 @@
                     <th>{{ __('Apellidos') }}</th>
                     <th>{{ __('Cédula') }}</th>
                     <th>{{ __('Numero de telefono') }}</th>
+                    <th>Opciones</th>
                   </tr>
                 </thead>
                 <tbody>
                   @foreach ($visitors as $visitor)
                     <tr id="tr_{{$visitor->id}}">
                       <td>
-                        @if (Auth::user()->role_id === 4)
-                          <a href="{{ route('visitantes.edit', $visitor->id) }}"
-                            onclick="event.preventDefault();
-                            document.getElementById('frm_registro_{{ $visitor->id }}').submit();">
-                                {{ $visitor->firstname }}
-                          </a>
-                          <form id="frm_registro_{{ $visitor->id }}" action="{{ route('visitantes.edit', $visitor->id) }}" class="d-none">
-                              @method('PUT')
-                              @csrf
-                          </form>
-                        @else
+                        <a href="{{ route('visitantes.show', $visitor->id) }}">
                           {{ $visitor->firstname }}
-                        @endif
+                        </a>
                       </td>
                       <td>{{ $visitor->lastname }}</td>
                       <td>{{ $visitor->dni }}</td>
                       <td>{{ $visitor->phone_number }}</td>
-            
+                      <td>
+                        <a 
+                          title="{{ __('Editar visitante') }}" 
+                          href="{{ route('visitantes.edit', $visitor->id) }}" 
+                        >
+                          <small>
+                            <small class="text-info"><i class="far fa-edit fa-2x"></i></small>
+                          </small>
+                        </a>
+                      </td>
                     </tr>
                   @endforeach
                 </tbody>

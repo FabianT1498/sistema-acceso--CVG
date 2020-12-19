@@ -16,6 +16,11 @@ class CreateReportsTable extends Migration
         //
         Schema::create('reports', function (Blueprint $table) {
             $table->bigIncrements('id');
+            $table->string('visitor_fullname');
+            $table->string('visitor_dni');
+            $table->string('auto_enrrolment')->nullable();
+            $table->string('auto_model')->nullable();
+
             $table->unsignedBigInteger('user_id')->unsigned()->nullable();
             $table->unsignedBigInteger('visit_id')->unsigned()->nullable();
             $table->foreign('user_id')->references('id')->on('users');

@@ -5,26 +5,25 @@
         <nav class="main-header navbar navbar-expand navbar-white navbar-light border-bottom-0 col-12 flex-wrap">
           <div class="row w-100 mb-md-2">
             <span class="text-dark d-inline h4 mr-3">
-              <a href="{{ route('visitas.mis_visitas') }}" title="">
+              <a href="{{ route('mis_visitas') }}" title="">
                 <small class="mr-md-2"><i class="nav-icon icon fa fa-file"></i></small>{{ __('Mis visitas') }}
               </a>
             </span>
-            @if (Auth::user()->role_id === 4)
-              <form class="d-flex mr-md-3" action="{{ route('visitas.create') }}">
-                <input type="hidden" name="search" value="{{ $search }}">
-                <div class="input-group" title="{{ __('Nuevo Registro') }}">
-                  <div class="">
-                    <button class="btn btn-primary btn-sm" type="submit">
-                      <i class="icon ion-android-add px-1"></i>
-                    </button>
-                  </div>
+            
+            <form class="d-flex mr-md-3" action="{{ route('visitas.create') }}">
+              <input type="hidden" name="is_my_visit" value="1">
+              <div class="input-group" title="{{ __('Nueva Visita') }}">
+                <div class="">
+                  <button class="btn btn-primary btn-sm" type="submit">
+                    <i class="icon ion-android-add px-1"></i>
+                  </button>
                 </div>
-              </form>
-            @endif
-            <form id="searchForm" class="d-flex flex-column ml-3" action="{{ route('visitas.mis_visitas') }}">
+              </div>
+            </form>
+            
+            <form id="searchForm" class="d-flex flex-column ml-3" action="{{ route('mis_visitas') }}">
               <div class="row mb-md-2">
                 <div class="form-inline ">
-                  
                   <label class="mr-3" for="search">{{ _('Buscar:') }}</label>
                   <input 
                     type="text" 
@@ -42,6 +41,7 @@
                     <option value="POR CONFIRMAR" {{$status_select === "POR CONFIRMAR" ? 'selected' : '' }}>Por confirmar</option>
                     <option value="CANCELADA" {{$status_select === "CANCELADA" ? 'selected' : '' }}>Cancelada</option>
                     <option value="CONFIRMADA" {{ $status_select === "CONFIRMADA" ? 'selected' : '' }}>Confirmada</option>
+                    <option value="COMPLETADA" {{ $status_select === "COMPLETADA" ? 'selected' : '' }}>Completada</option>
                   </select>  
                 </div>
               </div>

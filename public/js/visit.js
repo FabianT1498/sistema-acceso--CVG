@@ -67,7 +67,8 @@ $(document).ready(function () {
                             type="text" 
                             class="form-control" 
                             id="visitorFirstname" 
-                            name="visitor_firstname" 
+                            name="visitor_firstname"
+                            autocomplete="off"
                             placeholder="Nombre del visitante"
                             required
                         >                   
@@ -80,27 +81,28 @@ $(document).ready(function () {
                         id="visitorLastname" 
                         name="visitor_lastname" 
                         placeholder="Apellido del visitante"
+                        autocomplete="off"
                         required
                         >                   
                     </div>
                     <div class="form-group col-md-4">
-                        <label for="visitorPhoneNumber">Telefono:&nbsp;<sup class="text-danger">*</sup></label>
+                        <label for="visitorPhoneNumber">Telefono:</label>
                         <input 
                         type="text" 
                         class="form-control" 
                         id="visitorPhoneNumber" 
-                        name="visitor_phone_number" 
-                        placeholder="Telefono del visitante"
-                        required
+                        name="visitor_phone_number"
+                        autocomplete="off" 
+                        placeholder="Telefono del visitante"         
                         >
                     </div>
                 </div>
                 <div class="form-row">
                     <div class="form-group col-md-4">
-                        <label for="file">Foto del visitante &nbsp;<sup class="text-danger">*</sup></label>
+                        <label for="file">Foto del visitante:</label>
                         <input type="file" name="image" class="file" accept="image/*">
                         <div class="input-group">
-                            <input type="text" class="form-control" disabled placeholder="Subir Foto" id="file" required>
+                            <input type="text" class="form-control" disabled placeholder="Subir Foto" id="file">
                             <div class="input-group-append">
                                 <button type="button" class="browse btn btn-primary">Buscar...</button>
                             </div>

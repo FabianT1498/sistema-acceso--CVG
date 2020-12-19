@@ -1,12 +1,12 @@
 <?php
 
-namespace App\Http\Requests;
+namespace App\Http\Requests\Auto;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-use App\User;
+use App\Auto;
 
-class RestoreUserRequest extends FormRequest
+class DestroyAutoRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -17,10 +17,9 @@ class RestoreUserRequest extends FormRequest
     {
         $auth_user_role = $this->user()->role_id;
 
-        $user = User::onlyTrashed()->where('id', $this->route('usuario'))->first();
+        $auto = Auto::find($this->route('id'));
 
-        return ($user && ($auth_user_role === 1 || 
-            ($user->role_id > 2 && $auth_user_role === 2)));
+        return (($auto && !$auto->deleted_at) && $auth_user_role <= 2);
     }
 
     /**

@@ -12,10 +12,11 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Auth;
 
-use App\Http\Requests\StoreAutoRequest;
-use App\Http\Requests\UpdateAutoRequest;
-use App\Http\Requests\DestroyAutoRequest;
-use App\Http\Requests\EditAutoRequest;
+use App\Http\Requests\Auto\StoreAutoRequest;
+use App\Http\Requests\Auto\UpdateAutoRequest;
+use App\Http\Requests\Auto\DestroyAutoRequest;
+use App\Http\Requests\Auto\EditAutoRequest;
+use App\Http\Requests\Auto\CreateAutoRequest;
 
 
 class AutoController extends WebController
@@ -60,7 +61,7 @@ class AutoController extends WebController
      *
      * @return \Illuminate\Http\Response
      */
-    public function create()
+    public function create(CreateAutoRequest $request)
     {
         
         $vista = $this::CREATE;
@@ -144,20 +145,22 @@ class AutoController extends WebController
         $trashed = request('trashed');
 
         $columns = [
-            'autos.*',
-            'autos.auto_model_id as model_id',
-            'auto_models.name as model',
-            'auto_models.auto_brand_id as brand_id',
-            'auto_brands.name as brand'
+            'autos.id as auto_id',
+            'autos.enrrolment as auto_enrrolment',
+            'autos.color as auto_color',
+            'autos.auto_model_id as auto_model_id',
+            'auto_models.name as auto_model',
+            'auto_models.auto_brand_id as auto_brand_id',
+            'auto_brands.name as auto_brand'
         ];
 
-        $auto = Auto::select($columns)
+        $record = Auto::select($columns)
             ->join('auto_models', 'auto_models.id', '=', 'autos.auto_model_id')
             ->join('auto_brands', 'auto_brands.id', '=', 'auto_models.auto_brand_id')
             ->where("autos.id", "=", $id)
             ->first();
         
-        return view('auto.edit', compact('vista', 'search', 'trashed', 'auto'));
+        return view('auto.edit', compact('vista', 'search', 'trashed', 'record'));
     }
 
     /**
@@ -180,7 +183,7 @@ class AutoController extends WebController
 
         $auto->color = $validated['auto_color'];
         
-        /* $auto->enrrolment =  $validated['auto_enrrolment'];
+        $auto->enrrolment =  $validated['auto_enrrolment'];
 
         $auto_brand = AutoBrand::where('name', $validated['auto_brand'])
                 ->first();
@@ -199,7 +202,7 @@ class AutoController extends WebController
             $auto_model->name = $validated['auto_model'];
             $auto_model->auto_brand_id = $auto_brand->id;
             $auto_model->save();
-        } */
+        }
       
         if(!$auto->update())
         {

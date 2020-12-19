@@ -1,12 +1,13 @@
 <?php
 
-namespace App\Http\Requests;
+namespace App\Http\Requests\Auto;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
-use App\Auto;
 
-class UpdateAutoRequest extends FormRequest
+use App\Visitor;
+
+class StoreAutoRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -16,11 +17,8 @@ class UpdateAutoRequest extends FormRequest
     public function authorize()
     {
         $auth_user_role = $this->user()->role_id;
-        
-        $auto = Auto::find($this->route('auto'));
-
-        return (($auto && !$auto->deleted_at) 
-                && $auth_user_role === 4);
+     
+        return ($auth_user_role === 4);
     }
 
     /**
@@ -30,10 +28,17 @@ class UpdateAutoRequest extends FormRequest
      */
     public function rules()
     {
-        $auto_id = $this->route('auto');
-    
-        $rules = [       
+        $visitor_id = $this->visitor_id;
+
+        $rules = [
+            'auto_enrrolment' => [
+                'required',
+                'unique:autos,enrrolment',
+                'max:7'
+            ],
             'auto_color' => ['required'],
+            'auto_brand' => ['required'],
+            'auto_model' => ['required'],
         ];
 
         return $rules;
@@ -48,17 +53,17 @@ class UpdateAutoRequest extends FormRequest
     {
 
         $messages = [
-            'auto_color.required' => 'Indique el color del auto por favor'
+            'auto_enrrolment.unique' => 'La matricula de este auto ya fue registrada'
         ];
 
         return $messages;
     }
 
-    /* /**
+    /**
      * Prepare the data for validation.
      *
      * @return void
-     *
+     */
     protected function prepareForValidation()
     {
  
@@ -67,5 +72,5 @@ class UpdateAutoRequest extends FormRequest
         $inputs['auto_brand'] = strtoupper($this->auto_brand);
         
         $this->merge($inputs);
-    } */
+    }
 }

@@ -9,18 +9,21 @@
                 <small class="mr-md-2"><i class="nav-icon icon fa fa-file"></i></small>{{ __('Visitas') }}
               </a>
             </span>
+            
             @if (Auth::user()->role_id === 4)
-            <form class="d-flex mr-md-3" action="{{ route('visitas.create') }}">
-                <input type="hidden" name="search" value="{{ $search }}">
-                <div class="input-group" title="{{ __('Nuevo Registro') }}">
-                  <div class="">
-                    <button class="btn btn-primary btn-sm" type="submit">
-                      <i class="icon ion-android-add px-1"></i>
-                    </button>
+              <form class="d-flex mr-md-3" action="{{ route('visitas.create') }}">
+                  <input type="hidden" name="search" value="{{ $search }}">
+                  <input type="hidden" name="is_my_visit" value="0">
+                  <div class="input-group" title="{{ __('Nueva Visita') }}">
+                    <div class="">
+                      <button class="btn btn-primary btn-sm" type="submit">
+                        <i class="icon ion-android-add px-1"></i>
+                      </button>
+                    </div>
                   </div>
-                </div>
               </form>
             @endif
+            
             <form id="searchForm" class="d-flex flex-column ml-3" action="{{ route('visitas.index') }}">
               <div class="row mb-md-2">
                 <div class="form-inline ">
@@ -42,6 +45,7 @@
                     <option value="POR CONFIRMAR" {{$status_select === "POR CONFIRMAR" ? 'selected' : '' }}>Por confirmar</option>
                     <option value="CANCELADA" {{$status_select === "CANCELADA" ? 'selected' : '' }}>Cancelada</option>
                     <option value="CONFIRMADA" {{ $status_select === "CONFIRMADA" ? 'selected' : '' }}>Confirmada</option>
+                    <option value="COMPLETADA" {{ $status_select === "COMPLETADA" ? 'selected' : '' }}>Completada</option>
                   </select>  
                 </div>
               </div>

@@ -59,49 +59,12 @@
             @endif
             <div class="card card-primary">
               <!-- form start -->
-              <form method='POST' action="{{ route('autos.update', $auto->id) }}"  role="form"  enctype="multipart/form-data">
+              <form id="formAutoUpdate" method="POST" action="{{ route('autos.update', $record->auto_id) }}"  role="form"  enctype="multipart/form-data">
                 @csrf
                 @method('PUT')
                 <div class="card-body">
-
-                  <h3 class="h3 mb-md-5 text-center title-subline">Datos del auto</h3>
-                  <div class="form-row mb-md-4">
-                      <div class="form-group col-md-3">
-                          <label for="autoEnrrolment">Matricula del auto:&nbsp;</label>
-                          <p>{{$auto->enrrolment}}</p>                 
-                          <input 
-                              type="hidden" 
-                              id="autoID" 
-                              name="auto_id" 
-                              value="{{$auto->id}}"
-                              readonly
-                          >
-                      </div>
-                      <div class="form-group col-md-3">
-                          <label for="autoBrand">Marca del auto:</label>
-                          <p>{{$auto->brand}}</p>           
-                      </div>
-                      <div class="form-group col-md-3">
-                          <label for="autoModel">Modelo del auto:</label>
-                          <p>{{$auto->model}}</p>               
-                      </div>
-                  </div>
-                      
-                  <div class="form-row">
-                      <div class="form-group col-md-3">
-                          <label for="autoColor">Color:</label>
-                          <input 
-                              type="text" 
-                              class="form-control" 
-                              id="autoColor" 
-                              name="auto_color" 
-                              value="{{$auto->color}}"
-                              placeholder="COLOR DEL AUTO"
-                          >                   
-                      </div> 
-                  </div>
+                  @include('auto.inputs')
                 </div>
-
                 <!-- /.card-body -->
                 <div class="card-footer">
                   <button type="submit" class="btn btn-success">{{ __('Actualizar Registro') }}</button>

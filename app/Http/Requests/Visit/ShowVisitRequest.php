@@ -1,12 +1,12 @@
 <?php
 
-namespace App\Http\Requests;
+namespace App\Http\Requests\Visit;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
-use App\Report;
+use App\Visit;
 
-class EditReportRequest extends FormRequest
+class ShowVisitRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -19,12 +19,11 @@ class EditReportRequest extends FormRequest
         $auth_user_id = $this->user()->id;
         $auth_worker_id = $this->user()->worker_id;
         
-        $report = Report::find($this->route('reporte'));
+        $visit = Visit::find($this->route('visita'));
 
-        return (($report && !$report->deleted_at) 
+        return (($visit && !$visit->deleted_at) 
                 && ($auth_user_role !== 3 
-                        || ($report->user_id === $auth_user_id) 
-                                || ($report->worker_id === $auth_worker_id)));
+                        || $visit->worker_id === $auth_worker_id));
         }
 
     /**

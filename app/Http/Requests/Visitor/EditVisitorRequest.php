@@ -1,12 +1,13 @@
 <?php
 
-namespace App\Http\Requests;
+namespace App\Http\Requests\Visitor;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
-use App\Report;
+use App\Visitor;
 
-class ShowReportRequest extends FormRequest
+class EditVisitorRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -16,15 +17,11 @@ class ShowReportRequest extends FormRequest
     public function authorize()
     {
         $auth_user_role = $this->user()->role_id;
-        $auth_user_id = $this->user()->id;
-        $auth_worker_id = $this->user()->worker_id;
-        
-        $report = Report::find($this->route('reporte'));
 
-        return (($report && !$report->deleted_at) 
-                && ($auth_user_role !== 3 
-                        || $report->worker_id === $auth_worker_id));
-        }
+        $visitor = Visitor::find($this->route('visitante'));
+
+        return ($visitor && ($auth_user_role !== 3 || $visitor->user_id === Auth::user()->id));
+    }
 
     /**
      * Get the validation rules that apply to the request.

@@ -1,12 +1,12 @@
 <?php
 
-namespace App\Http\Requests;
+namespace App\Http\Requests\Visit;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-use App\Report;
+use App\Visit;
 
-class DestroyReportRequest extends FormRequest
+class DestroyVisitRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -17,9 +17,9 @@ class DestroyReportRequest extends FormRequest
     {
         $auth_user_role = $this->user()->role_id;
 
-        $report = Report::find($this->route('id'));
+        $visit = Visit::find($this->route('id'));
 
-        return (($report && !$report->deleted_at) && $auth_user_role <= 2);
+        return (($visit && !$visit->deleted_at) && $auth_user_role <= 2);
     }
 
     /**

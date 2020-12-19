@@ -56,10 +56,7 @@
                     <th>{{ __('Hora de entrada') }}</th>
                     <th>{{ __('Hora de salida') }}</th>
                     <th>{{ __('Estatus') }}</th>
-
-                    @if (Auth::user()->role_id === 4)
-                      <th>{{ __('Opciones') }}</th>
-                    @endif
+                    <th>{{ __('Opciones') }}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -76,13 +73,25 @@
                       <td>{{ date('H:i', strtotime($visit->entry_time)) }}</td>   
                       <td>{{ date('H:i', strtotime($visit->departure_time)) }}</td>
                       <td>{{ $visit->status }}</td>
-                                    
-                      @if(Auth::user()->role_id === 4)
-                        @if($visit->status === "CONFIRMADA")
-                          <td>
-                              <a title="{{ __('Generar PDF') }}" href="#" onclick="
+                      <td>           
+                          @if (Auth::user()->role_id === 4 && $visit->status !== "COMPLETADA" && $visit->status !== "CANCELADA")
+                            <a 
+                              title="{{ __('Editar cita') }}" 
+                              href="{{ route('visitas.edit', $visit->id) }}" 
+                            >
+                              <small>
+                                <small class="text-info"><i class="far fa-edit fa-2x"></i></small>
+                              </small>
+                            </a>
+                          @endif
+
+                          @if ($today_date <= $visit->date_attendance)
+                            @if ( (Auth::user()->role_id === 4 && $visit->status === "CONFIRMADA") 
+                                || ( (Auth::user()->role_id === 1 || Auth::user()->role_id === 2) && $visit->status === "COMPLETADA" ) )
+                              
+                              <a class="ml-md-2" title="{{ __('Generar PDF') }}" href="#" onclick="
                                 event.preventDefault();
-                                confirm('{{ __("Usted va a generar un visite, esto quedará registrado. ¿Desea continuar?") }}') ?
+                                confirm('{{ __("Usted va a generar un visita, esto quedará registrado. ¿Desea continuar?") }}') ?
                                   document.getElementById('frm_pdf_{{ $visit->id }}').submit() : false;"
                               >
                                 <small>
@@ -93,11 +102,23 @@
                                   @csrf
                                   <input type="hidden" name="search" value="{{ $search }}">
                               </form>           
-                          </td>
-                        @else
-                          <td>&nbsp;</td>
-                        @endif
-                      @endif
+                            @elseif(Auth::user()->role_id === 4 && $visit->status === "COMPLETADA")
+                              <a 
+                                data-toggle="modal" 
+                                data-target="#reportPrintedModal"
+                                title="{{ __('Pase generado') }}"
+                                href="#"
+                              >
+                                  <small>
+                                    <small class="text-secondary"><i class="fa fa-file-pdf fa-2x"></i></small>
+                                  </small>
+                              </a>
+                              @include ('report.report-printed-modal')
+                            @endif
+                          @endif
+
+                          &nbsp;
+                      </td>              
                     </tr>
                   @endforeach
                 </tbody>

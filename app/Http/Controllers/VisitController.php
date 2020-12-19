@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Visitor;
-use App\Worker;
 use App\Visit;
 use App\Auto;
 use App\AutoBrand;
@@ -12,25 +11,23 @@ use App\Photo;
 use App\Building;
 use App\Department;
 
+use DateTime;
+
 use Illuminate\Validation\Rule;
 use App\Http\Controllers\WebController;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Facades\Hash;
+
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
+
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Auth;
 
-use App\Http\Requests\StoreReportRequest;
-use App\Http\Requests\UpdateReportRequest;
-use App\Http\Requests\DestroyReportRequest;
-use App\Http\Requests\EditReportRequest;
-use App\Http\Requests\ShowReportRequest;
-
-use App\Http\Requests\ChangeReportStatusRequest;
-
-use PDF;
+use App\Http\Requests\Visit\StoreVisitRequest;
+use App\Http\Requests\Visit\EditVisitRequest;
+use App\Http\Requests\Visit\UpdateVisitRequest;
+use App\Http\Requests\Visit\ShowVisitRequest;
+use App\Http\Requests\Visit\DestroyVisitRequest;
+use App\Http\Requests\Visit\ChangeVisitStatusRequest;
 
 class VisitController extends WebController
 {
@@ -45,9 +42,12 @@ class VisitController extends WebController
     {
         $vista = $this::READ;
         $search = request('search');
+        $is_my_visit = 0;
         $status_select = request('status_select') ? request('status_select') : 'TODAS' ;
         $start_date = request('start_date') ? request('start_date') : '';
         $finish_date = request('finish_date') ? request('finish_date') : '';
+
+        $today_date = (new DateTime())->format('Y-m-d');
 
         $columns = [
             'visits.*',
@@ -57,7 +57,8 @@ class VisitController extends WebController
             'users.username as user_username',
             'workers.firstname as worker_firstname',
             'workers.lastname as worker_lastname',
-            'workers.dni as worker_dni'
+            'workers.dni as worker_dni',
+            'report_visit.id as report_id'
         ];
 
         $visits = Visit::select($columns);
@@ -88,7 +89,12 @@ class VisitController extends WebController
                 }
             )
             ->join('workers', 'workers.id', '=', 'visits.worker_id')
-            ->join('users', 'users.id', '=', 'visits.user_id');
+            ->join('users', 'users.id', '=', 'visits.user_id')
+            ->leftJoin(DB::raw("(SELECT DISTINCT ON (visit_id) * FROM reports) as report_visit"),
+                    function($join) {
+                        $join->on("report_visit.visit_id", "=", "visits.id");
+                    }
+            );
         
         if ($status_select !== "TODAS"){
             $visits = $visits->where('visits.status', $status_select);
@@ -101,9 +107,9 @@ class VisitController extends WebController
             $visits = $visits->whereBetween('visits.date_attendance', [$new_start_date, $new_finish_date]);
         }
 
-        $visits = $visits->paginate(10); 
+        $visits = $visits->orderBy('created_at', 'desc')->paginate(10); 
 
-        return view('visit.read', compact('vista', 'status_select', 'search', 'visits', 'start_date', 'finish_date'));
+        return view('visit.read', compact('vista', 'status_select', 'search', 'visits', 'start_date', 'finish_date', 'is_my_visit', 'today_date'));
     }
 
     //
@@ -116,16 +122,19 @@ class VisitController extends WebController
     {
         $vista = $this::READ;
         $search = request('search');
+        $is_my_visit = 1;
         $start_date = request('start_date') ? request('start_date') : '';
         $finish_date = request('finish_date') ? request('finish_date') : '';
         $status_select = request('status_select') ? request('status_select') : 'TODAS' ;
+        $today_date = (new DateTime())->format('Y-m-d');
 
         $columns = [
             'visits.*',
             'visitors.firstname as visitor_firstname',
             'visitors.lastname as visitor_lastname',
             'visitors.dni as visitor_dni',
-            'users.username as user_username'
+            'users.username as user_username',
+            'report_visit.id as report_id'
         ];
 
         $visits = Visit::select($columns);
@@ -156,7 +165,12 @@ class VisitController extends WebController
                 }
             )
             ->join('workers', 'workers.id', '=', 'visits.worker_id')
-            ->join('users', 'users.id', '=', 'visits.user_id');
+            ->join('users', 'users.id', '=', 'visits.user_id')
+            ->leftJoin(DB::raw("(SELECT DISTINCT ON (visit_id) * FROM reports) as report_visit"),
+                    function($join) {
+                        $join->on("report_visit.visit_id", "=", "visits.id");
+                    }
+            );
         
         if ($status_select !== "TODAS"){
             $visits = $visits->where('visits.status', $status_select);
@@ -170,9 +184,9 @@ class VisitController extends WebController
         }
 
         $visits = $visits->where('visits.worker_id', Auth::user()->worker_id);
-        $visits = $visits->paginate(10); 
+        $visits = $visits->orderBy('created_at', 'desc')->paginate(10); 
 
-        return view('visit.my_visits', compact('vista', 'status_select', 'search', 'visits', 'start_date', 'finish_date'));
+        return view('visit.my_visits', compact('vista', 'status_select', 'search', 'visits', 'start_date', 'finish_date', 'is_my_visit', 'today_date'));
     }
 
     /**
@@ -185,11 +199,21 @@ class VisitController extends WebController
         
         $vista = $this::CREATE;
         $search = request('search');
+
+        $is_my_visit = Auth::user()->role_id !== 4 ? 1 : null;
+
+        if (is_null($is_my_visit)){
+            $is_my_visit = !is_null(request('is_my_visit')) 
+                    && (request('is_my_visit') === '1' || request('is_my_visit') === '0') 
+                ? (int) request('is_my_visit')
+                : 0;
+        }
+            
         $status_select = request('status_select') ? request('status_select') : 'TODAS';
         $start_date = request('start_date') ? request('start_date') : '';
         $finish_date = request('finish_date') ? request('finish_date') : '';
 
-        return view('report.create', compact('status_select', 'vista', 'search', 'start_date', 'finish_date'));
+        return view('visit.create', compact('status_select', 'vista', 'search', 'start_date', 'finish_date', 'is_my_visit'));
     }
 
     /**
@@ -198,7 +222,7 @@ class VisitController extends WebController
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(StoreReportRequest $request)
+    public function store(StoreVisitRequest $request)
     {
         
         $vista = $this::CREATE;
@@ -211,14 +235,14 @@ class VisitController extends WebController
 
         $validated = $request->validated();
 
-        // Create report record
-        $report = new Report();
-        $report->worker_id = $request->worker_id;
-        $report->date_attendance =  $validated['attending_date'];
-        $report->entry_time =  $validated['entry_time'];
-        $report->departure_time =  $validated['departure_time'];
-        $report->status =  "POR CONFIRMAR";
-        $report->user_id = Auth::id();
+        // Create visit record
+        $visit = new Visit();
+        $visit->worker_id = $request->worker_id;
+        $visit->date_attendance =  $validated['attending_date'];
+        $visit->entry_time =  $validated['entry_time'];
+        $visit->departure_time =  $validated['departure_time'];
+        $visit->status =  "POR CONFIRMAR";
+        $visit->user_id = Auth::id();
 
         $building = Building::where('name', $validated['building'])
                 ->first();
@@ -239,50 +263,53 @@ class VisitController extends WebController
             $department->save();
         }
 
-        $report->department_id =  $department->id;
+        $visit->department_id =  $department->id;
     
         if ($visitor_id === -1){
 
             $visitor = new Visitor($validated);
             $visitor->user_id = Auth::id();
-
-            // Make a image name based on user name and current timestamp
-            $name = Str::slug( $validated['visitor_firstname']. '_' . $validated['visitor_lastname'].'_'. time() );
-            $photo = new Photo();
-            $photo->storePhoto($validated['image'], $name);
-
             $visitor->save();
-            $visitor->photo()->save($photo);
+  
+            if ($request->has('image')){
+                // Make a image name based on user name and current timestamp
+                $name = Str::slug( $validated['visitor_firstname']. '_' . $validated['visitor_lastname'].'_'. time() );
+                $photo = new Photo();
+                $photo->storePhoto($validated['image'], $name);
+                $visitor->photo()->save($photo);
+            }
 
-            $report->visitor_id = $visitor->id;
+            $visit->visitor_id = $visitor->id;
         } else {
-            $report->visitor_id = $request->visitor_id;
+            $visit->visitor_id = $request->visitor_id;
         }
 
         if ($auto_option){
 
-            $auto_brand = AutoBrand::where('name', $validated['auto_brand'])
-                ->first();
-                
-            $auto_model = AutoModel::where('name', $validated['auto_model'])
-                ->first();
-     
-            if (!$auto_model){
-                if (!$auto_brand){
-                    $auto_brand = new AutoBrand();
-                    $auto_brand->name = $validated['auto_brand'];
-                    $auto_brand->save();
+            $auto_id = (int) $request->auto_id;
+            
+            if ($auto_id !== -1){
+                $visit->auto_id = $auto_id;
+            } else {
+                $auto_brand = AutoBrand::where('name', $validated['auto_brand'])
+                    ->first();
+                    
+                $auto_model = AutoModel::where('name', $validated['auto_model'])
+                    ->first();
+         
+                if (!$auto_model){
+                    if (!$auto_brand){
+                        $auto_brand = new AutoBrand();
+                        $auto_brand->name = $validated['auto_brand'];
+                        $auto_brand->save();
+                    }
+    
+                    $auto_model = new AutoModel();
+                    $auto_model->name = $validated['auto_model'];
+                    $auto_model->auto_brand_id = $auto_brand->id;
+                    $auto_model->save();
                 }
 
-                $auto_model = new AutoModel();
-                $auto_model->name = $validated['auto_model'];
-                $auto_model->auto_brand_id = $auto_brand->id;
-                $auto_model->save();
-            }
-
-            $auto_id = (int) $request->auto_id;
-
-            if ($auto_id === -1){
                 $auto = new Auto();
                 $auto->enrrolment = $validated['auto_enrrolment'];
                 $auto->user_id = Auth::user()->id;
@@ -290,19 +317,23 @@ class VisitController extends WebController
                 $auto->color = $validated['auto_color'];
                 $auto->save();
 
-                $report->auto_id = $auto->id;
-            } else {
-                $report->auto_id = $auto_id;   
+                $visit->auto_id = $auto->id;
             }
+        } else {
+            $visit->auto_id = null;
         }
         
-        if (!$report->save()){
+        if (!$visit->save()){
             toastr()->error(__('Error al crear el registro'));
         } else {
             toastr()->success(__('Registro creado con éxito'));
         }
+
+        if ($worker_id === Auth::user()->worker_id){
+            return redirect()->route('mis_visitas', compact('vista', 'trashed', 'search'));
+        }
                 
-        return redirect()->route('reportes.index', compact('vista', 'trashed', 'search'));
+        return redirect()->route('visitas.index', compact('vista', 'trashed', 'search'));
     }
 
     /**
@@ -311,47 +342,23 @@ class VisitController extends WebController
      * @param  \App\User  $user
      * @return \Illuminate\Http\Response
      */
-    public function show($id, ShowReportRequest $request)
+    public function show($id, ShowVisitRequest $request)
     {
         $start_date = request('start_date') ? request('start_date') : '';
         $finish_date = request('finish_date') ? request('finish_date') : '';
-
-        //
+        $search = request('search');
         $status_select = request('status_select') ? request('status_select') : 'TODAS' ;
+        $vista = $this::EDIT;
 
-        $columns = [
-            'reports.*',
-            'departments.name as department_name',
-            'buildings.name as building_name',
-            'visitors.id as visitor_id',
-            'visitors.firstname as visitor_firstname',
-            'visitors.lastname as visitor_lastname',
-            'visitors.dni as visitor_dni',
-            'workers.firstname as worker_firstname',
-            'workers.lastname as worker_lastname',
-            'workers.dni as worker_dni',
-            'autos.id as auto_id',
-            'autos.enrrolment as auto_enrrolment',
-            'autos.color as auto_color',
-            'auto_models.name as auto_model',
-            'auto_brands.name as auto_brand'
-        ];
+        $visit = $this->getVisitByID($id);
 
-        $report = Report::select($columns)
-            ->join('visitors', 'visitors.id', '=', 'reports.visitor_id')
-            ->join('workers', 'workers.id', '=', 'reports.worker_id')
-            ->join('departments', 'departments.id', '=', 'reports.department_id')
-            ->join('buildings', 'buildings.id', '=', 'departments.building_id')
-            ->leftJoin('autos', 'autos.id', '=', 'reports.auto_id')
-            ->leftJoin('auto_models', 'autos.auto_model_id', '=', 'auto_models.id')
-            ->leftJoin('auto_brands', 'auto_models.auto_brand_id', '=', 'auto_brands.id')
-            ->where("reports.id", "=", $id)
-            ->first();
+        if ($visit->worker_id === Auth::user()->worker_id){
+            $is_my_visit = 1;
+        } else {
+            $is_my_visit = 0;
+        }
         
-            $vista = $this::EDIT;
-            $search = request('search');
-            
-            return view('report.show', compact('vista', 'search', 'status_select', 'report', 'start_date', 'finish_date'));
+        return view('visit.show', compact('vista', 'search', 'status_select', 'visit', 'start_date', 'finish_date', 'is_my_visit'));
     }
 
     /**
@@ -360,49 +367,23 @@ class VisitController extends WebController
      * @param  \App\User  $user
      * @return \Illuminate\Http\Response
      */
-    public function edit($id , EditReportRequest $request)
+    public function edit($id , EditVisitRequest $request)
     {
-        
-        $columns = [
-            'reports.*',
-            'visitors.id as visitor_id',
-            'visitors.firstname as visitor_firstname',
-            'visitors.lastname as visitor_lastname',
-            'visitors.dni as visitor_dni',
-            'workers.id as worker_id',
-            'workers.firstname as worker_firstname',
-            'workers.lastname as worker_lastname',
-            'workers.dni as worker_dni',
-            'autos.id as auto_id',
-            'autos.enrrolment as auto_enrrolment',
-            'autos.color as auto_color',
-            'auto_models.name as auto_model_name',
-            'auto_brands.name as auto_model_name'
-        ];
-       
-        $report = Report::select($columns)
-            ->join('visitors', 'visitors.id', '=', 'reports.visitor_id')
-            ->join('workers', 'workers.id', '=', 'reports.worker_id')
-            ->leftJoin('autos', 'autos.id', '=', 'reports.auto_id')
-            ->leftJoin('auto_models', 'autos.auto_model_id', '=', 'auto_models.id')
-            ->where("reports.id", "=", $id)
-            ->first();
-
-        $autos = Auto::select(
-                'autos.id as auto_id',
-                'autos.enrrolment as auto_enrrolment',
-                'auto_models.name as auto_model_name'
-            )
-            ->join('auto_models', 'auto_models.id', '=', 'autos.auto_model_id')
-            ->where('autos.visitor_id', '=', $report->visitor_id)
-            ->where('autos.id', '!=', $report->auto_id)
-            ->get();
-
-        $vista = $this::EDIT;
+        $start_date = request('start_date') ? request('start_date') : '';
+        $finish_date = request('finish_date') ? request('finish_date') : '';
         $search = request('search');
-        $trashed = (request('trashed')) ? true : false;
+        $status_select = request('status_select') ? request('status_select') : 'TODAS' ;
+        $vista = $this::EDIT;
+
+        $record = $this->getVisitByID($id);
+
+        if ($record->worker_id === Auth::user()->worker_id){
+            $is_my_visit = 1;
+        } else {
+            $is_my_visit = 0;
+        }
         
-        return view('report.edit', compact('vista', 'search', 'trashed', 'report', 'autos'));
+        return view('visit.edit', compact('vista', 'search', 'record', 'start_date', 'finish_date', 'status_select', 'is_my_visit'));
     }
 
     /**
@@ -412,31 +393,117 @@ class VisitController extends WebController
      * @param  \App\User  $user
      * @return \Illuminate\Http\Response
      */
-    public function update(UpdateReportRequest $request, $id)
+    public function update(UpdateVisitRequest $request, $id)
     {
-        $vista = $this::READ;
+        $vista = $this::EDIT;
         $search = request('search');
-        $trashed = (request('trashed')) ? true : false;
-        $buscar = true;
+        $trashed = request('trashed');
 
-        $report = Report::withTrashed()->where('id', $id)->first();
-       
-        $attending_date = date('Y-m-d H:i:s', strtotime($request->attending_date));
+        $visitor_id  = (int) $request->visitor_id;
+        $worker_id  = (int) $request->worker_id;
+        $auto_option = isset($request->auto_option) ? $request->auto_option : 0;
 
-        $report->visitor_id = $request->visitor_id;
-        $report->worker_id = $request->worker_id;
-        $auto_id = (int) $request->auto_id;
-        $report->auto_id = (isset($auto_id) && $auto_id >= 0) ? $auto_id : null;
-        $report->date_attendance =  $attending_date;
+        $validated = $request->validated();
 
-        if(!$report->update())
-        {
-            toastr()->error(__('Error al actualizar el registro'));
+        // Create visit record
+        $visit = Visit::find($id);
+
+        $visit->worker_id = $worker_id;
+        $visit->date_attendance =  $validated['attending_date'];
+        $visit->entry_time =  $validated['entry_time'];
+        $visit->departure_time =  $validated['departure_time'];
+        $visit->user_id = Auth::id();
+
+        $building = Building::where('name', $validated['building'])
+                ->first();
+                
+        $department = Department::where('name', $validated['department'])
+            ->first();
+     
+        if (!$department){
+            if (!$building){
+                $building = new Building();
+                $building->name = $validated['building'];
+                $building->save();
+            }
+
+            $department = new Department();
+            $department->name = $validated['department'];
+            $department->building_id = $building->id;
+            $department->save();
+        }
+
+        $visit->department_id =  $department->id;
+    
+        if ($visitor_id === -1){
+
+            $visitor = new Visitor($validated);
+            $visitor->user_id = Auth::id();
+            $visitor->save();
+  
+            if ($request->has('image')){
+                // Make a image name based on user name and current timestamp
+                $name = Str::slug( $validated['visitor_firstname']. '_' . $validated['visitor_lastname'].'_'. time() );
+                $photo = new Photo();
+                $photo->storePhoto($validated['image'], $name);
+                $visitor->photo()->save($photo);
+            }
+
+            $visit->visitor_id = $visitor->id;
+        } else {
+            $visit->visitor_id = $request->visitor_id;
+        }
+
+        if ($auto_option){
+
+            $auto_id = (int) $request->auto_id;
+            
+            if ($auto_id !== -1){
+                $visit->auto_id = $auto_id;
+            } else {
+                $auto_brand = AutoBrand::where('name', $validated['auto_brand'])
+                    ->first();
+                    
+                $auto_model = AutoModel::where('name', $validated['auto_model'])
+                    ->first();
+         
+                if (!$auto_model){
+                    if (!$auto_brand){
+                        $auto_brand = new AutoBrand();
+                        $auto_brand->name = $validated['auto_brand'];
+                        $auto_brand->save();
+                    }
+    
+                    $auto_model = new AutoModel();
+                    $auto_model->name = $validated['auto_model'];
+                    $auto_model->auto_brand_id = $auto_brand->id;
+                    $auto_model->save();
+                }
+
+                $auto = new Auto();
+                $auto->enrrolment = $validated['auto_enrrolment'];
+                $auto->user_id = Auth::user()->id;
+                $auto->auto_model_id = $auto_model->id;
+                $auto->color = $validated['auto_color'];
+                $auto->save();
+
+                $visit->auto_id = $auto->id;
+            }
+        } else {
+            $visit->auto_id = null;
+        }
+        
+        if (!$visit->update()){
+            toastr()->error(__('Error al actualizar  el registro'));
         } else {
             toastr()->success(__('Registro actualizado con éxito'));
         }
 
-        return redirect()->route('reportes.index', compact('vista', 'search', 'trashed', 'buscar'));
+        if ($worker_id === Auth::user()->worker_id){
+            return redirect()->route('mis_visitas', compact('vista', 'trashed', 'search'));
+        }
+                
+        return redirect()->route('visitas.index', compact('vista', 'trashed', 'search'));
     }
 
     /**
@@ -454,38 +521,38 @@ class VisitController extends WebController
         $trashed = request('trashed');
 
         // Delete visitor
-        $report = Report::withTrashed()->where('id', $id)->first();
-        $report->delete();
+        $visit = visit::withTrashed()->where('id', $id)->first();
+        $visit->delete();
 
         toastr()->success(__('Registro eliminado con éxito'));
 
-        return redirect()->route('reportes.index', compact('vista', 'search', 'trashed'));
+        return redirect()->route('visitas.index', compact('vista', 'search', 'trashed'));
     }
 
     
-    public function denyVisit($id, ChangeReportStatusRequest $request){
-        $report = Report::where('id', $id);
+    public function denyVisit($id, ChangeVisitStatusRequest $request){
+        $visit = visit::where('id', $id);
         
 
-        if (!$report->update(['status' => "CANCELADA"])){
+        if (!$visit->update(['status' => "CANCELADA"])){
             toastr()->error(__('Error al actualizar el registro'));
         } else {
             toastr()->success(__('Cita cancelada con exito'));
         }
 
-        return redirect()->route('reportes.myVisits');
+        return redirect()->route('mis_visitas');
     }
 
-    public function confirmVisit($id, ChangeReportStatusRequest $request){
-        $report = Report::where('id', $id);
+    public function confirmVisit($id, ChangeVisitStatusRequest $request){
+        $visit = visit::where('id', $id);
     
-        if (!$report->update(['status' => "CONFIRMADA"])){
+        if (!$visit->update(['status' => "CONFIRMADA"])){
             toastr()->error(__('Error al actualizar el registro'));
         } else {
             toastr()->success(__('Cita confirmada con exito'));
         }
 
-        return redirect()->route('reportes.myVisits');
+        return redirect()->route('mis_visitas');
 
     }
 
@@ -558,6 +625,36 @@ class VisitController extends WebController
         return response()->json($response);
     }
 
+    private function getVisitByID($id){
+        $columns = [
+            'visits.*',
+            'departments.name as department_name',
+            'buildings.name as building_name',
+            'visitors.id as visitor_id',
+            'visitors.firstname as visitor_firstname',
+            'visitors.lastname as visitor_lastname',
+            'visitors.dni as visitor_dni',
+            'workers.id as worker_id',
+            'workers.firstname as worker_firstname',
+            'workers.lastname as worker_lastname',
+            'workers.dni as worker_dni',
+            'autos.id as auto_id',
+            'autos.enrrolment as auto_enrrolment',
+            'autos.color as auto_color',
+            'auto_models.name as auto_model',
+            'auto_brands.name as auto_brand'
+        ];
 
-
+        return (visit::select($columns)
+            ->join('visitors', 'visitors.id', '=', 'visits.visitor_id')
+            ->join('workers', 'workers.id', '=', 'visits.worker_id')
+            ->join('departments', 'departments.id', '=', 'visits.department_id')
+            ->join('buildings', 'buildings.id', '=', 'departments.building_id')
+            ->leftJoin('autos', 'autos.id', '=', 'visits.auto_id')
+            ->leftJoin('auto_models', 'autos.auto_model_id', '=', 'auto_models.id')
+            ->leftJoin('auto_brands', 'auto_models.auto_brand_id', '=', 'auto_brands.id')
+            ->where("visits.id", "=", $id)
+            ->first());
+        
+    }
 }

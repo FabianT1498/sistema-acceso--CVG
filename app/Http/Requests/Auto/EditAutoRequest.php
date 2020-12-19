@@ -1,12 +1,11 @@
 <?php
 
-namespace App\Http\Requests;
+namespace App\Http\Requests\Auto;
 
 use Illuminate\Foundation\Http\FormRequest;
-
 use App\Auto;
 
-class DestroyAutoRequest extends FormRequest
+class EditAutoRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -16,10 +15,10 @@ class DestroyAutoRequest extends FormRequest
     public function authorize()
     {
         $auth_user_role = $this->user()->role_id;
+  
+        $auto = Auto::find($this->route('auto'));
 
-        $auto = Auto::find($this->route('id'));
-
-        return (($auto && !$auto->deleted_at) && $auth_user_role <= 2);
+        return ($auto && $auth_user_role === 4);
     }
 
     /**

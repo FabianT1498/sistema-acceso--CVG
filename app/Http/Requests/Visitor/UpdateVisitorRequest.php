@@ -1,10 +1,11 @@
 <?php
 
-namespace App\Http\Requests;
+namespace App\Http\Requests\Visitor;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 use App\Visitor;
+use Illuminate\Support\Facades\Auth;
 
 class UpdateVisitorRequest extends FormRequest
 {
@@ -18,8 +19,7 @@ class UpdateVisitorRequest extends FormRequest
         $auth_user_role = $this->user()->role_id;     
         $visitor = Visitor::find($this->route('visitante'));
 
-        return (($visitor && !$visitor->deleted_at) 
-            && ($auth_user_role === 4));
+        return ($visitor && ($auth_user_role !== 3 || $visitor->user_id === Auth::user()->id));
     }
 
     /**
@@ -32,8 +32,15 @@ class UpdateVisitorRequest extends FormRequest
         $visitor_id = $this->route('visitante');
 
         return [
-            'visitor_phone_number' => [
+            'visitor_firstname' => ['required','max:50'],
+            'visitor_lastname' => ['required','max:50'],
+            'visitor_dni' => [
                 'required',
+                Rule::unique('visitors', 'dni')
+                    ->ignore($visitor_id),
+                'max:10'
+            ],
+            'visitor_phone_number' => [
                 Rule::unique('visitors', 'phone_number')
                     ->ignore($visitor_id),
                 'max:15'
@@ -69,7 +76,7 @@ class UpdateVisitorRequest extends FormRequest
      * Prepare the data for validation.
      *
      * @return void
-     *
+     **/
     protected function prepareForValidation()
     {
         
@@ -79,6 +86,6 @@ class UpdateVisitorRequest extends FormRequest
 
         $this->merge($inputs);
     }
-    */
+    
 }
 
