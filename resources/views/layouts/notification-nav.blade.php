@@ -1,29 +1,11 @@
 <!--  Navbar Right Menu -->
 <ul class="navbar-nav ml-auto">
-    
-      <!-- Messages Dropdown Menu -->
-      <li class="nav-item dropdown">
-        <a class="nav-link" id="dropdownMenuLink" data-toggle="dropdown" href="#">
-          <i class="far fa-comments"></i>
-          <span class="badge badge-danger navbar-badge">3</span>
+    <!-- Notifications Dropdown Menu -->
+    <li class="nav-item mr-md-2">
+        <a class="nav-link" id="visitByConfirm" title="" href="{{route('mis_visitas', 'POR CONFIRMAR')}}">
+            <i class="far fa-bell fa-2x"></i>
+            <span id="visitByConfirmBadge" class="badge badge-warning navbar-badge"></span>
         </a>
-        <div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
-          <a href="#" class="dropdown-item">
-            <!-- Message Start -->
-            <div class="media">
-               <div class="media-body">
-                <h3 class="dropdown-item-title">
-                  Brad Diesel
-                  <span class="float-right text-sm text-danger"><i class="fas fa-star"></i></span>
-                </h3>
-                <p class="text-sm">Call me whenever you can...</p>
-                <p class="text-sm text-muted"><i class="far fa-clock mr-1"></i> 4 Hours Ago</p>
-              </div>
-            </div>
-            <!-- Message End -->
-          </a>
-          <a href="#" class="dropdown-item dropdown-footer">See All Messages</a>
-        </div>
-      </li>
+    </li>
 </ul>
     

@@ -37,10 +37,69 @@ $(function () {
         }
     });
 
+    // Deny and confirm buttons actions
+    $( '.denyVisitBtn, .confirmVisitBtn' ).on('click', function(e){
+
+        e.preventDefault();
+
+        var classList = $(this).attr('class');
+        var classArr = classList.split(/\s+/);
+        const result = classArr.find(element => element === 'denyVisitBtn');
+        
+        const visitID = $(this).closest('tr').attr('data-visit-id');
+        const modal = $('#visitStatusModal');
+        const titleVisitStatus = $('#titleVisitStatusModal');
+        const bodyVisitStatus = $('#bodyVisitStatusModal');
+        const acceptBtn = $('#changeVisitStatusAccept');
+
+        titleVisitStatus.html('');
+        bodyVisitStatus.html('');
+        
+        if (typeof result !== 'undefined'){
+            titleVisitStatus.html('Cancelar solicitud de visita');
+            bodyVisitStatus.html('¿Esta seguro de cancelar la solicitud de visita, esta acción es irreversible ?');
+        } else {
+            titleVisitStatus.html('Aceptar solicitud de visita');
+            bodyVisitStatus.html('¿Esta seguro de aceptar la solicitud de visita, esta acción es irreversible ?');
+        }
+
+        modal.modal('show');
+
+        acceptBtn.on('click', function(e) {
+            if (typeof result !== 'undefined'){
+                $(`#frm_anular_${ visitID }`).submit();
+            } else {
+                $(`#frm_confirmar_${ visitID }`).submit();
+            }
+        });
+    });
+
+    $( '.printReportBtn' ).on('click', function(e){
+
+        e.preventDefault();
+
+        const modal = $('#printReportModal');
+        const acceptBtn = $('#printReportAccept');
+        const visitID = $(this).closest('tr').attr('data-visit-id');
+
+        modal.modal('show');
+
+        acceptBtn.on('click', function(e) {
+            $(`#frm_pdf_${ visitID }`).submit();
+            modal.modal('hide');
+            $(".modal-backdrop").remove();
+        });
+
+    });
+
     $('#workerDNI').mask('C-99999999', options);
+
+    
 });
 
 $(document).ready(function () {
+
+    $('#visitByConfirm').dropdown();
 
     const delay = function (fn, ms) {
         let timer = 0

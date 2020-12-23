@@ -118,14 +118,14 @@ class VisitController extends WebController
      *
      * @return \Illuminate\Http\Response
      */
-    public function myVisits()
+    public function myVisits($status = 'TODAS')
     {
         $vista = $this::READ;
         $search = request('search');
         $is_my_visit = 1;
         $start_date = request('start_date') ? request('start_date') : '';
         $finish_date = request('finish_date') ? request('finish_date') : '';
-        $status_select = request('status_select') ? request('status_select') : 'TODAS' ;
+        $status_select = request('status_select') ? request('status_select') : $status;
         $today_date = (new DateTime())->format('Y-m-d');
 
         $columns = [
@@ -241,7 +241,7 @@ class VisitController extends WebController
         $visit->date_attendance =  $validated['attending_date'];
         $visit->entry_time =  $validated['entry_time'];
         $visit->departure_time =  $validated['departure_time'];
-        $visit->status =  "POR CONFIRMAR";
+        $visit->status =  Auth::user()->worker_id == $request->worker_id ? "CONFIRMADA" : "POR CONFIRMAR";
         $visit->user_id = Auth::id();
 
         $building = Building::where('name', $validated['building'])
@@ -322,7 +322,7 @@ class VisitController extends WebController
         } else {
             $visit->auto_id = null;
         }
-        
+
         if (!$visit->save()){
             toastr()->error(__('Error al crear el registro'));
         } else {
@@ -656,5 +656,16 @@ class VisitController extends WebController
             ->where("visits.id", "=", $id)
             ->first());
         
+    }
+
+    public function getVisitsByConfirm(Request $request){
+        $response = array();
+        
+        $visits = Visit::where("status", "POR CONFIRMAR")
+            ->where("worker_id", Auth::user()->worker_id);
+
+        $response[] = array('visitsByConfirm' => $visits->count());
+
+        return response()->json($response);
     }
 }

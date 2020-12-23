@@ -20,6 +20,7 @@ class CreateReportsTable extends Migration
             $table->string('visitor_dni');
             $table->string('auto_enrrolment')->nullable();
             $table->string('auto_model')->nullable();
+            $table->string('auto_color')->nullable();
 
             $table->unsignedBigInteger('user_id')->unsigned()->nullable();
             $table->unsignedBigInteger('visit_id')->unsigned()->nullable();

@@ -23,9 +23,10 @@
     <link rel="stylesheet" href="{{ asset('css/icheck-bootstrap.min.css') }}">
     
     @yield('mascss')
-
+    
     <!-- Theme style -->
     <link rel="stylesheet" href="{{ asset('css/adminlte.min.css') }}">
+
     <!-- overlayScrollbars -->
     <link rel="stylesheet" href="{{ asset('css/OverlayScrollbars.min.css') }}">
     <!-- Daterange picker -->
@@ -50,19 +51,22 @@
         </aside>
         <!-- /.control-sidebar -->
     </div>
+    
+    <!-- JQUERY -->
+    <script src="{{ asset('js/jquery-3.5.1.min.js') }}"></script>
+
+    <!-- Bootstrap 4 -->
+    <script src="{{ asset('js/bootstrap.bundle.min.js') }}"></script>
+
+    <!-- Visits by confirm notification -->
+    <script src="{{ asset('js/notificationVisit.js') }}"></script>
 
     <!-- Script Generales de la aplicacion -->
     <script src="{{ asset('js/app.js') }}"></script>
 
-    <!-- JQUERY -->
-    <script src="{{ asset('js/jquery.js') }}"></script>
-   
-    <!-- Bootstrap 4 -->
-    <script src="{{ asset('js/bootstrap.bundle.min.js') }}"></script>
-
     <!-- AdminLTE App -->
     <script src="{{ asset('js/adminlte.min.js') }}"></script>
-    
+
     <!-- jQuery UI 1.11.4 -->
     <script src="{{ asset('js/jquery-ui.min.js') }}"></script>
 

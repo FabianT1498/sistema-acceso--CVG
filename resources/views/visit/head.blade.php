@@ -6,7 +6,7 @@
           <div class="row w-100 mb-md-2">
             <span class="text-dark d-inline h4 mr-3">
               <a href="{{ route('visitas.index') }}" title="">
-                <small class="mr-md-2"><i class="nav-icon icon fa fa-file"></i></small>{{ __('Visitas') }}
+                <small class="mr-md-2"><i class="fas fa-book"></i></small>Historial de<br>Visitas
               </a>
             </span>
             

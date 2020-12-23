@@ -60,7 +60,7 @@
                 </thead>
                 <tbody>
                   @foreach ($visits as $visit)
-                    <tr id="tr_{{$visit->id}}">
+                    <tr data-visit-id="{{$visit->id}}">
                       <td>          
                         <a href="{{ route('visitas.show', $visit->id) }}">
                           {{ $visit->visitor_firstname. ' ' .$visit->visitor_lastname }}
@@ -76,11 +76,12 @@
                         
                         @if ($visit->status === "POR CONFIRMAR")
 
-                          <a class="" title="{{ __('Anular cita') }}" href="#" onclick="
-                            event.preventDefault();
-                            confirm('Está a punto de cancelar la cita, esta acción no se puede deshacer. ¿Desea continuar?') 
-                              ? document.getElementById('frm_anular_{{ $visit->id }}').submit() :
-                                false;"
+                          <a 
+                            class="denyVisitBtn"
+                            title="{{ __('Anular cita') }}"
+                            href="#"
+                            data-toggle="modal" 
+                            data-target="#visitStatusModal"
                           >
                             <small>
                               <small class="text-danger"><i class="fa fa-ban fa-2x"></i></small>
@@ -89,14 +90,14 @@
                           <form method="POST" id="frm_anular_{{ $visit->id }}"action="{{ route('visitas.denyVisit', $visit->id) }}" class="d-none">
                               @method('PUT')
                               @csrf
-                              <input type="hidden" name="search" value="{{ $search }}">
                           </form>
 
-                          <a class="ml-md-2" title="{{ __('Confirmar cita') }}" href="#" onclick="
-                            event.preventDefault();
-                            confirm('Está a punto de confirmar la cita, esta acción no se puede deshacer. ¿Desea continuar?') 
-                              ? document.getElementById('frm_confirmar_{{ $visit->id }}').submit() 
-                              : false;"
+                          <a 
+                            class="ml-md-2 confirmVisitBtn"
+                            title="{{ __('Confirmar cita') }}"
+                            href="#"
+                            data-toggle="modal" 
+                            data-target="#visitStatusModal"
                           >
                             <small>
                               <small class="text-success"><i class="fa fa-check fa-2x"></i></small>
@@ -105,8 +106,8 @@
                           <form method="POST" id="frm_confirmar_{{ $visit->id }}" action="{{ route('visitas.confirmVisit', $visit->id) }}" class="d-none">
                               @method('PUT')
                               @csrf
-                              <input type="hidden" name="search" value="{{ $search }}">
                           </form>
+
                         @endif
 
                         @if (is_null($visit->report_id) && $visit->status !== "CANCELADA")
@@ -125,10 +126,12 @@
                           @if ( (Auth::user()->role_id === 4 && $visit->status === "CONFIRMADA") 
                               || ( (Auth::user()->role_id === 1 || Auth::user()->role_id === 2) && $visit->status === "COMPLETADA" ) )
                               
-                            <a class="ml-md-2" title="{{ __('Generar PDF') }}" href="#" onclick="
-                              event.preventDefault();
-                              confirm('{{ __("Usted va a generar un visita, esto quedará registrado. ¿Desea continuar?") }}') ?
-                                document.getElementById('frm_pdf_{{ $visit->id }}').submit() : false;"
+                            <a 
+                              class="ml-md-2 printReportBtn"
+                              title="{{ __('Generar PDF') }}"
+                              href="#"
+                              data-toggle="modal" 
+                              data-target="#printReportModal"
                             >
                               <small>
                                 <small class="text-info"><i class="fa fa-file-pdf fa-2x"></i></small>
@@ -136,8 +139,8 @@
                             </a>
                             <form method="GET" id="frm_pdf_{{ $visit->id }}" action="{{ route('reportes.generar_pase', $visit->id) }}" class="d-none">
                                 @csrf
-                                <input type="hidden" name="search" value="{{ $search }}">
-                            </form>           
+                            </form>       
+                                
                           @elseif(Auth::user()->role_id === 4 && $visit->status === "COMPLETADA")
                             <a
                               class="ml-md-2" 
@@ -150,7 +153,7 @@
                                   <small class="text-secondary"><i class="fa fa-file-pdf fa-2x"></i></small>
                                 </small>
                             </a>
-                            @include ('report.report-printed-modal')
+                            
                           @endif
                         @endif
 
@@ -178,6 +181,10 @@
       </div><!-- /.container-fluid -->
     </section>
     <!-- /.content -->
+    
   </div>
   <!-- /.content-wrapper -->
+  @include('report.print-report-modal')
+  @include('visit.visit-status-modal')
+  @include('report.report-printed-modal')
 @endsection

@@ -1,6 +1,6 @@
+$(document).ready(function () {
 
-$(function(){
-    
+    let reloadTime;
     const delay = function (fn, ms) {
         let timer = 0
         return function (...args) {
@@ -13,4 +13,4 @@ $(function(){
         $('#searchForm').submit();
     }, 4000));
 
-});
+})

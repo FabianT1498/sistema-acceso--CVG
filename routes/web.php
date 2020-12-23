@@ -41,6 +41,10 @@ Route::group(['middleware' => ['auth', 'admin']], function () {
 	
 	/********           DASHBOARD         **********/
 	Route::get('/dashboard', 'HomeController@index')->name('dashboard');
+
+	/*************        PASES  **************** */
+	Route::get('reportes/', 'ReportController@index')->name('reportes.index');
+	Route::get('reportes/{reporte}', 'ReportController@show')->name('reportes.show');
 });
 
 /*********************************************/
@@ -94,9 +98,10 @@ Route::group(['middleware' => ['auth']], function () {
 
 	/********           VISIT         **********/
 	Route::resource('visitas', 'VisitController')->except(['destroy', 'index']);
-	Route::get('mis-visitas', 'VisitController@myVisits')->name('mis_visitas');
+	Route::get('mis-visitas/{status?}', 'VisitController@myVisits')->name('mis_visitas');
 	Route::put('visita/{id}/anular', 'VisitController@denyVisit')->name('visitas.denyVisit');
 	Route::put('visita/{id}/confirmar', 'VisitController@confirmVisit')->name('visitas.confirmVisit');
+	Route::post('/visitas-por-confirmar', 'VisitController@getVisitsByConfirm');
 
 	/********           VISITOR         **********/	
 	Route::resource('visitantes', 'VisitorController')->except(['destroy']);

@@ -60,14 +60,14 @@
         @if(isset($is_my_visit))
           <li class="nav-item {{ $is_my_visit === 0 ? setActive('visitas') : '' }}">
             <a href="{{ route('visitas.index') }}" class="nav-link {{ $is_my_visit === 0 ? setActive('visitas') : '' }}">
-              <i class="nav-icon icon fa fa-file"></i>
+              <i class="fas fa-book ml-md-1 mr-md-2"></i>
               <p>{{ __('HISTORIAL DE VISITAS') }}</p>
             </a>
           </li>
         @else
           <li class="nav-item {{  setActive('visitas') }}">
             <a href="{{ route('visitas.index') }}" class="nav-link {{ setActive('visitas') }}">
-              <i class="nav-icon icon fa fa-file"></i>
+              <i class="fas fa-book ml-md-1 mr-md-2"></i>
               <p>{{ __('HISTORIAL DE VISITAS') }}</p>
             </a>
           </li>
@@ -82,6 +82,13 @@
       @endif
       
       @if (Auth::user()->role->name == "ADMIN" || Auth::user()->role->name == "SUPERADMIN")
+
+        <li class="nav-item {{ setActive('reportes') }}">
+          <a href="{{ route('reportes.index') }}" class="nav-link {{ setActive('reportes') }}">
+            <i class="fas fa-ticket-alt mr-md-2"></i>
+            <p>{{ __('REPORTES') }}</p>
+          </a>
+        </li>
       
         <li class="nav-item {{ setActive('usuarios') }}">
           <a href="{{ route('usuarios.index') }}" class="nav-link {{ setActive('usuarios') }}">
@@ -89,6 +96,7 @@
             <p>{{ __('USUARIOS') }}</p>
           </a>
         </li>
+
       @endif
     </ul>
   </nav>

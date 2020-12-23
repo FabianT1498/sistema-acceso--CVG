@@ -68,6 +68,12 @@ function getSearchOptions(){
 			'Nombre y apellido del visitante (ej. Juan Perez)',
 			'Cedula del visitante (ej. v-1014823 o e-1014823)',
 		);
+	} else if($arrName[0] === 'reportes'){
+		$options = array(
+			'Cedula del visitante (ej. v-1014823 o e-1014823)',
+			'Intervalo de tiempo de emisión del reporte',
+			'Número de visita'
+		);
 	}
 
 	return $options;

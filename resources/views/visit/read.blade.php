@@ -61,7 +61,7 @@
                 </thead>
                 <tbody>
                   @foreach ($visits as $visit)
-                    <tr id="tr_{{$visit->id}}">
+                    <tr data-visit-id="{{$visit->id}}">
                       <td>          
                         <a href="{{ route('visitas.show', $visit->id) }}">
                           {{ $visit->visitor_firstname. ' ' .$visit->visitor_lastname }}
@@ -89,10 +89,10 @@
                             @if ( (Auth::user()->role_id === 4 && $visit->status === "CONFIRMADA") 
                                 || ( (Auth::user()->role_id === 1 || Auth::user()->role_id === 2) && $visit->status === "COMPLETADA" ) )
                               
-                              <a class="ml-md-2" title="{{ __('Generar PDF') }}" href="#" onclick="
-                                event.preventDefault();
-                                confirm('{{ __("Usted va a generar un visita, esto quedará registrado. ¿Desea continuar?") }}') ?
-                                  document.getElementById('frm_pdf_{{ $visit->id }}').submit() : false;"
+                              <a
+                                class="ml-md-2 printReportBtn" 
+                                title="{{ __('Generar PDF') }}" 
+                                href="#" 
                               >
                                 <small>
                                   <small class="text-info"><i class="fa fa-file-pdf fa-2x"></i></small>
@@ -100,8 +100,8 @@
                               </a>
                               <form method="GET" id="frm_pdf_{{ $visit->id }}" action="{{ route('reportes.generar_pase', $visit->id) }}" class="d-none">
                                   @csrf
-                                  <input type="hidden" name="search" value="{{ $search }}">
-                              </form>           
+                              </form>   
+
                             @elseif(Auth::user()->role_id === 4 && $visit->status === "COMPLETADA")
                               <a 
                                 data-toggle="modal" 
@@ -113,7 +113,7 @@
                                     <small class="text-secondary"><i class="fa fa-file-pdf fa-2x"></i></small>
                                   </small>
                               </a>
-                              @include ('report.report-printed-modal')
+                              
                             @endif
                           @endif
 
@@ -142,4 +142,7 @@
     <!-- /.content -->
   </div>
   <!-- /.content-wrapper -->
+  @include ('report.print-report-modal')
+  @include ('report.report-printed-modal')
+  
 @endsection
