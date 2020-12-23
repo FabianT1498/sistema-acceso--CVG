@@ -141,7 +141,7 @@ class ReportController extends WebController
         }
 
         if ($record->worker_id === Auth::user()->worker_id){
-            return redirect()->route('mis_visitas', compact('vista', 'trashed', 'search'));
+            return redirect()->route('mis_visitas');
         }
                 
         return redirect()->route('visitas.index', compact('vista', 'trashed', 'search'));
