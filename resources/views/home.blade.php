@@ -54,13 +54,13 @@
               <div class="inner">
                 <h3 class="d-none d-sm-block">{{ __('Reportes') }}</h3>
                 <h4 class="d-block d-sm-none">{{ __('Reportes') }}</h4>
-                <h4>{{ $estadisticas->reportesAnio }}&nbsp;&nbsp;<small><small><small>{{ __('Este Año') }}</small></small></small></h4>
-                <h4>{{ $estadisticas->reportesMes }}&nbsp;&nbsp;<small><small><small>{{ __('Este mes') }}</small></small></small></h4>
+                <h4>{{ $estadisticas->visitasAnio }}&nbsp;&nbsp;<small><small><small>{{ __('Este Año') }}</small></small></small></h4>
+                <h4>{{ $estadisticas->visitasMes }}&nbsp;&nbsp;<small><small><small>{{ __('Este mes') }}</small></small></small></h4>
               </div>
               <div class="icon">
                 <i class="fa fa-file"></i>
               </div>
-              <a href="{{ route('reportes.index') }}" class="small-box-footer">{{ __('Más información') }} <i class="fas fa-arrow-circle-right"></i></a>
+              <a href="{{ route('visitas.index') }}" class="small-box-footer">{{ __('Más información') }} <i class="fas fa-arrow-circle-right"></i></a>
             </div>
           </div>
           <!-- ./col -->

@@ -2,53 +2,27 @@
 
 namespace App;
 
-use App\User;
-use App\Visitor;
-use App\Worker;
-use App\Auto;
-use App\PassRecord;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes; //línea necesaria
+use Illuminate\Database\Eloquent\Relations\Pivot;
+
 
 class Report extends Model
 {
-	use SoftDeletes;
-
-	protected $nullable = ['auto_id'];
-
-	protected $dates = [
-        'date_attendance',
-	];
-
     //
-	public function user(){
-		return $this->belongsTo(User::class);
-	}
+    public function __construct(array $values = array(), array $attributes = array()){
+        parent::__construct($attributes);
 
-	public function visitor(){
-		return $this->belongsTo(Visitor::class);
-	}
+        $this->visit_id = isset($values['id']) ? $values['id'] : '';
+        $this->visitor_fullname = isset($values['visitor_firstname']) && isset($values['visitor_lastname']) 
+                ? $values['visitor_firstname'] . ' ' . $values['visitor_lastname'] 
+                : '';
+        $this->visitor_dni = isset($values['visitor_dni']) ? $values['visitor_dni'] : '';
+        $this->auto_enrrolment = isset($values['auto_enrrolment']) ? $values['auto_enrrolment'] : '';
+        $this->auto_model = isset($values['auto_model']) ? $values['auto_model'] : '';
+        $this->auto_color = isset($values['auto_color']) ? $values['auto_color'] : '';
+    }
 
-	public function worker(){
-		return $this->belongsTo(Worker::class);
-	}
+    public $incrementing = true;
 
-	public function auto(){
-		return $this->belongsTo(Auto::class);
-	}
-
-	/**
-	 * Este método establece la relación n:n entre los usuarios 
-	 * y los reportes en la tabla pass_record.
-	 */
-    public function issuersUsers()
-    {
-	    return $this->belongsToMany(User::class, 'pass_record')
-	      ->withTimestamps()
-	      ->using(PassRecord::class)
-	      ->withPivot([
-	          'created_at',
-	          'updated_at',
-	      ]);
-	}
+    protected $guarded = ['created_at', 'updated_at'];
 }

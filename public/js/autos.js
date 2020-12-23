@@ -27,9 +27,15 @@ $(document).ready(function() {
         }
     }
 
+    const isAutoUpdate = function(){
+        return $('#formAutoUpdate').length ? true : false;
+    }
+
     $( document ).on( "keyup", "#autoEnrrolment", delay(function (e) {
 
-        if (this.value.length < 7) {
+        console.log(isAutoUpdate());
+
+        if (isAutoUpdate() || this.value.length < 7) {
             return;
         }
 
@@ -40,11 +46,11 @@ $(document).ready(function() {
         const autoModel = $("#autoModel");
         const autoBrand = $("#autoBrand");
         const autoColor = $("#autoColor");
-        const autoIDInput = $('#AutoID');
+        const autoIDInput = $('#autoID');
         const autoModelIDInput = $('#AutoModelID');
 
         const resultMsg = $('#autoResult');
-     
+        
         ajaxParams.beforeSend = function () {
             loader.removeClass(['d-none', 'success']);
             resultMsg.html('');
@@ -65,8 +71,10 @@ $(document).ready(function() {
                 autoModel.val(data[0].model);
                 autoBrand.val(data[0].brand);
                 autoColor.val(data[0].color);
-                autoIDInput.val(data[0].auto_id)
-                autoModelIDInput.val(data[0].auto_model_id)
+                autoIDInput.val(data[0].auto_id);
+                autoModelIDInput.val(data[0].auto_model_id);
+
+                console.log(autoIDInput);
             }
         }
 
@@ -75,6 +83,7 @@ $(document).ready(function() {
         // Fetch data
         $.ajax(ajaxParams);
     }, 500))
+    
 
     $( document ).on( "focus", "#autoModel", function(e) {
         

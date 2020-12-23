@@ -41,6 +41,10 @@ Route::group(['middleware' => ['auth', 'admin']], function () {
 	
 	/********           DASHBOARD         **********/
 	Route::get('/dashboard', 'HomeController@index')->name('dashboard');
+
+	/*************        PASES  **************** */
+	Route::get('reportes/', 'ReportController@index')->name('reportes.index');
+	Route::get('reportes/{reporte}', 'ReportController@show')->name('reportes.show');
 });
 
 /*********************************************/
@@ -64,13 +68,12 @@ Route::group(['middleware' => ['auth', 'worker']], function () {
 /*********************************************/
 
 Route::group(['middleware' => ['auth', 'receptionist']], function () {
-	
-		/********           REPORT         **********/
-		Route::resource('reportes', 'ReportController')->except(['destroy', 'edit', 'update']);
-		Route::get('mis-visitas', 'ReportController@myVisits')->name('reportes.myVisits');
+
+		/********           VISIT         **********/
+		Route::get('visitas', 'VisitController@index')->name('visitas.index');
+
+		/*************        PASES ************** */
 		Route::get('/generar_pase/{id}/pdf', 'ReportController@generatePDF')->name('reportes.generar_pase');
-		Route::post('/departamentos', 'ReportController@getDepartments');
-		Route::post('/edificios', 'ReportController@getBuildings');
 
 		/********           WORKER         **********/	
 		Route::post('trabajador', 'WorkerController@getWorker');
@@ -80,10 +83,6 @@ Route::group(['middleware' => ['auth', 'receptionist']], function () {
 		Route::post('/autos_modelos', 'AutoController@getAutoModels');
 		Route::post('/autos_marcas', 'AutoController@getAutoBrands');
 		Route::post('/auto', 'AutoController@getAuto');
-
-		/********           VISITOR         **********/	
-		Route::resource('visitantes', 'VisitorController')->except(['destroy']);
-		Route::post('/visitante', 'VisitorController@getVisitor');
 	}
 );
 
@@ -97,19 +96,28 @@ Route::group(['middleware' => ['auth', 'receptionist']], function () {
 /*********************************************/
 Route::group(['middleware' => ['auth']], function () {
 
-	/********           REPORT         **********/	
-	Route::get('mis-visitas', 'ReportController@myVisits')->name('reportes.myVisits');
-	Route::get('reportes/{reporte}', 'ReportController@show')->name('reportes.show');
-	Route::put('reporte/{id}/anular', 'ReportController@denyVisit')->name('reportes.denyVisit');
-	Route::put('reporte/{id}/confirmar', 'ReportController@confirmVisit')->name('reportes.confirmVisit');
+	/********           VISIT         **********/
+	Route::resource('visitas', 'VisitController')->except(['destroy', 'index']);
+	Route::get('mis-visitas/{status?}', 'VisitController@myVisits')->name('mis_visitas');
+	Route::put('visita/{id}/anular', 'VisitController@denyVisit')->name('visitas.denyVisit');
+	Route::put('visita/{id}/confirmar', 'VisitController@confirmVisit')->name('visitas.confirmVisit');
+	Route::post('/visitas-por-confirmar', 'VisitController@getVisitsByConfirm');
+
+	/********           VISITOR         **********/	
+	Route::resource('visitantes', 'VisitorController')->except(['destroy']);
+	Route::post('/visitante', 'VisitorController@getVisitor');
+
+	/******  AJAX REQUESTS ********/
+	Route::post('/departamentos', 'VisitController@getDepartments');
+	Route::post('/edificios', 'VisitController@getBuildings');	
 	
 	Route::get('/home', function(){
 		if(Auth::user())
 		{	
 			if (Auth::user()->role_id === 3){
-				return redirect()->route('reportes.myVisits');
+				return redirect()->route('mis_visitas');
 			} else if (Auth::user()->role_id === 4){
-				return redirect()->route('reportes.index');
+				return redirect()->route('visitas.index');
 			}
 
 			return redirect()->route('dashboard');

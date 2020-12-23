@@ -14,10 +14,10 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use DB;
 
-use App\Http\Requests\StoreUserRequest;
-use App\Http\Requests\UpdateUserRequest;
-use App\Http\Requests\DestroyUserRequest;
-use App\Http\Requests\RestoreUserRequest;
+use App\Http\Requests\User\StoreUserRequest;
+use App\Http\Requests\User\UpdateUserRequest;
+use App\Http\Requests\User\DestroyUserRequest;
+use App\Http\Requests\User\RestoreUserRequest;
 
 class UserController extends WebController
 {

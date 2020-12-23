@@ -1,22 +1,9 @@
 @extends('layouts.app')
 
-@section('mascss')
-  
-  <link rel="stylesheet" href="{{ asset('css/toastr.css') }}">
-@endsection
-
-
-@section('masjs')
-  <script src="{{ asset('js/toastr.min.js') }}"></script>
-
-  @toastr_render
-  <script src="{{ asset('js/report.js') }}"></script>
-@endsection
-
 @section('migasdepan')
-    <a href="{{ route('reportes.index') }}">{{ __('Visita') }}</a>
-    &nbsp;&nbsp;<i class="icon ion-android-arrow-forward"></i>&nbsp;&nbsp;{{ __('Visita') }}
-     <span class="text-success">({{ __('Crear') }})</span>
+    <a href="{{ route('reportes.index') }}">{{ __('REPORTES') }}</a>
+    &nbsp;&nbsp;<i class="icon ion-android-arrow-forward"></i>&nbsp;&nbsp;{{ __('REPORTES') }}
+     <span class="text-info">({{ __('Listado') }})</span>
 @endsection
 
 @section('content')
@@ -45,107 +32,68 @@
          
                     <div class="card" id="visitorData">
                         <div class="card-body">
-                            <h3 class="h3 mb-md-5 text-center title-subline">Datos del visitante</h3>
-                            <div class="form-row mb-md-4">
-                                <div class="form-group col-md-4">
-                                    <label for="visitorFirstname">Cedula</label>
-                                    <p>{{$report->visitor_dni}}</p>                 
+                            <h3 class="h3 mb-md-5 text-center title-subline">Datos del reporte</h3>
+                            <div class="form-row">
+                                <div class="form-group col-md-3">
+                                    <label for="visitorFirstname">Numero de visita:&nbsp;</label>
+                                    <p>{{ $report->visit_id }}</p>                 
                                 </div>
-                                <div class="form-group col-md-4">
-                                    <label for="visitorFirstname">Nombre(s):&nbsp;</label>
-                                    <p>{{$report->visitor_firstname}}</p>                 
+                                <div class="form-group col-md-3">
+                                    <label for="visitorFirstname">Fecha de emisión:&nbsp;</label>
+                                    <p>{{ date('d-m-Y H:i', strtotime($report->created_at)) }}</p>                 
                                 </div>
-                                <div class="form-group col-md-4">
-                                    <label for="visitorLastname">Apellido(s):&nbsp;</label>
-                                    <p>{{$report->visitor_lastname}}</p> 
-                                </div>
+                                <div class="form-group col-md-3">
+                                    <label for="visitorFirstname">Emitido por:</label>
+                                    <p>{{$report->user_username}}</p>                 
+                                </div>          
                             </div>
                         </div>
                     </div>
 
                     <div class="card">
                         <div class="card-body">
-                            <h3 class="h3 mb-md-5 text-center title-subline">Datos de la visita</h3>
-
-                            
-                            @if (Auth::user()->role_id !== 3)
-                                <div class="form-row mb-md-4">
-                                    <div class="form-group col-md-4">
-                                        <label for="workerDNI">Cedula del trabajador</label>
-                                        <p>{{$report->worker_dni}}</p>                 
-                                    </div>
-                                    <div class="form-group col-md-4">
-                                        <label for="visitorFirstname">Nombre(s):&nbsp;</label>
-                                        <p>{{$report->worker_firstname}}</p>                 
-                                    </div>
-                                    <div class="form-group col-md-4">
-                                        <label for="visitorLastname">Apellido(s):&nbsp;</label>
-                                        <p>{{$report->worker_lastname}}</p> 
-                                    </div>
-                                </div>
-                            @endif
-
-                            <div class="form-row mb-md-4">
+                            <h3 class="h3 mb-md-5 text-center title-subline">Datos del visitante</h3>
+   
+                            <div class="form-row mb-md-1">
                                 <div class="form-group col-md-3">
-                                    <label for="attendingDate">{{ _('Fecha de visita:') }}</label>
-                                    <p>{{date('d-m-Y', strtotime($report->date_attendance))}}</p> 
+                                    <label for="visitorFirstname">Nombre del visitante:&nbsp;</label>
+                                    <p>{{ $report->visitor_fullname }}</p>                 
                                 </div>
                                 <div class="form-group col-md-3">
-                                    <label for="entry-time">{{ _('Hora de entrada:') }}&nbsp;</label>
-                                    <p>{{ date('H:i', strtotime($report->entry_time)) }}</p>           
-                                </div>
-                                <div class="form-group col-md-3">
-                                    <label for="departure-time">{{ _('Hora de salida:') }}&nbsp;</label>
-                                    <p>{{ date('H:i', strtotime($report->departure_time)) }}</p>                 
-                                </div>
-                                <div class="form-group col-md-3">
-                                    <label for="departure-time">{{ _('Estatus:') }}&nbsp;</label>
-                                    <p>{{$report->status}}</p>                 
-                                </div>
-                            </div>
-
-                            <div class="form-row">
-                                <div class="form-group col-md-4">
-                                    <label for="attendingDate">{{ _('Edificio:') }}</label>
-                                    <p>{{$report->building_name}}</p> 
-                                </div>
-                                <div class="form-group col-md-4">
-                                    <label for="attendingDate">{{ _('Departamento:') }}</label>
-                                    <p>{{$report->department_name}}</p> 
-                                </div>
+                                    <label for="visitorDNI">Cedula del visitante</label>
+                                    <p>{{ $report->visitor_dni }}</p>                 
+                                </div>                   
                             </div>
                         </div>
                     </div>
 
-                    @if(!is_null($report->auto_id))
+                    @if(!is_null($report->auto_enrrolment))
                         <div class="card">
                             <div class="card-body">
                                 <h3 class="h3 mb-md-5 text-center title-subline">Datos del automovil</h3>
-                                <div class="form-row mb-md-4">
-                                    <div class="form-group col-md-4">
+                                <div class="form-row mb-md-2">
+                                    <div class="form-group col-md-3">
                                         <label for="workerDNI">Matricula del auto</label>
                                         <p>{{$report->auto_enrrolment}}</p>                 
                                     </div>
-                                    <div class="form-group col-md-4">
-                                        <label for="visitorFirstname">Marca</label>
-                                        <p>{{$report->auto_brand}}</p>                 
-                                    </div>
-                                    <div class="form-group col-md-4">
+                                    <div class="form-group col-md-3">
                                         <label for="visitorFirstname">Modelo</label>
                                         <p>{{$report->auto_model}}</p>                 
                                     </div>
-                                </div>
-                                <div class="form-row">
-                                    <div class="form-group col-md-4">
-                                        <label for="workerDNI">Color del auto</label>
+                                    <div class="form-group col-md-3">
+                                        <label for="visitorFirstname">Color</label>
                                         <p>{{$report->auto_color}}</p>                 
                                     </div>
                                 </div>
                             </div>
                         </div> 
                     @endif
-                </div>
 
+                    <!-- /.card-body -->
+                    <div class="card-footer">
+                        <a href="{{ route('visitas.show', $report->visit_id) }}" class="btn btn-success">{{ __('Ver detalles de la visita') }}</a>
+                    </div>
+                </div>
               </div>
         <!-- /.row -->
       </div><!-- /.container-fluid -->

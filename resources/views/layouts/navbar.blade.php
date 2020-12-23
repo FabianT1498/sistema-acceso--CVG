@@ -10,8 +10,7 @@
     </li>
   </ul>
 
-  <!-- FORMULARIO DE BUSQUEDA DE CADA OPCION (COMPRAS, ENTREGAS, iNVENTARIO entre otros...)
-  @yield('formsearch') -->
+  @include('layouts.notification-nav')
 
 </nav>
 <!-- /.navbar -->

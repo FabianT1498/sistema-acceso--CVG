@@ -8,18 +8,18 @@
               <small><i class="nav-icon icon fa fa-address-book">&nbsp;</i></small>{{ __('Visitantes') }}
             </a>
           </span>
-          @if (Auth::user()->role_id === 4)
-            <form class="form-inline ml-0" action="{{ route('visitantes.create') }}">
-              <input type="hidden" name="search" value="{{ $search }}">
-              <div class="input-group ml-3" title="{{ __('Nuevo Registro') }}">
-                <div class="">
-                  <button class="btn btn-primary btn-sm" type="submit">
-                    <i class="icon ion-android-add px-1"></i>
-                  </button>
-                </div>
+          
+          <form class="form-inline ml-0" action="{{ route('visitantes.create') }}">
+            <input type="hidden" name="search" value="{{ $search }}">
+            <div class="input-group ml-3" title="{{ __('Nuevo Registro') }}">
+              <div class="">
+                <button class="btn btn-primary btn-sm" type="submit">
+                  <i class="icon ion-android-add px-1"></i>
+                </button>
               </div>
-            </form>
-          @endif
+            </div>
+          </form>
+          
           <form id="searchForm" class="form-inline ml-3" action="{{ route('visitantes.index') }}">
             <div class="input-group input-group-sm">
               <input type="hidden" name="buscar" value="true">

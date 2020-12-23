@@ -30,5 +30,6 @@ class DepartmentsTable extends Migration
     public function down()
     {
         //
+        Schema::drop('departments');
     }
 }

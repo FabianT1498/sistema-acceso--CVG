@@ -3,8 +3,8 @@
 namespace App;
 
 use App\Role;
+use App\Visit;
 use App\Report;
-use App\PassRecord;
 use App\Worker;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
@@ -58,17 +58,17 @@ class User extends Authenticatable
      */
     public function passesIssued()
     {
-        return $this->belongsToMany(Report::class, 'pass_record')
+        return $this->belongsToMany(Report::class, 'reports')
             ->withTimestamps()
-            ->using(PassRecord::class)
+            ->using(Report::class)
             ->withPivot([
                 'created_at',
                 'updated_at',
             ]);
     }
 
-    public function reports(){
-        return $this->hasMany(Report::class);
+    public function visits(){
+        return $this->hasMany(Visit::class);
     }
 
 }

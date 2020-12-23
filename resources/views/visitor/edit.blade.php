@@ -60,61 +60,9 @@
               <form method='POST' action="{{ route('visitantes.update', $visitor->id) }}"  role="form" enctype="multipart/form-data">
                 @csrf
                 @method('PUT')
-                <div class="card-body">
-                  <h3 class="h3 mb-md-5 text-center title-subline">Datos del visitante</h3>
-                  <div class="form-row mb-md-4">
-
-                      <div class="form-group col-md-4">
-                          <label for="visitorFirstname">Nombre(s):&nbsp;<sup class="text-danger">*</sup></label>
-                          <p>{{$visitor->firstname}}</p>            
-                      </div>
-
-                      <div class="form-group col-md-4">
-                          <label for="visitorLastname">Apellido(s):&nbsp;<sup class="text-danger">*</sup></label>
-                          <p>{{$visitor->lastname}}</p>                
-                      </div>
-
-                      <div class="form-group col-md-4">
-                          <label for="visitorDNI">Cedula del visitante:&nbsp;<sup class="text-danger">*</sup></label>
-                          <p>{{$visitor->dni}}</p>              
-                      </div>
-                  </div>
-
-                  <div class="form-row">
-
-                    <div class="form-group col-md-4">
-                      <label for="visitorPhoneNumber">Telefono:&nbsp;<sup class="text-danger">*</sup></label>
-                      <input 
-                        type="text" 
-                        class="form-control" 
-                        id="visitorPhoneNumber" 
-                        name="visitor_phone_number" 
-                        value="{{$visitor->phone_number}}"
-                        placeholder="Telefono del visitante"
-                        required
-                      >
-                    </div>
-
-                    <div class="form-group col-md-4">
-                        <label for="file">Foto del visitante &nbsp;<sup class="text-danger">*</sup></label>
-                        <input type="file" name="image" class="file" accept="image/*">
-                        <div class="input-group">
-                            <input type="text" class="form-control" disabled placeholder="Subir Foto" id="file">
-                            <div class="input-group-append">
-                                <button type="button" class="browse btn btn-primary">Buscar...</button>
-                            </div>
-                        </div>
-                    </div>
-                      <div class="form-group col-md-2 ml-md-4">                      
-                        @if (!is_null($photo))
-                          <img src="{{ Storage::url($photo->path) }}" id="preview" class="img-thumbnail">
-                        @else
-                          <img src="" id="preview" class="img-thumbnail">
-                        @endif                   
-                      </div>
-                  </div>
-                </div>
                 
+                @include('visitor.inputs', ['is_form_visit' => false, 'is_show_view' => false])
+
                 <!-- /.card-body -->
                 <div class="card-footer">
                   <button type="submit" class="btn btn-success">{{ __('Actualizar Registro') }}</button>

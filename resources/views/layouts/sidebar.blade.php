@@ -31,28 +31,47 @@
   <!-- Sidebar Menu -->
   <nav class="mt-2">
     <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
-    
-      <li class="nav-item {{ setActive('mis-visitas') }}">
-          <a href="{{ route('reportes.myVisits') }}" class="nav-link {{ setActive('mis-visitas') }}">
-            <i class="nav-icon icon fa fa-file"></i>
-            <p>{{ __('MIS VISITAS') }}</p>
-          </a>
+
+      @if(isset($is_my_visit))
+        <li class="nav-item {{ $is_my_visit === 1 ? setActive(['mis_visitas', 'visitas']) : '' }}">
+            <a href="{{ route('mis_visitas') }}" class="nav-link {{ $is_my_visit === 1 ? setActive(['mis_visitas', 'visitas']) : ''}}">
+              <i class="nav-icon icon fa fa-file"></i>
+              <p>{{ __('MIS VISITAS') }}</p>
+            </a>
+        </li>
+      @else
+        <li class="nav-item {{setActive('mis_visitas') }}">
+            <a href="{{ route('mis_visitas') }}" class="nav-link {{setActive('mis_visitas') }}">
+              <i class="nav-icon icon fa fa-file"></i>
+              <p>{{ __('MIS VISITAS') }}</p>
+            </a>
+        </li>
+      @endif
+
+      <li class="nav-item {{ setActive('visitantes') }}">
+        <a href="{{ route('visitantes.index') }}" class="nav-link {{ setActive('visitantes') }}">
+          <i class="nav-icon icon fa fa-address-book"></i>
+          <p>{{ __('VISITANTES') }}</p>
+        </a>
       </li>
 
       @if (Auth::user()->role_id !== 3)
-        <li class="nav-item {{ setActive('visitantes') }}">
-          <a href="{{ route('visitantes.index') }}" class="nav-link {{ setActive('visitantes') }}">
-            <i class="nav-icon icon fa fa-address-book"></i>
-            <p>{{ __('VISITANTES') }}</p>
-          </a>
-        </li>
-      
-        <li class="nav-item {{ setActive('reportes') }}">
-          <a href="{{ route('reportes.index') }}" class="nav-link {{ setActive('reportes') }}">
-            <i class="nav-icon icon fa fa-file"></i>
-            <p>{{ __('VISITAS') }}</p>
-          </a>
-        </li>
+
+        @if(isset($is_my_visit))
+          <li class="nav-item {{ $is_my_visit === 0 ? setActive('visitas') : '' }}">
+            <a href="{{ route('visitas.index') }}" class="nav-link {{ $is_my_visit === 0 ? setActive('visitas') : '' }}">
+              <i class="fas fa-book ml-md-1 mr-md-2"></i>
+              <p>{{ __('HISTORIAL DE VISITAS') }}</p>
+            </a>
+          </li>
+        @else
+          <li class="nav-item {{  setActive('visitas') }}">
+            <a href="{{ route('visitas.index') }}" class="nav-link {{ setActive('visitas') }}">
+              <i class="fas fa-book ml-md-1 mr-md-2"></i>
+              <p>{{ __('HISTORIAL DE VISITAS') }}</p>
+            </a>
+          </li>
+        @endif
 
         <li class="nav-item {{ setActive('autos') }}">
           <a href="{{ route('autos.index') }}" class="nav-link {{ setActive('autos') }}">
@@ -63,6 +82,13 @@
       @endif
       
       @if (Auth::user()->role->name == "ADMIN" || Auth::user()->role->name == "SUPERADMIN")
+
+        <li class="nav-item {{ setActive('reportes') }}">
+          <a href="{{ route('reportes.index') }}" class="nav-link {{ setActive('reportes') }}">
+            <i class="fas fa-ticket-alt mr-md-2"></i>
+            <p>{{ __('REPORTES') }}</p>
+          </a>
+        </li>
       
         <li class="nav-item {{ setActive('usuarios') }}">
           <a href="{{ route('usuarios.index') }}" class="nav-link {{ setActive('usuarios') }}">
@@ -70,6 +96,7 @@
             <p>{{ __('USUARIOS') }}</p>
           </a>
         </li>
+
       @endif
     </ul>
   </nav>

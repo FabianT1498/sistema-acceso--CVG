@@ -1,5 +1,5 @@
 <h3 class="h3 mb-md-5 text-center title-subline">Datos del auto</h3>
-<div class="form-row mb-md-4">
+<div class="form-row mb-md-2">
     <div class="form-group col-md-3">
         <label for="autoEnrrolment">Matricula del auto:&nbsp;<sup class="text-danger">*</sup></label>
         <input 
@@ -10,14 +10,14 @@
             style="text-transform:uppercase"
             placeholder="Ingrese Matricula"
             autocomplete="off"
-            value="{{old('auto_enrrolment')}}"
+            value="{{ old('auto_enrrolment') ? old('auto_enrrolment') : (isset($record) ? $record->auto_enrrolment : '')}}"
             required
         >                   
         <input 
             type="hidden" 
             id="autoID" 
             name="auto_id" 
-            value="{{old('auto_id') ? old('auto_id') : -1}}"
+            value="{{old('auto_id') ? old('auto_id') : (isset($record) && !is_null($record->auto_id) ? $record->auto_id : -1)}}"
             readonly
         >
     </div>
@@ -29,7 +29,7 @@
             id="autoBrand" 
             name="auto_brand" 
             placeholder="INGRESE LA MARCA"
-            value="{{old('auto_brand')}}"
+            value="{{old('auto_brand') ? old('auto_brand') : (isset($record) ? $record->auto_brand : '')}}"
             required
         >
         <input 
@@ -48,7 +48,7 @@
             id="autoModel" 
             name="auto_model" 
             placeholder="INGRESE EL MODELO"
-            value="{{old('auto_model')}}"
+            value="{{old('auto_model') ? old('auto_model') : (isset($record) ? $record->auto_model : '')}}"
             required
         >                   
         <input 
@@ -73,7 +73,7 @@
             class="form-control" 
             id="autoColor" 
             name="auto_color" 
-            value="{{old('auto_color')}}"
+            value="{{old('auto_color') ? old('auto_color') : (isset($record) ? $record->auto_color : '')}}"
             placeholder="COLOR DEL AUTO"
             required
         >                   

@@ -8,15 +8,13 @@
 @section('masjs')
   <script src="{{ asset('js/jquery.dataTables.js') }}"></script>
   <script src="{{ asset('js/dataTables.bootstrap4.js') }}"></script>
-  <script src="{{ asset('js/toastr.min.js') }}"></script>
-  @toastr_render
   <script src="{{ asset('js/insumo.js') }}"></script>
-  <script src="{{ asset('js/report.js') }}"></script>
+  <script src="{{ asset('js/reports.js') }}"></script>
 @endsection
 
 @section('migasdepan')
-    <a href="{{ route('reportes.index') }}">{{ __('VISITAS') }}</a>
-    &nbsp;&nbsp;<i class="icon ion-android-arrow-forward"></i>&nbsp;&nbsp;{{ __('VISITAS') }}
+    <a href="{{ route('reportes.index') }}">{{ __('REPORTES') }}</a>
+    &nbsp;&nbsp;<i class="icon ion-android-arrow-forward"></i>&nbsp;&nbsp;{{ __('REPORTES') }}
      <span class="text-info">({{ __('Listado') }})</span>
 @endsection
 
@@ -48,17 +46,11 @@
               <table id="tbl_read" class="table table-bordered table-hover">
                 <thead>
                   <tr>
-                    <th>{{ __('Visitante') }}</th>
-                    <th>{{ __('Trabajador') }}</th>       
-                    <th>{{ __('Creado por') }}</th>
-                    <th>{{ __('Fecha de visita') }}</th>
-                    <th>{{ __('Hora de entrada') }}</th>
-                    <th>{{ __('Hora de salida') }}</th>
-                    <th>{{ __('Estatus') }}</th>
-
-                    @if (Auth::user()->role_id === 4)
-                      <th>{{ __('Opciones') }}</th>
-                    @endif
+                    <th>{{ __('Nro de visita') }}</th>
+                    <th>{{ __('Nombre del visitante') }}</th>       
+                    <th>{{ __('Cedula del visitante') }}</th>
+                    <th>{{ __('Usuario emisor') }}</th>
+                    <th>{{ __('Fecha de emision') }}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -66,37 +58,13 @@
                     <tr id="tr_{{$report->id}}">
                       <td>          
                         <a href="{{ route('reportes.show', $report->id) }}">
-                          {{ $report->visitor_firstname. ' ' .$report->visitor_lastname }}
+                          {{ $report->visit_id }}
                         </a>  
                       </td>        
-                      <td>{{ $report->worker_firstname. ' ' .$report->worker_lastname }}</td>                    
+                      <td>{{ $report->visitor_fullname }}</td>                    
+                      <td>{{ $report->visitor_dni }}</td>
                       <td>{{ $report->user_username }}</td>
-                      <td>{{ date('d-m-Y', strtotime($report->date_attendance)) }}</td>
-                      <td>{{ date('H:i', strtotime($report->entry_time)) }}</td>   
-                      <td>{{ date('H:i', strtotime($report->departure_time)) }}</td>
-                      <td>{{ $report->status }}</td>
-                                    
-                      @if(Auth::user()->role_id === 4)
-                        @if($report->status === "CONFIRMADA")
-                          <td>
-                              <a title="{{ __('Generar PDF') }}" href="#" onclick="
-                                event.preventDefault();
-                                confirm('{{ __("Usted va a generar un reporte, esto quedará registrado. ¿Desea continuar?") }}') ?
-                                  document.getElementById('frm_pdf_{{ $report->id }}').submit() : false;"
-                              >
-                                <small>
-                                  <small class="text-info"><i class="fa fa-file-pdf fa-2x"></i></small>
-                                </small>
-                              </a>
-                              <form method="GET" id="frm_pdf_{{ $report->id }}" action="{{ route('reportes.generar_pase', $report->id) }}" class="d-none">
-                                  @csrf
-                                  <input type="hidden" name="search" value="{{ $search }}">
-                              </form>           
-                          </td>
-                        @else
-                          <td>&nbsp;</td>
-                        @endif
-                      @endif
+                      <td>{{ date('d-m-Y H:i', strtotime($report->created_at)) }}</td>             
                     </tr>
                   @endforeach
                 </tbody>

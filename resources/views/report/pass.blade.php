@@ -12,16 +12,20 @@
 
         body * { 
 			box-sizing: border-box;
-			font-size: 16px;
+			font-size: 14px;
         }
 
-		/* 9.30 cm x 7.19 cm */
+		.border-bottom {
+			border-bottom: 0.5px solid #000;
+		}
+
+		/* 10 cm x 9.26 cm */
         .container {
 			margin: 0 auto;
 			padding: 1rem;
 			border: 2px solid;
-			width:351.49px;
-			height: 272.12px;
+			width: 377.95275591px;
+			height: 350px;
         }
 
         .img {
@@ -44,104 +48,147 @@
 		}
 
 		.item {
-			margin-bottom: 0.5rem;
+			margin-bottom: 0.2rem;
 		}
 
+		.items-container {
+			margin-bottom: 0.4rem;
+		}
+
+		.items-container:last-of-type {
+			margin-bottom: 2rem;
+		}
+
+		.items-container .item:last-child {
+			margin-bottom: 0;
+		}
+
+		.signature:before {
+			display: block;
+			height: 1px;
+			background-color: #000;
+			content: ' ';
+			width: 200px;
+			margin-bottom: 5px;
+		}
 
     </style>
   </head>
   <body>
         <div class="container">
 
-			<div class="clearfix item">
-				<div class="left">
-					<img class="img" src="{{ public_path('img/logocvg.jpg') }}" alt="">
+			<div class="items-container border-bottom">
+				<div class="clearfix item">
+					<div class="left">
+						<img class="img" src="{{ public_path('img/logocvg.jpg') }}" alt="">
+					</div>
+
+					<div class="right">
+						<b>Fecha de emision:</b>
+						&nbsp;{{ date('d-m-Y H:i') }}
+					</div>
 				</div>
-
-				<div class="right">
-					<span>Fecha de emision:</span>
-					&nbsp;{{ date('Y-m-d H:i') }}
-				</div>		
-			</div>
-
-			<div class="clearfix item">
-				<div class="left">
-					<span>Visitante:</span>
-					&nbsp;{{$record->visitor_firstname}}&nbsp;{{$record->visitor_lastname}}
-				</div>
-
-				<div class="right">
-					<span>Cedula:</span>
-					&nbsp;{{$record->visitor_dni}}
+				
+				<div class="clearfix item">
+					<div class="left">
+						<b>Nro de solicitud:</b>
+						&nbsp;{{ $record->id }}
+					</div>
 				</div>
 			</div>
 
-			<div class="clearfix item">
-				<div class="left">
-					<span>Trabajador:</span>
-					&nbsp;{{$record->worker_firstname}}&nbsp;{{$record->worker_lastname}}
+			<div class="items-container border-bottom">
+				<div class="clearfix item">
+					<div class="left">
+						<b>Visitante:</b>
+						&nbsp;{{ ucwords($record->visitor_firstname . ' '. $record->visitor_lastname) }}
+					</div>
 				</div>
 
-				<div class="right">
-					<span>Cedula:</span>
-					&nbsp;{{$record->worker_dni}}
+				<div class="clearfix item">
+					<div class="left">
+						<b>Cedula:</b>
+						&nbsp;{{$record->visitor_dni}}
+					</div>
+				</div>	
+			</div>
+
+			<div class="items-container border-bottom">
+				<div class="clearfix item">
+					<div class="left">
+						<b>Autorizado por:</b>
+						&nbsp;{{ucwords($record->worker_firstname. ' '. $record->worker_lastname)}}
+					</div>
 				</div>
 			</div>
 
-			<div class="clearfix item">
-				<div class="left">
-					<span>Fecha de asistencia:</span>
-					&nbsp;{{date('d-m-Y', strtotime($record->date_attendance))}}
+			<div class="items-container border-bottom">
+				<div class="clearfix item">
+					<div class="left">
+						<b>Fecha de asistencia:</b>
+						&nbsp;{{date('d-m-Y', strtotime($record->date_attendance))}}
+					</div>
+				</div>
+
+				<div class="clearfix item">
+					<div class="left">
+						<b>Hora de entrada:</b>
+						&nbsp;{{ date('H:i', strtotime($record->entry_time)) }}
+					</div>
+					<div class="right">
+						<b>Hora de salida</b>
+						&nbsp;{{ date('H:i', strtotime($record->departure_time)) }}
+					</div>
+				</div>			
+			</div>
+
+			<div class="items-container border-bottom">
+				<div class="clearfix item">
+					<div class="left">
+						<b>Edif.:</b>
+						&nbsp;{{ $record->building }}
+					</div>
+					<div class="right">
+							<b>Dpto.:</b>
+							&nbsp;{{ $record->department }}
+					</div>
 				</div>
 			</div>
 
-			<div class="clearfix item">
-				<div class="left">
-					<span>Hora de entrada:</span>
-					&nbsp;{{ date('H:i', strtotime($record->entry_time)) }}
-				</div>
-				<div class="right">
-					<span>Hora de salida</span>
-					&nbsp;{{ date('H:i', strtotime($record->departure_time)) }}
+			<div class="items-container border-bottom">
+				<div class="clearfix item">
+					<div class="left">
+						<b>Emitido por:</b>
+						&nbsp;{{ ucwords(Auth::user()->worker->firstname . ' ' . Auth::user()->worker->lastname) }}
+					</div>
 				</div>
 			</div>
 
-			<div class="clearfix item">
-				<div class="left">
-					<span>Edificio</span>
-					&nbsp;{{ $record->building }}
+			@if ($record->auto_enrrolment)
+				<div class="items-container border-bottom">
+					<div class="clearfix item">
+						<div class="left">
+							<b>Datos del Auto:</b>	
+						</div>
+					</div>
+					<div class="clearfix item">
+						<div class="left">
+							<b>Modelo Auto:</b>
+							&nbsp;{{$record->auto_model}}
+						</div>
+
+						<div class="right">
+							<b>Matricula:</b>
+							&nbsp;{{$record->auto_enrrolment}}
+						</div>  
+					</div>
 				</div>
-				<div class="right">
-					<span>Departamento</span>
-					&nbsp;{{ $record->department }}
-				</div>
+			@endif
+
+			<div class="signature">
+				Firma autorizada y sello:
 			</div>
-
-			<div class="clearfix item">
-				<div class="left">
-					<span>Autorizado por:</span>
-					&nbsp;{{ Auth::user()->worker->firstname . ' ' . Auth::user()->worker->lastname }}
-				</div>
-				<div class="right">
-					<span>Cedula:</span>
-					&nbsp;{{Auth::user()->worker->dni}}
-				</div>
-			</div>
-
-          @if ($record->auto_enrrolment)
-		  	<div class="clearfix item">
-			  	<div class="left">
-					<span>Auto:</span>
-					&nbsp;{{$record->auto_model_name}}
-				</div>
-
-				<div class="right">
-					<span>Matricula:</span>
-					&nbsp;{{$record->auto_enrrolment}}
-				</div>  
-			</div>
-          @endif
-
+			
         </div>
   </body>
 </html>

@@ -63,7 +63,7 @@
 
                 <div class="card">
                   <!-- form start -->
-                  @include('visitor.inputs', ['is_form_report' => false])
+                  @include('visitor.inputs', ['is_form_visit' => false, 'is_show_view' => false])
                   <!-- /.card-body -->
                   <div class="card-footer">
                     <button type="submit" class="btn btn-success">{{ __('Crear Registro') }}</button>

@@ -7,7 +7,7 @@ function setActive($nameRoute, $nameClass = 'active'){
 		$clase = (getRouteIsCrud($nameRoute) ? $nameClass : '');
 	}else{
 		foreach ($nameRoute as $route) {
-			if (!$clase) {
+			if ($clase === '') {
 				$clase = (getRouteIsCrud($route) ? $nameClass : '');
 			}
 		}
@@ -17,14 +17,25 @@ function setActive($nameRoute, $nameClass = 'active'){
 
 function getRouteIsCrud($nameRoute){
 	$isRoute = (request()->routeIs($nameRoute) ? true :
-	(request()->routeIs($nameRoute . '.index') ? true :
-		(request()->routeIs($nameRoute . '.store') ? true :
-			(request()->routeIs($nameRoute . '.create') ? true :
-				(request()->routeIs($nameRoute . '.show') ? true :
-					(request()->routeIs($nameRoute . '.update') ? true :
-						(request()->routeIs($nameRoute . '.destroy') ? true :
-							(request()->routeIs($nameRoute . '.edit') ? true : false))))))));
+		(request()->routeIs($nameRoute . '.index') ? true :
+			(request()->routeIs($nameRoute . '.store') ? true :
+				(request()->routeIs($nameRoute . '.create') ? true :
+					(request()->routeIs($nameRoute . '.show') ? true :
+						(request()->routeIs($nameRoute . '.update') ? true :
+							(request()->routeIs($nameRoute . '.destroy') ? true :
+								(request()->routeIs($nameRoute . '.edit') ? true : false))))))));
 	return $isRoute;
+
+}
+
+function splitURI($uri){
+	$new_uri = $uri;
+
+	if ($new_uri[0] === '/'){
+		$new_uri = substr($new_uri, 1, strlen($new_uri) - 1);
+	}
+
+	return explode('/', $new_uri, 2);
 
 }
 
@@ -33,11 +44,7 @@ function getSearchOptions(){
 
 	$name = request()->route()->uri;
 	
-	if ($name[0] === '/'){
-		$name = str_replace("/", "", $name);
-	}
-
-	$arrName = explode('/', $name, 2);
+	$arrName = splitURI($name);
 
 	$options = null;
 
@@ -50,7 +57,7 @@ function getSearchOptions(){
 		$options = array(
 			'Número de matricula del auto (ej. ABC1246)',
 		);
-	} else if ($arrName[0] === 'reportes' || $arrName[0] === 'mis-visitas'){
+	} else if ($arrName[0] === 'visitas' || $arrName[0] === 'mis-visitas'){
 		$options = array(
 			'Nombre y apellido del visitante (ej. Juan Perez)',
 			'Cedula del visitante (ej. v-1014823 o e-1014823)',
@@ -60,6 +67,12 @@ function getSearchOptions(){
 		$options = array(
 			'Nombre y apellido del visitante (ej. Juan Perez)',
 			'Cedula del visitante (ej. v-1014823 o e-1014823)',
+		);
+	} else if($arrName[0] === 'reportes'){
+		$options = array(
+			'Cedula del visitante (ej. v-1014823 o e-1014823)',
+			'Intervalo de tiempo de emisión del reporte',
+			'Número de visita'
 		);
 	}
 
