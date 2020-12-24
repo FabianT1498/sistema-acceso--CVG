@@ -90,11 +90,12 @@
  -->
     <script type="text/javascript" src="{{ asset('js/jquery.mask.js') }}"></script>
 
+    <!-- Configuraciones del sitio web -->
+    <script src="{{ asset('js/configurationOptions.js') }}"></script>
+
     <script>
         var baseUrl = "{{url('/')}}";
     </script>
-
-    <script src="{{ asset('js/reloadPage.js') }}"></script>
 
     @yield('masjs')
 

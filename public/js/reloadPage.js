@@ -1,4 +1,3 @@
-
 $(document).ready(function () {
 
     const reloadTime = 5000;

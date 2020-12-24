@@ -12,8 +12,8 @@
   @toastr_render
   <script src="{{ asset('js/insumo.js') }}"></script>
   <script src="{{ asset('js/visit.js') }}"></script>
-<!--   <script src="{{ asset('js/reloadPage.js') }}"></script>
- -->@endsection
+  <script src="{{ asset('js/reloadPage.js') }}"></script>
+ @endsection
 
 @section('migasdepan')
     <a href="{{ route('visitas.index') }}">{{ __('VISITAS') }}</a>

@@ -13,6 +13,7 @@
 
   <script src="{{ asset('js/insumo.js') }}"></script>
   <script src="{{ asset('js/autos.js') }}"></script>
+  <script src="{{ asset('js/reloadPage.js') }}"></script>
 @endsection
 
 @section('migasdepan')

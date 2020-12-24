@@ -10,6 +10,7 @@
   <script src="{{ asset('js/dataTables.bootstrap4.js') }}"></script>
   <script src="{{ asset('js/insumo.js') }}"></script>
   <script src="{{ asset('js/reports.js') }}"></script>
+  <script src="{{ asset('js/reloadPage.js') }}"></script>
 @endsection
 
 @section('migasdepan')
