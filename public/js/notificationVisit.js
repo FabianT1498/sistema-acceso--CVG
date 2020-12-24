@@ -24,4 +24,10 @@ $(document).ready(function () {
        
     setTimeout(fetchVisitsByConfirm, 0);
 
+    $('#visitByConfirm').on('click', function(e){
+        $(this).click();
+    })
+
+   
+
 })

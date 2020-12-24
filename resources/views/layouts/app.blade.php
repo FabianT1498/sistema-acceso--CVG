@@ -45,6 +45,7 @@
             @yield('content')
         </main>
         @include('layouts.footer')
+        @include('layouts.configurations-modal')
         <!-- Control Sidebar -->
         <aside class="control-sidebar control-sidebar-dark">
         <!-- Control sidebar content goes here -->
@@ -92,6 +93,8 @@
     <script>
         var baseUrl = "{{url('/')}}";
     </script>
+
+    <script src="{{ asset('js/reloadPage.js') }}"></script>
 
     @yield('masjs')
 
