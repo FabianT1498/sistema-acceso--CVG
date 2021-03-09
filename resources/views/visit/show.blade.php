@@ -102,6 +102,14 @@
                                     <p>{{$visit->department_name}}</p> 
                                 </div>
                             </div>
+
+                            <div class="form-row">
+                                <div class="form-group col-md-8">
+                                    <label for="issue">{{ _('Asunto:') }}</label>
+                                    <p>{{$visit->issue}}</p> 
+                                </div>
+                            </div>
+
                         </div>
                     </div>
 

@@ -81,6 +81,9 @@ class UpdateVisitRequest extends FormRequest
             ],
             'department' => [
                 'required'
+            ],
+            'issue' => [
+                'required'
             ]
         ];
 
@@ -169,7 +172,8 @@ class UpdateVisitRequest extends FormRequest
             'departure_time.after' => 'La hora de salida debe ser posterior a la hora de entrada',
             'building.required' => 'Debe indicar el edificio donde se realizara la visita',
             'department.required' => 'Debe indicar el departamento donde se realizara la visita',
-            'attending_date.after_or_equal' => 'La fecha de la visita debe ser igual o posterior a la fecha de hoy'
+            'attending_date.after_or_equal' => 'La fecha de la visita debe ser igual o posterior a la fecha de hoy',
+            'issue.required' => 'Indique el asunto de la visita'
         ];
 
         if ($visitor_id === -1){

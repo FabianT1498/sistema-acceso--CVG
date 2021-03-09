@@ -23,6 +23,8 @@ class CreateVisitsTable extends Migration
             $table->unsignedBigInteger('auto_id')->unsigned()->nullable();
             $table->unsignedBigInteger('department_id')->unsigned()->nullable();
             $table->string('status');
+            $table->string('issue');
+
          
 
             $table->foreign('user_id')->references('id')->on('users');

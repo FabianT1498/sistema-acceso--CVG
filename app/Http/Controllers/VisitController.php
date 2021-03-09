@@ -244,6 +244,7 @@ class VisitController extends WebController
         $visit->date_attendance =  $validated['attending_date'];
         $visit->entry_time =  $validated['entry_time'];
         $visit->departure_time =  $validated['departure_time'];
+        $visit->issue =  $validated['issue'];
         $visit->status =  Auth::user()->worker_id == $request->worker_id ? "CONFIRMADA" : "POR CONFIRMAR";
         $visit->user_id = Auth::id();
 
@@ -415,6 +416,7 @@ class VisitController extends WebController
         $visit->date_attendance =  $validated['attending_date'];
         $visit->entry_time =  $validated['entry_time'];
         $visit->departure_time =  $validated['departure_time'];
+        $visit->issue =  $validated['issue'];
         $visit->user_id = Auth::id();
 
         $building = Building::where('name', $validated['building'])

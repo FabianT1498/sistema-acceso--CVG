@@ -192,6 +192,20 @@
                     </div>
                   </div>
 
+                  <div class="form-row mb-md-4">
+                    <div class="form-group col-md-4">
+                        <label for="issue">{{ _('Asunto:') }}&nbsp;<sup class="text-danger">*</sup></label>
+                        <textarea 
+                          class="form-control" 
+                          rows="2"
+                          name="issue"
+                          id="issue"
+                          placeholder="Asunto"
+                          required
+                        >{{ old('issue') ? old('issue') : $record->issue  }}</textarea>               
+                    </div>
+                  </div>
+
                   <div class="form-group row mb-md-4">
                     <label class="col-md-4 col-form-label" for="thereIsAutoOpt">{{ _('El visitante ha aparcado un auto:') }}</label>  
                     <div class="form-check form-check-inline">
