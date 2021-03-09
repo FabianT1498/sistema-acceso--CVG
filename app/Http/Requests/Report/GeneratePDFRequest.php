@@ -31,7 +31,7 @@ class GeneratePDFRequest extends FormRequest
         }
     
         return ($visit && ($now <= $date_attendance) &&
-                (($auth_user_role === 4 && $visit->status === "CONFIRMADA")
+                ((($auth_user_role === 4 || $auth_user_role === 5) && $visit->status === "CONFIRMADA")
                     || ($visit->status === "COMPLETADA" && ($auth_user_role === 1 || $auth_user_role === 2 ))));
     }
 

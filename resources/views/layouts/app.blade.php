@@ -90,7 +90,7 @@
  -->
     <script type="text/javascript" src="{{ asset('js/jquery.mask.js') }}"></script>
 
-    <!-- Configuraciones del sitio web -->
+    <!-- Configuraciones del sitio web, esto debe ir antes del archivo reloadPage.js -->
     <script src="{{ asset('js/configurationOptions.js') }}"></script>
 
     <script>

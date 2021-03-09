@@ -52,8 +52,8 @@
             <!-- small box -->
             <div class="small-box bg-info">
               <div class="inner">
-                <h3 class="d-none d-sm-block">{{ __('Reportes') }}</h3>
-                <h4 class="d-block d-sm-none">{{ __('Reportes') }}</h4>
+                <h3 class="d-none d-sm-block">{{ __('Visitas') }}</h3>
+                <h4 class="d-block d-sm-none">{{ __('Visitas') }}</h4>
                 <h4>{{ $estadisticas->visitasAnio }}&nbsp;&nbsp;<small><small><small>{{ __('Este Año') }}</small></small></small></h4>
                 <h4>{{ $estadisticas->visitasMes }}&nbsp;&nbsp;<small><small><small>{{ __('Este mes') }}</small></small></small></h4>
               </div>

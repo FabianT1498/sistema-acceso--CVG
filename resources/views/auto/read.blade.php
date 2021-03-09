@@ -55,7 +55,7 @@
                     <th>{{ __('Matricula') }}</th>
                     <th>{{ __('Color') }}</th>
                     <th>{{ __('Fecha de registro') }}</th>
-                    @if (Auth::user()->role_id === 4)
+                    @if (Auth::user()->role_id === 4 || Auth::user()->role_id === 5)
                       <th>{{ __('Opciones') }}</th>
                     @endif
                   </tr>
@@ -68,7 +68,7 @@
                       <td>{{ $auto->enrrolment }}</td>   
                       <td>{{ $auto->color }}</td> 
                       <td>{{ date('d-m-Y', strtotime($auto->created_at)) }}</td>
-                      @if (Auth::user()->role_id === 4)
+                      @if (Auth::user()->role_id === 4 || Auth::user()->role_id === 5)
                         <td>
                           <a 
                             class="" 

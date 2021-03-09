@@ -12,6 +12,7 @@
                 placeholder="Nombre del visitante"
                 value="{{ old('visitor_firstname') ? old('visitor_firstname') : (isset($visitor) ? $visitor->firstname : '')}}"
                 autocomplete="off"
+                {{isset($is_show_view) && $is_show_view ? "readonly" : ""}}
                 required
             >                   
         </div>
@@ -26,6 +27,7 @@
             placeholder="Apellido del visitante"
             value="{{ old('visitor_lastname') ? old('visitor_lastname') : (isset($visitor) ? $visitor->lastname : '')}}"
             autocomplete="off"
+            {{isset($is_show_view) && $is_show_view ? "readonly" : ""}}
             required
             >                   
         </div>
@@ -39,6 +41,7 @@
             name="visitor_phone_number" 
             value="{{ old('visitor_phone_number') ? old('visitor_phone_number') : (isset($visitor) ? $visitor->phone_number : '')}}"
             placeholder="Telefono del visitante"
+            {{isset($is_show_view) && $is_show_view ? "readonly" : ""}}
             autocomplete="off"
             >
         </div>
@@ -56,6 +59,7 @@
                     placeholder="Cedula del visitante"
                     value="{{ old('visitor_dni') ? old('visitor_dni') : (isset($visitor) ? $visitor->dni : '')}}"
                     autocomplete="off"
+                    {{isset($is_show_view) && $is_show_view ? "readonly" : ""}}
                     required
                 >                   
             </div>

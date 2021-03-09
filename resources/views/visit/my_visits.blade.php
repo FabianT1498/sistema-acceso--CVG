@@ -124,7 +124,7 @@
                         @endif
                         
                         @if ($today_date <= $visit->date_attendance)
-                          @if ( (Auth::user()->role_id === 4 && $visit->status === "CONFIRMADA") 
+                          @if ( ((Auth::user()->role_id === 4 || Auth::user()->role_id === 5) && $visit->status === "CONFIRMADA") 
                               || ( (Auth::user()->role_id === 1 || Auth::user()->role_id === 2) && $visit->status === "COMPLETADA" ) )
                               
                             <a 
@@ -142,7 +142,7 @@
                                 @csrf
                             </form>       
                                 
-                          @elseif(Auth::user()->role_id === 4 && $visit->status === "COMPLETADA")
+                          @elseif((Auth::user()->role_id === 4 || Auth::user()->role_id === 5) && $visit->status === "COMPLETADA")
                             <a
                               class="ml-md-2" 
                               data-toggle="modal" 

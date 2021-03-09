@@ -200,9 +200,12 @@ class VisitController extends WebController
         $vista = $this::CREATE;
         $search = request('search');
 
+        // Verifica si el usuario que esta solicitando crear la visita no es un recepcionista de departamento
         $is_my_visit = Auth::user()->role_id !== 4 ? 1 : null;
 
         if (is_null($is_my_visit)){
+            // Si el usuario autenticado es recepcionista de departamento, verificar
+            // si la visita es propia o para otro trabajador
             $is_my_visit = !is_null(request('is_my_visit')) 
                     && (request('is_my_visit') === '1' || request('is_my_visit') === '0') 
                 ? (int) request('is_my_visit')

@@ -24,7 +24,11 @@ class RoleSeeder extends Seeder
         ]);
         
         Role::create([
-            'name' => 'RECEPCIONISTA'
+            'name' => 'RECEPCIONISTA DEPARTAMENTO'
+        ]);
+
+        Role::create([
+            'name' => 'RECEPCIONISTA BASE'
         ]);
     }
 }

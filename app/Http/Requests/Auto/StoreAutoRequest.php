@@ -18,7 +18,7 @@ class StoreAutoRequest extends FormRequest
     {
         $auth_user_role = $this->user()->role_id;
      
-        return ($auth_user_role === 4);
+        return ($auth_user_role === 4 || $auth_user_role === 5);
     }
 
     /**

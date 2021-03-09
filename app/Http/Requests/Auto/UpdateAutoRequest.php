@@ -20,7 +20,7 @@ class UpdateAutoRequest extends FormRequest
         $auto = Auto::find($this->route('auto'));
 
         return ($auto 
-                && $auth_user_role === 4);
+                && ($auth_user_role === 4 || $auth_user_role === 5));
     }
 
     /**

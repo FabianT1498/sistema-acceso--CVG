@@ -59,32 +59,36 @@ Route::group(['middleware' => ['auth', 'worker']], function () {
 });
 
 /*********************************************/
-
-
 /*********************************************/
-/*********************************************/
-/********           RECEPCIONISTA   **********/
+/* RECEPCIONISTA BASE Y DEPARTAMENTO *********/
 /*********************************************/
 /*********************************************/
 
-Route::group(['middleware' => ['auth', 'receptionist']], function () {
+Route::group(['middleware' => ['auth', 'base_receptionist']], function () {
+	
+	/********           VISIT         **********/
+	Route::get('visitas', 'VisitController@index')->name('visitas.index');
+	
+	/*************      PASES ************** */
+	Route::get('/generar_pase/{id}/pdf', 'ReportController@generatePDF')->name('reportes.generar_pase');
 
-		/********           VISIT         **********/
-		Route::get('visitas', 'VisitController@index')->name('visitas.index');
+	/********           AUTO         **********/	
+	Route::resource('autos', 'AutoController')->except(['destroy']);
+	Route::post('/autos_modelos', 'AutoController@getAutoModels');
+	Route::post('/autos_marcas', 'AutoController@getAutoBrands');
+	Route::post('/auto', 'AutoController@getAuto');
+});
 
-		/*************        PASES ************** */
-		Route::get('/generar_pase/{id}/pdf', 'ReportController@generatePDF')->name('reportes.generar_pase');
+/*********************************************/
+/*********************************************/
+/******** RECEPCIONISTA DEPARTAMENTO *********/
+/*********************************************/
+/*********************************************/
+Route::group(['middleware' => ['auth', 'department_recepcionist']], function () {
 
-		/********           WORKER         **********/	
-		Route::post('trabajador', 'WorkerController@getWorker');
-
-		/********           AUTO         **********/	
-		Route::resource('autos', 'AutoController')->except(['destroy']);
-		Route::post('/autos_modelos', 'AutoController@getAutoModels');
-		Route::post('/autos_marcas', 'AutoController@getAutoBrands');
-		Route::post('/auto', 'AutoController@getAuto');
-	}
-);
+	/********           WORKER         **********/	
+	Route::post('trabajador', 'WorkerController@getWorker');
+});
 
 /*********************************************/
 
@@ -116,7 +120,7 @@ Route::group(['middleware' => ['auth']], function () {
 		{	
 			if (Auth::user()->role_id === 3){
 				return redirect()->route('mis_visitas');
-			} else if (Auth::user()->role_id === 4){
+			} else if (Auth::user()->role_id === 4 || Auth::user()->role_id === 5){
 				return redirect()->route('visitas.index');
 			}
 

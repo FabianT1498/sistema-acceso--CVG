@@ -8,7 +8,7 @@
               <small><i class="nav-icon icon fa fa-car">&nbsp;</i></small>{{ __('Autos') }}
             </a>
           </span>
-          @if (Auth::user()->role_id === 4)
+          @if (Auth::user()->role_id === 4 || Auth::user()->role_id === 5)
             <form class="form-inline ml-0" action="{{ route('autos.create') }}">
               <input type="hidden" name="search" value="{{ $search }}">
               <input type="hidden" name="trashed" id="trashed" value="{{ $trashed }}">

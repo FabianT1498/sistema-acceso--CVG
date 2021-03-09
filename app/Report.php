@@ -17,9 +17,9 @@ class Report extends Model
                 ? $values['visitor_firstname'] . ' ' . $values['visitor_lastname'] 
                 : '';
         $this->visitor_dni = isset($values['visitor_dni']) ? $values['visitor_dni'] : '';
-        $this->auto_enrrolment = isset($values['auto_enrrolment']) ? $values['auto_enrrolment'] : '';
-        $this->auto_model = isset($values['auto_model']) ? $values['auto_model'] : '';
-        $this->auto_color = isset($values['auto_color']) ? $values['auto_color'] : '';
+        $this->auto_enrrolment = isset($values['auto_enrrolment']) ? $values['auto_enrrolment'] : null;
+        $this->auto_model = isset($values['auto_model']) ? $values['auto_model'] : null;
+        $this->auto_color = isset($values['auto_color']) ? $values['auto_color'] : null;
     }
 
     public $incrementing = true;
