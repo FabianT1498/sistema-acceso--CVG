@@ -247,7 +247,8 @@ class VisitController extends WebController
         $visit->issue =  $validated['issue'];
         $visit->status =  Auth::user()->worker_id == $request->worker_id ? "CONFIRMADA" : "POR CONFIRMAR";
         $visit->user_id = Auth::id();
-
+        $visit->authorized_by = Auth::user()->worker->firstname . ' ' . Auth::user()->worker->lastname;
+        
         $building = Building::where('name', $validated['building'])
                 ->first();
                 

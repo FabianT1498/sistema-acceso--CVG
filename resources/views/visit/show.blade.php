@@ -101,6 +101,10 @@
                                     <label for="attendingDate">{{ _('Departamento:') }}</label>
                                     <p>{{$visit->department_name}}</p> 
                                 </div>
+                                <div class="form-group col-md-3">
+                                    <label for="attendingDate">{{ _('Autorizado por:') }}</label>
+                                    <p>{{$visit->authorized_by}}</p> 
+                                </div>
                             </div>
 
                             <div class="form-row">

@@ -198,11 +198,9 @@
                           rows="2" 
                           id="issue"
                           name="issue"
-                          value="{{ old('issue') }}"
                           placeholder="Asunto"
                           required
-                        >
-                        </textarea>               
+                        >{{ old('issue') ? old('issue') : '' }}</textarea>               
                     </div>
                   </div>
 

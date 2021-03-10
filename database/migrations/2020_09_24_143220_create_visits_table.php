@@ -22,10 +22,9 @@ class CreateVisitsTable extends Migration
             $table->unsignedBigInteger('worker_id')->unsigned()->nullable();
             $table->unsignedBigInteger('auto_id')->unsigned()->nullable();
             $table->unsignedBigInteger('department_id')->unsigned()->nullable();
+            $table->string('authorized_by');
             $table->string('status');
             $table->string('issue');
-
-         
 
             $table->foreign('user_id')->references('id')->on('users');
             $table->foreign('visitor_id')->references('id')->on('visitors')->onDelete('cascade');
