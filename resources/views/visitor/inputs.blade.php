@@ -46,10 +46,11 @@
             >
         </div>
     </div>
+
     <div class="form-row">
 
         @if (isset($is_form_visit) && !$is_form_visit)
-            <div class="form-group col-md-4">
+            <div class="form-group col-md-3">
                 <label for="visitorDNI">Cedula del visitante:&nbsp;<sup class="text-danger">*</sup></label>
                 <input 
                     type="text" 
@@ -65,8 +66,74 @@
             </div>
         @endif
 
+        <div class="form-group col-md-3">
+            <label for="origin">Procedencia del visitante:&nbsp;<sup class="text-danger">*</sup></label>
+            @if (isset($is_show_view) && !$is_show_view)
+                <select 
+                    class="form-control"
+                    name="origin" 
+                    id="origin"
+                    placeholder="Procedencia del visitante"
+                >
+                    <option hidden disabled value> -- seleccione un origen -- </option>
+                    <option value="Proveedor" {{ 
+                        old('origin') && old('origin') === 'Proveedor' 
+                            ? 'selected' 
+                            : (isset($visitor) && $visitor->origin === 'Proveedor' 
+                                ? 'selected' 
+                                : '')
+                        }}
+                    >
+                        Proveedor
+                    </option>
+                    <option value="Trabajador" {{ 
+                        old('origin') && old('origin') === 'Trabajador' 
+                            ? 'selected' 
+                            : (isset($visitor) && $visitor->origin === 'Trabajador' 
+                                ? 'selected' 
+                                : '')
+                        }}
+                    >
+                        Trabajador
+                    </option>
+                    <option value="Foráneo" {{ 
+                        old('origin') && old('origin') === 'Foráneo' 
+                            ? 'selected' 
+                            : (isset($visitor) && $visitor->origin === 'Foráneo' 
+                                ? 'selected' 
+                                : '')
+                        }}
+                    >
+                        Foráneo
+                    </option>
+                    <option value="Pasante" {{ 
+                        old('origin') && old('origin') === 'Pasante' 
+                            ? 'selected' 
+                            : (isset($visitor) && $visitor->origin === 'Pasante' 
+                                ? 'selected' 
+                                : '')
+                        }}
+                    >
+                        Pasante
+                    </option>
+                </select>
+            @else
+                <input 
+                    type="text" 
+                    class="form-control" 
+                    id="origin" 
+                    name="origin" 
+                    placeholder="Procedencia del visitante"
+                    value="{{ isset($visitor) ? $visitor->origin : ''}}"
+                    autocomplete="off"
+                    {{isset($is_show_view) && $is_show_view ? "readonly" : ""}}
+                    required
+                >  
+            @endif
+        </div>
+
         @if (isset($is_show_view) && !$is_show_view)
-            <div class="form-group col-md-4">
+            <div class="form-group col-md-3">
                 <label for="file">Foto del visitante &nbsp;</label>
                 <input type="file" name="image" class="file" accept="image/*">
                 <div class="input-group">

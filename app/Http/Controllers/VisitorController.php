@@ -180,6 +180,7 @@ class VisitorController extends WebController
         $visitor->firstname = $validated['visitor_firstname'];
         $visitor->lastname = $validated['visitor_lastname'];
         $visitor->dni = $validated['visitor_dni'];
+        $visitor->origin = $validated['origin'];
 
         if ($request->has('visitor_phone_number')){
             $visitor->phone_number = $validated['visitor_phone_number'];

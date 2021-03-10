@@ -50,6 +50,9 @@ class UpdateVisitorRequest extends FormRequest
                 'mimes:jpeg,png,jpg,gif',
                 'max:512'
             ],
+            'origin' => [
+                'required',
+            ],
         ];
     }
 
@@ -66,7 +69,8 @@ class UpdateVisitorRequest extends FormRequest
             'visitor_phone_number.unique' => 'El telefono del visitante ya fue registrado',
             'visitor_phone_number.required' => 'Debe especificar el numero de telefono del visitante',
             'image.required' => 'Es necesario que suba la imagen del visitante',
-            'image.max' =>'El peso maximo de la imagen es de 512 KB'
+            'image.max' =>'El peso maximo de la imagen es de 512 KB',
+            'origin.required' => 'Es necesario que indique la procedencia del visitante',
         ];
         
         return $messages;

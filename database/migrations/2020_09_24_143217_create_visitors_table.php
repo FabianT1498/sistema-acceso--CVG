@@ -19,6 +19,7 @@ class CreateVisitorsTable extends Migration
             $table->string('lastname', 50);
             $table->string('dni', 10);
             $table->string('phone_number', 15)->nullable();
+            $table->string('origin');
             $table->unsignedBigInteger('user_id')->unsigned();
             
             $table->foreign('user_id')->references('id')->on('users');

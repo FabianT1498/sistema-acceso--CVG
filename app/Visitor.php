@@ -20,6 +20,7 @@ class Visitor extends Model
         $this->lastname = isset($attributes['visitor_lastname']) ? $attributes['visitor_lastname'] : '';
         $this->dni = isset($attributes['visitor_dni']) ? strtoupper($attributes['visitor_dni']) : '';
         $this->phone_number = isset($attributes['visitor_phone_number']) ? $attributes['visitor_phone_number'] : '';
+        $this->origin = isset($attributes['origin']) ? $attributes['origin'] : '';
     }
 
     protected $fillable = ['name', 'dni', 'phone_number'];

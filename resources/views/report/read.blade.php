@@ -47,7 +47,7 @@
               <table id="tbl_read" class="table table-bordered table-hover">
                 <thead>
                   <tr>
-                    <th>{{ __('Nro de visita') }}</th>
+                    <th>{{ __('Identificador de visita') }}</th>
                     <th>{{ __('Nombre del visitante') }}</th>       
                     <th>{{ __('Cedula del visitante') }}</th>
                     <th>{{ __('Usuario emisor') }}</th>

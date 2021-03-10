@@ -36,6 +36,9 @@ class StoreVisitorRequest extends FormRequest
                 'unique:visitors,phone_number',
                 'max:15'
             ],
+            'origin' => [
+                'required',
+            ],
             'image' => [
                 'image' ,
                 'mimes:jpeg,png,jpg,gif',
@@ -58,7 +61,8 @@ class StoreVisitorRequest extends FormRequest
             'visitor_dni.unique' => 'La cedula del visitante ya fue registrada',
             'visitor_phone_number.unique' => 'El telefono del visitante ya fue registrado',
             'image.required' => 'Es necesario que suba la imagen del visitante',
-            'image.max' =>'El peso maximo de la imagen es de 512 KB'
+            'image.max' =>'El peso maximo de la imagen es de 512 KB',
+            'origin.required' => 'Es necesario que indique la procedencia del visitante',
         ];
         
         return $messages;
