@@ -158,6 +158,21 @@ $(document).ready(function () {
                 </div>
                 <div class="form-row">
                     <div class="form-group col-md-4">
+                        <label for="origin">Procedencia del visitante:&nbsp;<sup class="text-danger">*</sup></label>
+                        <select 
+                            class="form-control"
+                            name="origin" 
+                            id="origin"
+                            placeholder="Procedencia del visitante"
+                        >
+                            <option hidden disabled value> -- seleccione un origen -- </option>
+                            <option value="Proveedor">Proveedor</option>
+                            <option value="Trabajador">Trabajador</option>
+                            <option value="Foráneo">Foráneo</option>
+                            <option value="Pasante">Pasante</option>
+                        </select>
+                    </div>
+                    <div class="form-group col-md-4">
                         <label for="file">Foto del visitante:</label>
                         <input type="file" name="image" class="file" accept="image/*">
                         <div class="input-group">

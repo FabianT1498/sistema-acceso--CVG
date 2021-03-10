@@ -105,6 +105,9 @@ class UpdateVisitRequest extends FormRequest
                 'mimes:jpeg,png,jpg,gif',
                 'max:512'
             );
+            $rules['origin'] = array(
+                'required'
+            );
 
         } else {
             $rules['visitor_dni'] = array(
@@ -179,7 +182,7 @@ class UpdateVisitRequest extends FormRequest
         if ($visitor_id === -1){
             $messages['visitor_dni.unique'] = 'La cedula del visitante ya fue registrada';
             $messages['visitor_phone_number.unique'] = 'El telefono del visitante ya fue registrado';
-            /* $messages['image.required'] = 'Es necesario que suba la imagen del visitante'; */
+            $messages['origin.required'] = 'Es necesario que indique el origen del visitante';
             $messages['image.max'] = 'El peso maximo de la imagen es de 512 KB';
         } else {
             $messages['visitor_dni.exists'] = 'El visitante ingresado no existe, porfavor registrelo';
